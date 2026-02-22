@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { APP_URL } from '@/lib/utils/constants';
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db/client';
 import { users } from '@/lib/db/schema';
@@ -50,15 +51,15 @@ export async function GET(request: Request) {
       const isLocalEnv = process.env.NODE_ENV === 'development';
 
       if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(`${APP_URL}${next}`);
       } else if (forwardedHost) {
         return NextResponse.redirect(`https://${forwardedHost}${next}`);
       } else {
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(`${APP_URL}${next}`);
       }
     }
   }
 
   // Return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/en/login?error=auth_callback_failed`);
+  return NextResponse.redirect(`${APP_URL}/en/login?error=auth_callback_failed`);
 }
