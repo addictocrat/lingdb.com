@@ -44,7 +44,7 @@ export async function registerUserWithVerification(email: string, password?: str
 
     // Rewrite the generated Supabase link to point to our internal app verification route
     try {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lingdb.com';
+      const appUrl = APP_URL;
       const linkUrl = new URL(verifyLink);
       
       const token = linkUrl.searchParams.get('token');
@@ -96,7 +96,7 @@ export async function resendVerificationEmail(email: string) {
 
     // Rewrite the generated Supabase link to point to our internal app verification route
     try {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lingdb.com';
+      const appUrl = APP_URL;
       const linkUrl = new URL(verifyLink);
       
       const token = linkUrl.searchParams.get('token');
