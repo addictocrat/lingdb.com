@@ -4,6 +4,7 @@ import { db } from '@/lib/db/client';
 import { dictionaries, words, users } from '@/lib/db/schema';
 import { eq, sql, ilike, and } from 'drizzle-orm';
 import { z } from 'zod';
+import { generateUniqueSlug } from '@/lib/utils/slugify';
 
 const createDictionarySchema = z.object({
   title: z.string().min(1).max(100),
@@ -108,6 +109,8 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  const slug = await generateUniqueSlug(result.data.title);
+
   const [newDict] = await db
     .insert(dictionaries)
     .values({
@@ -116,6 +119,7 @@ export async function POST(request: NextRequest) {
       language: result.data.language,
       isPublic: result.data.isPublic,
       userId: dbUser.id,
+      slug,
     })
     .returning();
 

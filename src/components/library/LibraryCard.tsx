@@ -11,6 +11,7 @@ interface LibraryCardProps {
     description: string | null;
     language: string;
     userId: string;
+    slug: string | null;
     wordCount: number;
     forkCount: number;
     username: string | null;
@@ -33,7 +34,7 @@ export default function LibraryCard({ dictionary, currentUserId }: LibraryCardPr
   const isOwner = currentUserId === dictionary.userId;
   const href = isOwner 
     ? `/${locale}/dictionary/${dictionary.id}`
-    : `/${locale}/library/${dictionary.id}`;
+    : `/${locale}/library/${dictionary.slug || dictionary.id}`;
 
   return (
     <Link

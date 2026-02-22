@@ -6,6 +6,8 @@ import { dictionaries, users, forks } from '@/lib/db/schema';
 import { eq, and, sql } from 'drizzle-orm';
 import { APP_URL } from '@/lib/utils/constants';
 import DictionaryPreviewClient from '@/components/library/DictionaryPreviewClient';
+import DictionaryJsonLd from '@/components/seo/DictionaryJsonLd';
+import AdminSeoEditor from '@/components/library/AdminSeoEditor';
 
 export const revalidate = false; // Only revalidate on-demand
 
@@ -14,14 +16,14 @@ export async function generateStaticParams() {
     const publicDicts = await db.query.dictionaries.findMany({
       where: eq(dictionaries.isPublic, true),
       limit: 100,
-      columns: { id: true },
+      columns: { slug: true },
     });
     
-    // We need to return an array of objects for each locale if we have locales in the path
-    // For now, let's assume 'en' as default or handle all supported
     const locales = ['en', 'fr', 'de', 'es', 'tr'];
     return locales.flatMap((locale) => 
-      publicDicts.map((d) => ({ locale, id: d.id }))
+      publicDicts
+        .filter((d) => d.slug)
+        .map((d) => ({ locale, slug: d.slug! }))
     );
   } catch (error) {
     return [];
@@ -31,12 +33,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({ 
   params 
 }: { 
-  params: Promise<{ id: string; locale: string }> 
+  params: Promise<{ slug: string; locale: string }> 
 }): Promise<Metadata> {
-  const { id, locale } = await params;
+  const { slug, locale } = await params;
   
   const dict = await db.query.dictionaries.findFirst({
-    where: and(eq(dictionaries.id, id), eq(dictionaries.isPublic, true)),
+    where: and(eq(dictionaries.slug, slug), eq(dictionaries.isPublic, true)),
     with: {
       user: { columns: { username: true } },
       words: { columns: { id: true } }
@@ -45,8 +47,11 @@ export async function generateMetadata({
 
   if (!dict) return { title: 'Not Found - Lingdb' };
 
-  const title = `${dict.title} - Lingdb Library`;
-  const description = `Learn ${dict.language} with ${dict.words.length} words. Created by ${dict.user.username}. ${dict.description || ''}`;
+  // Use AI-generated SEO title if available, otherwise fallback
+  const title = dict.seoTitle || `${dict.title} - Lingdb Library`;
+  const description = dict.seoDescription 
+    ? dict.seoDescription.replace(/<[^>]*>/g, '').slice(0, 160) // Strip HTML for meta
+    : `Learn ${dict.language} with ${dict.words.length} words. Created by ${dict.user.username}. ${dict.description || ''}`;
 
   return {
     title,
@@ -55,7 +60,7 @@ export async function generateMetadata({
       title,
       description,
       type: 'article',
-      url: `${APP_URL}/${locale}/library/${dict.id}`,
+      url: `${APP_URL}/en/library/${dict.slug}`,
     },
     twitter: {
       card: 'summary_large_image',
@@ -63,17 +68,19 @@ export async function generateMetadata({
       description,
     },
     alternates: {
-      canonical: `/${locale}/library/${dict.id}`,
-    }
+      canonical: `/en/library/${dict.slug}`,
+    },
+    // Only index English locale pages
+    robots: locale !== 'en' ? { index: false, follow: true } : undefined,
   };
 }
 
 export default async function DictionaryLibraryPreviewPage({
   params,
 }: {
-  params: Promise<{ locale: string; id: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { locale, id } = await params;
+  const { locale, slug } = await params;
   const supabase = await createClient();
   const {
     data: { user },
@@ -88,7 +95,7 @@ export default async function DictionaryLibraryPreviewPage({
   }
 
   const dict = await db.query.dictionaries.findFirst({
-    where: and(eq(dictionaries.id, id), eq(dictionaries.isPublic, true)),
+    where: and(eq(dictionaries.slug, slug), eq(dictionaries.isPublic, true)),
     with: {
       user: { columns: { username: true } },
       words: {
@@ -99,14 +106,6 @@ export default async function DictionaryLibraryPreviewPage({
   });
 
   if (!dict) notFound();
-
-  // If user owns it and is logged in, they can just edit it in their dashboard
-  if (dbUser && dict.userId === dbUser.id) {
-    // We don't redirect in metadata generation, but here it's fine
-    // However, for ISR, maybe we should just show the preview or a link to dashboard
-    // Let's keep the redirect if they are the owner for better UX
-    // redirect(`/${locale}/dictionary/${dict.id}`);
-  }
 
   // Count forks for this dictionary
   const forksData = await db
@@ -126,6 +125,8 @@ export default async function DictionaryLibraryPreviewPage({
     hasForked = !!forkCheck;
   }
 
+  const isAdmin = dbUser?.role === 'ADMIN';
+
   const processedDict = {
     ...dict,
     _count: { forks: forksData[0]?.count || 0 },
@@ -133,11 +134,31 @@ export default async function DictionaryLibraryPreviewPage({
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      <DictionaryJsonLd dictionary={processedDict} />
+
       <DictionaryPreviewClient 
         dictionary={processedDict} 
         hasForked={hasForked} 
         isLoggedIn={!!user}
       />
+
+      {/* Visually hidden SEO rich content for crawlers */}
+      {dict.seoDescription && (
+        <section
+          className="sr-only"
+          aria-hidden="true"
+          dangerouslySetInnerHTML={{ __html: dict.seoDescription }}
+        />
+      )}
+
+      {isAdmin && (
+        <AdminSeoEditor 
+          dictionaryId={dict.id}
+          currentSeoTitle={dict.seoTitle}
+          currentSeoDescription={dict.seoDescription}
+          seoGeneratedAt={dict.seoGeneratedAt?.toISOString() || null}
+        />
+      )}
     </main>
   );
 }

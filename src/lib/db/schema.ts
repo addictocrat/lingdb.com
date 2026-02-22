@@ -74,10 +74,14 @@ export const dictionaries = pgTable(
     description: text('description'),
     language: text('language').notNull(), // "en", "fr", "de", "es", "tr"
     isPublic: boolean('is_public').notNull().default(false),
+    slug: text('slug').unique(),
     userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     activeMagicWords: jsonb('active_magic_words').$type<{ word: string; translation: string; isAdded: boolean }[]>(),
+    seoTitle: text('seo_title'),
+    seoDescription: text('seo_description'),
+    seoGeneratedAt: timestamp('seo_generated_at', { withTimezone: true }),
     lastDailyUpdateSentAt: timestamp('last_daily_update_sent_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true })
       .notNull()
@@ -89,6 +93,7 @@ export const dictionaries = pgTable(
   (table) => [
     index('dictionaries_user_id_idx').on(table.userId),
     index('dictionaries_is_public_idx').on(table.isPublic),
+    index('dictionaries_slug_idx').on(table.slug),
   ]
 );
 

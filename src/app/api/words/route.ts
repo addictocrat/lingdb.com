@@ -150,13 +150,18 @@ export async function POST(request: NextRequest) {
     })
     .where(eq(dictionaries.id, dictToEdit.id));
 
-  if (dictToEdit.isPublic) {
-    const id = dictToEdit.id;
-    revalidatePath(`/en/library/${id}`);
-    revalidatePath(`/fr/library/${id}`);
-    revalidatePath(`/de/library/${id}`);
-    revalidatePath(`/es/library/${id}`);
-    revalidatePath(`/tr/library/${id}`);
+  if (dictToEdit.isPublic && dictToEdit.slug) {
+    revalidatePath(`/en/library/${dictToEdit.slug}`);
+  }
+
+  // Auto-generate SEO metadata when dictionary reaches 5 words
+  if (dictToEdit.isPublic && !dictToEdit.seoGeneratedAt && count + 1 === 5) {
+    // Fire-and-forget: don't block the response
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/dictionaries/generate-seo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: request.headers.get('cookie') || '' },
+      body: JSON.stringify({ dictionaryId: dictToEdit.id }),
+    }).catch(console.error);
   }
 
   return NextResponse.json({ word: newWord }, { status: 201 });

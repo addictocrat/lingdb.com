@@ -11,8 +11,8 @@ export default function robots(): MetadataRoute.Robots {
         allow: [
           '/',
           '/en', '/fr', '/de', '/es', '/tr',
-          '/*/library',
-          '/*/library/*',
+          '/en/library',
+          '/en/library/*',
           '/*/tiers',
           '/*/privacy',
           '/*/terms',
@@ -24,6 +24,10 @@ export default function robots(): MetadataRoute.Robots {
           '/*/dictionary', // Authenticated edit view
           '/*/payment',
           '/api/*',
+          '/fr/library/*',
+          '/de/library/*',
+          '/es/library/*',
+          '/tr/library/*',
         ],
       },
     ],

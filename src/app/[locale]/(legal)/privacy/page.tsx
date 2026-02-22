@@ -24,6 +24,9 @@ export default function PrivacyPolicyPage() {
       
       <h2 className="text-3xl font-bold mt-12 mb-4">{t('section5_title')}</h2>
       <p className="mb-6">{t('section5_content')}</p>
+      
+      <h2 className="text-3xl font-bold mt-12 mb-4">{t('section6_title')}</h2>
+      <p className="mb-6">{t('section6_content')}</p>
     </>
   );
 }

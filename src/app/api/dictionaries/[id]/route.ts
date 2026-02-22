@@ -8,9 +8,11 @@ import { z } from 'zod';
 
 const updateDictionarySchema = z.object({
   title: z.string().min(1).max(100).optional(),
-  description: z.string().max(500).optional(),
+  description: z.string().max(500).nullable().optional(),
   isPublic: z.boolean().optional(),
   activeMagicWords: z.array(z.any()).optional(),
+  seoTitle: z.string().max(200).nullable().optional(),
+  seoDescription: z.string().nullable().optional(),
 });
 
 // Helper: verify ownership
@@ -107,6 +109,21 @@ export async function PATCH(
 
   const ownership = await verifyOwnership(id, user.id);
   if (!ownership) {
+    // Debug: log why ownership failed
+    const dbUser = await db.query.users.findFirst({
+      where: eq(users.supabaseId, user.id),
+    });
+    const dict = await db.query.dictionaries.findFirst({
+      where: eq(dictionaries.id, id),
+      columns: { id: true, userId: true },
+    });
+    console.error('[PATCH dictionaries] ownership check failed:', {
+      supabaseUserId: user.id,
+      dbUserId: dbUser?.id,
+      dictionaryId: id,
+      dictOwnerId: dict?.userId,
+      match: dbUser?.id === dict?.userId,
+    });
     return NextResponse.json({ error: 'Not found or forbidden' }, { status: 404 });
   }
 
@@ -126,12 +143,8 @@ export async function PATCH(
     .where(eq(dictionaries.id, id))
     .returning();
 
-  if (updated.isPublic) {
-    revalidatePath(`/en/library/${id}`);
-    revalidatePath(`/fr/library/${id}`);
-    revalidatePath(`/de/library/${id}`);
-    revalidatePath(`/es/library/${id}`);
-    revalidatePath(`/tr/library/${id}`);
+  if (updated.isPublic && updated.slug) {
+    revalidatePath(`/en/library/${updated.slug}`);
     revalidatePath('/en/library');
   }
 
@@ -170,12 +183,8 @@ export async function DELETE(
       .where(eq(users.id, ownership.dbUser.id));
   }
 
-  if (ownership.dict.isPublic) {
-    revalidatePath(`/en/library/${id}`);
-    revalidatePath(`/fr/library/${id}`);
-    revalidatePath(`/de/library/${id}`);
-    revalidatePath(`/es/library/${id}`);
-    revalidatePath(`/tr/library/${id}`);
+  if (ownership.dict.isPublic && ownership.dict.slug) {
+    revalidatePath(`/en/library/${ownership.dict.slug}`);
     revalidatePath('/en/library');
   }
 

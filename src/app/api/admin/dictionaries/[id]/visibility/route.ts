@@ -49,11 +49,10 @@ export async function PATCH(
     }
 
     // Revalidate library paths
-    const locales = ['en', 'fr', 'de', 'es', 'tr'];
-    locales.forEach(l => {
-      revalidatePath(`/${l}/library/${id}`);
-      revalidatePath(`/${l}/library`);
-    });
+    if (updated.slug) {
+      revalidatePath(`/en/library/${updated.slug}`);
+    }
+    revalidatePath('/en/library');
 
     return NextResponse.json({ dictionary: updated });
   } catch (error) {

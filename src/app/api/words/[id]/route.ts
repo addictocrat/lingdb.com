@@ -75,13 +75,8 @@ export async function PATCH(
     .where(eq(words.id, id))
     .returning();
 
-  if (word.dictionary.isPublic) {
-    const id = word.dictionary.id;
-    revalidatePath(`/en/library/${id}`);
-    revalidatePath(`/fr/library/${id}`);
-    revalidatePath(`/de/library/${id}`);
-    revalidatePath(`/es/library/${id}`);
-    revalidatePath(`/tr/library/${id}`);
+  if (word.dictionary.isPublic && word.dictionary.slug) {
+    revalidatePath(`/en/library/${word.dictionary.slug}`);
   }
 
   return NextResponse.json({ word: updated });
@@ -148,13 +143,8 @@ export async function DELETE(
     .set({ updatedAt: new Date() })
     .where(eq(dictionaries.id, word.dictionaryId));
 
-  if (word.dictionary.isPublic) {
-    const id = word.dictionary.id;
-    revalidatePath(`/en/library/${id}`);
-    revalidatePath(`/fr/library/${id}`);
-    revalidatePath(`/de/library/${id}`);
-    revalidatePath(`/es/library/${id}`);
-    revalidatePath(`/tr/library/${id}`);
+  if (word.dictionary.isPublic && word.dictionary.slug) {
+    revalidatePath(`/en/library/${word.dictionary.slug}`);
   }
 
   return NextResponse.json({ success: true });

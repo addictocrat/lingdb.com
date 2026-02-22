@@ -97,13 +97,10 @@ export async function PATCH(request: Request) {
 
     const dictionaryId = existingWords[0]?.dictionaryId;
     const isPublic = existingWords[0]?.dictionary?.isPublic;
+    const dictSlug = (existingWords[0]?.dictionary as any)?.slug;
 
-    if (dictionaryId && isPublic) {
-      revalidatePath(`/en/library/${dictionaryId}`);
-      revalidatePath(`/fr/library/${dictionaryId}`);
-      revalidatePath(`/de/library/${dictionaryId}`);
-      revalidatePath(`/es/library/${dictionaryId}`);
-      revalidatePath(`/tr/library/${dictionaryId}`);
+    if (dictionaryId && isPublic && dictSlug) {
+      revalidatePath(`/en/library/${dictSlug}`);
     }
 
     return NextResponse.json({ success: true });

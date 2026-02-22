@@ -37,11 +37,10 @@ export async function DELETE(
     }
 
     // Revalidate library paths
-    const locales = ['en', 'fr', 'de', 'es', 'tr'];
-    locales.forEach(l => {
-      revalidatePath(`/${l}/library/${id}`);
-      revalidatePath(`/${l}/library`);
-    });
+    if (deleted.slug) {
+      revalidatePath(`/en/library/${deleted.slug}`);
+    }
+    revalidatePath('/en/library');
 
     return NextResponse.json({ success: true });
   } catch (error) {

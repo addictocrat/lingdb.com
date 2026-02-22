@@ -63,6 +63,7 @@ export default async function LibraryPage({
       description: dictionaries.description,
       language: dictionaries.language,
       userId: dictionaries.userId,
+      slug: dictionaries.slug,
       createdAt: dictionaries.createdAt,
       wordCount: wordCountQuery,
       forkCount: forkCountQuery,
