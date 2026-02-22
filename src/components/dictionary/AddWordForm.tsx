@@ -1,0 +1,168 @@
+'use client';
+
+import { useState, useRef } from 'react';
+import Button from '@/components/ui/Button';
+import { useToast } from '@/components/ui/Toast';
+import { Plus } from 'lucide-react';
+import { z } from 'zod';
+import { useLocale } from 'next-intl';
+import AutoSuggest from './AutoSuggest';
+
+import Dropdown, { DropdownItem } from '@/components/ui/Dropdown';
+
+const addWordSchema = z.object({
+  title: z.string().min(1, 'Word is required').max(100),
+  translation: z.string().min(1, 'Translation is required').max(200),
+});
+
+const languages = [
+  { code: 'en', flagClass: 'fi fi-gb' },
+  { code: 'fr', flagClass: 'fi fi-fr' },
+  { code: 'de', flagClass: 'fi fi-de' },
+  { code: 'es', flagClass: 'fi fi-es' },
+  { code: 'tr', flagClass: 'fi fi-tr' },
+];
+
+interface AddWordFormProps {
+  dictionaryId: string;
+  dictionaryLanguage: string;
+  onWordAdded: () => void;
+  wordCount: number;
+}
+
+export default function AddWordForm({
+  dictionaryId,
+  dictionaryLanguage,
+  onWordAdded,
+  wordCount,
+}: AddWordFormProps) {
+  const { toast } = useToast();
+  const locale = useLocale();
+  const [title, setTitle] = useState('');
+  const [translation, setTranslation] = useState('');
+  const [targetLang, setTargetLang] = useState(locale);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const titleRef = useRef<HTMLInputElement>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrors({});
+
+    const result = addWordSchema.safeParse({ title, translation });
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.issues.forEach((issue) => {
+        fieldErrors[issue.path[0] as string] = issue.message;
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
+    if (wordCount >= 500) {
+      toast('Maximum 500 words per dictionary', 'warning');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/words', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...result.data, dictionaryId }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        toast(data.error || 'Failed to add word', 'error');
+        return;
+      }
+
+      setTitle('');
+      setTranslation('');
+      titleRef.current?.focus(); // Actually AutoSuggest input ref might not be exposed, but that's fine
+      onWordAdded();
+    } catch {
+      toast('Something went wrong', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-3 rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] p-4 sm:flex-row sm:items-end"
+    >
+      <div className="flex-1 space-y-1">
+        <label className="text-sm font-medium text-[var(--fg)]/60">Word</label>
+        <AutoSuggest
+          language={dictionaryLanguage}
+          value={title}
+          onChange={setTitle}
+          placeholder="Enter a word..."
+          className={errors.title ? 'border-accent-400' : ''}
+        />
+        {errors.title && (
+          <p className="text-sm text-accent-500">{errors.title}</p>
+        )}
+      </div>
+
+      <div className="flex-1 space-y-1">
+        <label className="text-sm font-medium text-[var(--fg)]/60">
+          Translation
+        </label>
+        <AutoSuggest
+          language={dictionaryLanguage}
+          targetLang={targetLang}
+          sourceWord={title}
+          apiEndpoint="/api/words/translate-suggest"
+          value={translation}
+          onChange={setTranslation}
+          placeholder="Enter translation..."
+          className={errors.translation ? 'border-accent-400' : ''}
+          rightElement={
+            <Dropdown
+              key={targetLang}
+              trigger={
+                <button
+                  type="button"
+                  className="flex h-7 w-9 items-center justify-center rounded-md hover:bg-[var(--surface)] transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500/50"
+                  title="Change translation language"
+                >
+                  <span
+                    className={`text-lg rounded-sm overflow-hidden ${
+                      languages.find((l) => l.code === targetLang)?.flagClass || 'fi fi-gb'
+                    }`}
+                  ></span>
+                </button>
+              }
+            >
+              <div className="py-1">
+                {languages.map((lang) => (
+                  <DropdownItem
+                    key={lang.code}
+                    onClick={() => setTargetLang(lang.code)}
+                    className="gap-3"
+                    type="button"
+                  >
+                    <span className={`text-xl rounded-sm overflow-hidden ${lang.flagClass}`}></span>
+                    <span className="text-base uppercase">{lang.code}</span>
+                  </DropdownItem>
+                ))}
+              </div>
+            </Dropdown>
+          }
+        />
+        {errors.translation && (
+          <p className="text-sm text-accent-500">{errors.translation}</p>
+        )}
+      </div>
+
+      <Button type="submit" className="cursor-pointer" isLoading={isSubmitting} size="md">
+        <Plus className="h-4 w-4" />
+        Add
+      </Button>
+    </form>
+  );
+}
