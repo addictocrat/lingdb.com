@@ -49,8 +49,9 @@
     "step3": "Lernen beginnen",
     "step3_desc": "Lernen Sie mit Karteikarten, Quiz und KI-generierten Beispielen.",
     "pricing_title": "Einfache Preise",
-    "footer_cta": "Schließen Sie sich tausenden Lernenden an",
-    "footer_cta_button": "Jetzt registrieren",
+    "footer_title": "Bereit zu lernen?",
+    "footer_description": "Schließen Sie sich Tausenden von Lernenden an, die ihren Wortschatz mit intelligenten Tools und KI-gestützter Unterstützung aufbauen.",
+    "footer_cta": "Kostenlos starten",
     "features_heading_1": "Leistungsstarke Tools",
     "features_heading_highlight": " für Sie",
     "features_subheading": "Lernen Sie intelligenter mit maßgeschneiderten Dienstprogrammen, die für Ihre Lernkurve entwickelt wurden.",
@@ -217,7 +218,13 @@
     "all_languages": "Alle Sprachen",
     "no_results": "Keine Ergebnisse für Ihre Suche gefunden.",
     "none_available": "Noch keine öffentlichen Wörterbücher verfügbar.",
-    "try_adjusting": "Versuchen Sie, Ihre Filter oder den Suchbegriff anzupassen."
+    "try_adjusting": "Versuchen Sie, Ihre Filter oder den Suchbegriff anzupassen.",
+    "no_description": "Keine Beschreibung vorhanden.",
+    "en": "Englisch",
+    "fr": "Französisch",
+    "de": "Deutsch",
+    "es": "Spanisch",
+    "tr": "Türkisch"
   },
   "ai": {
     "magic_examples": "Magische Beispiele ✨",
@@ -281,7 +288,9 @@
       "section4_title": "4. Ihre Rechte (DSGVO)",
       "section4_content": "Sie haben das Recht, jederzeit auf Ihre persönlichen Daten zuzugreifen, sie zu exportieren oder zu löschen. Sie können sich auch in Ihren Einstellungen von Marketing-E-Mails abmelden.",
       "section5_title": "5. Kontakt",
-      "section5_content": "Wenn Sie Fragen zu dieser Richtlinie haben, kontaktieren Sie uns bitte unter privacy@lingdb.com."
+      "section5_content": "Wenn Sie Fragen zu dieser Richtlinie haben, kontaktieren Sie uns bitte unter privacy@lingdb.com.",
+      "section6_title": "6. KI-Verarbeitung von Wörterbuchinhalten",
+      "section6_content": "Wenn ein öffentliches Wörterbuch eine Mindestanzahl an Wörtern erreicht, kann unser KI-System (betrieben von OpenAI) den Titel, die Sprache und die Wortliste des Wörterbuchs verarbeiten, um SEO-optimierte Metadaten wie eine Überschrift und Beschreibung zu generieren. Diese Metadaten werden in unserer Datenbank gespeichert und öffentlich auf Bibliotheksseiten angezeigt. Keine persönlichen Daten über Ihren öffentlichen Benutzernamen hinaus sind in diesem Prozess enthalten."
     },
     "terms": {
       "title": "Nutzungsbedingungen",
@@ -296,7 +305,9 @@
       "section4_title": "4. Geistiges Eigentum",
       "section4_content": "Die Lingdb-Anwendung und ihre ursprünglichen Inhalte sind Eigentum von Lingdb und durch internationale Urheberrechtsgesetze geschützt.",
       "section5_title": "5. Kündigung",
-      "section5_content": "Wir behalten uns das Recht vor, Ihr Konto bei Verstößen gegen diese Bedingungen zu kündigen oder zu sperren."
+      "section5_content": "Wir behalten uns das Recht vor, Ihr Konto bei Verstößen gegen diese Bedingungen zu kündigen oder zu sperren.",
+      "section6_title": "6. Öffentliche Wörterbücher und SEO",
+      "section6_content": "Wenn Sie ein Wörterbuch öffentlich machen, werden sein Titel, seine Beschreibung, seine Wörter und Übersetzungen öffentlich angezeigt und können von Suchmaschinen indexiert werden. KI-generierte Metadaten (wie ein optimierter Titel und eine erweiterte Beschreibung) können automatisch erstellt werden, um die Auffindbarkeit zu verbessern. Indem Sie ein Wörterbuch öffentlich machen, stimmen Sie dieser Verarbeitung Ihrer Inhalte zu."
     },
     "cookies": {
       "title": "Cookie-Richtlinie",
@@ -314,5 +325,20 @@
     "dashboard": "Dashboard",
     "library": "Bibliothek",
     "profile": "Profil"
+  },
+  "tutorial": {
+    "welcome_title": "Willkommen bei Lingdb! 🚀",
+    "welcome_desc": "Machen wir eine kurze 1-minütige Tour, die Ihnen hilft, jede Sprache zu meistern.",
+    "library_title": "Ihre Bibliothek",
+    "library_desc": "Alle Ihre persönlichen Wörterbücher werden hier für einen einfachen Zugriff angezeigt.",
+    "profile_title": "Ihr Profil",
+    "profile_desc": "Verfolgen Sie hier Ihre Lernsträhnen, Statistiken und verwalten Sie Ihre Kontoeinstellungen.",
+    "premium_title": "Premium-Funktionen",
+    "premium_desc": "Führen Sie ein Upgrade für unbegrenzte KI-Credits, werbefreies Lernen und erweiterte Statistiken durch.",
+    "create_title": "Erstellen Sie Ihr erstes Wörterbuch",
+    "create_desc": "Klicken Sie hier, um mit dem Aufbau Ihrer Vokabelliste zu beginnen.",
+    "next_btn": "Weiter",
+    "prev_btn": "Zurück",
+    "done_btn": "Fertig"
   }
 }

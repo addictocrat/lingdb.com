@@ -29,11 +29,14 @@ export default function OnboardingTour({ hasCompletedTour, userId }: OnboardingT
       animate: true,
       allowClose: true,
       overlayColor: 'rgba(0,0,0,0.75)',
+      nextBtnText: t('next_btn'),
+      prevBtnText: t('prev_btn'),
+      doneBtnText: t('done_btn'),
       steps: [
         {
           popover: {
-            title: 'Welcome to Lingdb! 🚀',
-            description: "Let's take a quick 1-minute tour to help you master any language.",
+            title: t('welcome_title'),
+            description: t('welcome_desc'),
             side: 'bottom',
             align: 'start'
           }
@@ -41,8 +44,8 @@ export default function OnboardingTour({ hasCompletedTour, userId }: OnboardingT
         {
           element: '#dictionary-grid',
           popover: {
-            title: 'Your Library',
-            description: 'All your personal dictionaries will appear here for easy access.',
+            title: t('library_title'),
+            description: t('library_desc'),
             side: 'top',
             align: 'start'
           }
@@ -50,8 +53,8 @@ export default function OnboardingTour({ hasCompletedTour, userId }: OnboardingT
         {
           element: '#profile-nav-link',
           popover: {
-            title: 'Your Profile',
-            description: 'Track your learning streaks, stats, and manage your account settings here.',
+            title: t('profile_title'),
+            description: t('profile_desc'),
             side: 'bottom',
             align: 'start'
           }
@@ -59,8 +62,8 @@ export default function OnboardingTour({ hasCompletedTour, userId }: OnboardingT
         {
           element: '#tiers-nav-link',
           popover: {
-            title: 'Premium Features',
-            description: 'Upgrade for unlimited AI credits, ad-free learning, and advanced stats.',
+            title: t('premium_title'),
+            description: t('premium_desc'),
             side: 'bottom',
             align: 'start'
           }
@@ -68,8 +71,8 @@ export default function OnboardingTour({ hasCompletedTour, userId }: OnboardingT
         {
           element: '#create-dictionary-btn',
           popover: {
-            title: 'Create Your First Dictionary',
-            description: 'Click here to start building your vocabulary list.',
+            title: t('create_title'),
+            description: t('create_desc'),
             side: 'bottom',
             align: 'start'
           }

@@ -49,8 +49,9 @@
     "step3": "Start Learning",
     "step3_desc": "Study with flashcards, quizzes, and AI-generated examples.",
     "pricing_title": "Simple Pricing",
-    "footer_cta": "Join thousands of learners",
-    "footer_cta_button": "Sign Up Now",
+    "footer_title": "Ready to start learning?",
+    "footer_description": "Join thousands of learners building their vocabulary with smart tools and AI-powered assistance.",
+    "footer_cta": "Get Started Free",
     "features_heading_1": "Powerful Tools",
     "features_heading_highlight": " for Your Context",
     "features_subheading": "Learn smarter with customized utilities built for your learning curve.",
@@ -217,7 +218,13 @@
     "all_languages": "All Languages",
     "no_results": "No results found for your search.",
     "none_available": "No public dictionaries available yet.",
-    "try_adjusting": "Try adjusting your filters or search query."
+    "try_adjusting": "Try adjusting your filters or search query.",
+    "no_description": "No description provided.",
+    "en": "English",
+    "fr": "French",
+    "de": "German",
+    "es": "Spanish",
+    "tr": "Turkish"
   },
   "ai": {
     "magic_examples": "Magic Examples ✨",
@@ -281,7 +288,9 @@
       "section4_title": "4. Your Rights (GDPR/KVKK)",
       "section4_content": "You have the right to access, export, or delete your personal data at any time. You can also opt-out of marketing emails in your settings.",
       "section5_title": "5. Contact",
-      "section5_content": "If you have any questions about this policy, please contact us at privacy@lingdb.com."
+      "section5_content": "If you have any questions about this policy, please contact us at privacy@lingdb.com.",
+      "section6_title": "6. AI Processing of Dictionary Content",
+      "section6_content": "When a public dictionary reaches a minimum word threshold, our AI system (powered by OpenAI) may process the dictionary title, language, and word list to generate SEO-optimized metadata such as a headline and description. This metadata is stored in our database and displayed publicly on library pages to improve discoverability. No personal data beyond your public username is included in this process."
     },
     "terms": {
       "title": "Terms of Use",
@@ -296,7 +305,9 @@
       "section4_title": "4. Intellectual Property",
       "section4_content": "The Lingdb application and its original content are owned by Lingdb and protected by international copyright laws.",
       "section5_title": "5. Termination",
-      "section5_content": "We reserve the right to terminate or suspend your account for violations of these terms."
+      "section5_content": "We reserve the right to terminate or suspend your account for violations of these terms.",
+      "section6_title": "6. Public Dictionaries & SEO",
+      "section6_content": "When you set a dictionary to public, its title, description, words, and translations will be displayed publicly and may be indexed by search engines. AI-generated metadata (such as an optimized headline and rich description) may be created automatically to improve discoverability. By making a dictionary public, you agree to this processing of your content."
     },
     "cookies": {
       "title": "Cookie Policy",
@@ -314,5 +325,20 @@
     "dashboard": "Dashboard",
     "library": "Library",
     "profile": "Profile"
+  },
+  "tutorial": {
+    "welcome_title": "Welcome to Lingdb! 🚀",
+    "welcome_desc": "Let's take a quick 1-minute tour to help you master any language.",
+    "library_title": "Your Library",
+    "library_desc": "All your personal dictionaries will appear here for easy access.",
+    "profile_title": "Your Profile",
+    "profile_desc": "Track your learning streaks, stats, and manage your account settings here.",
+    "premium_title": "Premium Features",
+    "premium_desc": "Upgrade for unlimited AI credits, ad-free learning, and advanced stats.",
+    "create_title": "Create Your First Dictionary",
+    "create_desc": "Click here to start building your vocabulary list.",
+    "next_btn": "Next",
+    "prev_btn": "Previous",
+    "done_btn": "Done"
   }
 }

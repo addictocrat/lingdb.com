@@ -49,8 +49,9 @@
     "step3": "Empieza a aprender",
     "step3_desc": "Estudia con tarjetas, cuestionarios y ejemplos generados por IA.",
     "pricing_title": "Precios simples",
-    "footer_cta": "Únete a miles de estudiantes",
-    "footer_cta_button": "Regístrate ahora",
+    "footer_title": "¿Listo para empezar a aprender?",
+    "footer_description": "Únete a miles de estudiantes que construyen su vocabulario con herramientas inteligentes y asistencia impulsada por IA.",
+    "footer_cta": "Empezar gratis",
     "features_heading_1": "Herramientas poderosas",
     "features_heading_highlight": " para ti",
     "features_subheading": "Aprende de manera más inteligente con utilidades personalizadas diseñadas para tu curva de aprendizaje.",
@@ -217,7 +218,13 @@
     "all_languages": "Todos los idiomas",
     "no_results": "No se encontraron resultados para tu búsqueda.",
     "none_available": "Aún no hay diccionarios públicos disponibles.",
-    "try_adjusting": "Intenta ajustar tus filtros o tu búsqueda."
+    "try_adjusting": "Intenta ajustar tus filtros o tu búsqueda.",
+    "no_description": "Sin descripción proporcionada.",
+    "en": "Inglés",
+    "fr": "Francés",
+    "de": "Alemán",
+    "es": "Español",
+    "tr": "Turco"
   },
   "ai": {
     "magic_examples": "Ejemplos mágicos ✨",
@@ -281,7 +288,9 @@
       "section4_title": "4. Sus derechos (RGPD)",
       "section4_content": "Tiene derecho a acceder, exportar o eliminar sus datos personales en cualquier momento. También puede optar por no recibir correos electrónicos de marketing en su configuración.",
       "section5_title": "5. Contacto",
-      "section5_content": "Si tiene alguna pregunta sobre esta política, póngase en contacto con nosotros en privacy@lingdb.com."
+      "section5_content": "Si tiene alguna pregunta sobre esta política, póngase en contacto con nosotros en privacy@lingdb.com.",
+      "section6_title": "6. Procesamiento IA del contenido del diccionario",
+      "section6_content": "Cuando un diccionario público alcanza un umbral mínimo de palabras, nuestro sistema de IA (impulsado por OpenAI) puede procesar el título, el idioma y la lista de palabras del diccionario para generar metadatos optimizados para SEO, como un titular y una descripción. Estos metadatos se almacenan en nuestra base de datos y se muestran públicamente en las páginas de la biblioteca. No se incluyen datos personales más allá de su nombre de usuario público."
     },
     "terms": {
       "title": "Condiciones de uso",
@@ -296,7 +305,9 @@
       "section4_title": "4. Propiedad intelectual",
       "section4_content": "La aplicación Lingdb y su contenido original son owned por Lingdb y están protegidos por las leyes internacionales de derechos de autor.",
       "section5_title": "5. Terminación",
-      "section5_content": "Nos reservamos el derecho de terminar o suspender su cuenta por violaciones de estas condiciones."
+      "section5_content": "Nos reservamos el derecho de terminar o suspender su cuenta por violaciones de estas condiciones.",
+      "section6_title": "6. Diccionarios públicos y SEO",
+      "section6_content": "Cuando establece un diccionario como público, su título, descripción, palabras y traducciones se mostrarán públicamente y podrán ser indexados por los motores de búsqueda. Los metadatos generados por IA (como un titular optimizado y una descripción enriquecida) pueden crearse automáticamente para mejorar la visibilidad. Al hacer público un diccionario, usted acepta este procesamiento de su contenido."
     },
     "cookies": {
       "title": "Política de cookies",
@@ -314,5 +325,20 @@
     "dashboard": "Panel de control",
     "library": "Biblioteca",
     "profile": "Perfil"
+  },
+  "tutorial": {
+    "welcome_title": "¡Bienvenido a Lingdb! 🚀",
+    "welcome_desc": "Hagamos un recorrido rápido de 1 minuto para ayudarlo a dominar cualquier idioma.",
+    "library_title": "Tu Biblioteca",
+    "library_desc": "Todos tus diccionarios personales aparecerán aquí para un fácil acceso.",
+    "profile_title": "Tu Perfil",
+    "profile_desc": "Realiza un seguimiento de tus rachas de aprendizaje, estadísticas y administra la configuración de tu cuenta aquí.",
+    "premium_title": "Funciones Premium",
+    "premium_desc": "Actualiza para obtener créditos de IA ilimitados, aprendizaje sin anuncios y estadísticas avanzadas.",
+    "create_title": "Crea Tu Primer Diccionario",
+    "create_desc": "Haz clic aquí para comenzar a construir tu lista de vocabulario.",
+    "next_btn": "Siguiente",
+    "prev_btn": "Anterior",
+    "done_btn": "Hecho"
   }
 }

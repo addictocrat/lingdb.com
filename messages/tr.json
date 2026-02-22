@@ -27,8 +27,8 @@
   },
   "landing": {
     "badge_text": "Dil öğrenmenin daha akıllı yolu",
-    "hero_title": "Herhangi Bir Dili Öğrenin",
-    "hero_title_highlight": "kolaylıkla",
+    "hero_title": "Akıllı Sözlüklerle Dil Öğrenin",
+    "hero_title_highlight": "Hem de Birlikte.",
     "hero_subtitle": "Kelime kartları oluşturun, quiz çözün ve yapay zeka destekli araçlarla öğrenin.",
     "cta_button": "Ücretsiz Başlayın",
     "browse_library": "Kütüphaneye Göz At",
@@ -49,8 +49,9 @@
     "step3": "Öğrenmeye Başlayın",
     "step3_desc": "Kelime kartları, quizler ve yapay zeka örnekleri ile çalışın.",
     "pricing_title": "Basit Fiyatlandırma",
-    "footer_cta": "Binlerce öğrenciye katılın",
-    "footer_cta_button": "Hemen Kayıt Ol",
+    "footer_title": "Öğrenmeye hazır mısınız?",
+    "footer_description": "Akıllı araçlar ve yapay zeka destekli yardım ile kelime hazinelerini geliştiren binlerce öğrenciye katılın.",
+    "footer_cta": "Ücretsiz Başlayın",
     "features_heading_1": "Güçlü Araçlar",
     "features_heading_highlight": " Sizin İçin",
     "features_subheading": "Öğrenme eğriniz için oluşturulmuş özelleştirilmiş yardımcı programlarla daha akıllıca öğrenin.",
@@ -217,7 +218,13 @@
     "all_languages": "Tüm Diller",
     "no_results": "Aramanız için sonuç bulunamadı.",
     "none_available": "Henüz herkese açık sözlük yok.",
-    "try_adjusting": "Aramanızı veya filtrelerinizi ayarlamayı deneyin."
+    "try_adjusting": "Aramanızı veya filtrelerinizi ayarlamayı deneyin.",
+    "no_description": "Açıklama belirtilmedi.",
+    "en": "İngilizce",
+    "fr": "Fransızca",
+    "de": "Almanca",
+    "es": "İspanyolca",
+    "tr": "Türkçe"
   },
   "ai": {
     "magic_examples": "Sihirli Örnekler ✨",
@@ -281,7 +288,9 @@
       "section4_title": "4. Haklarınız (GDPR/KVKK)",
       "section4_content": "Kişisel verilerinize istediğiniz zaman erişme, dışa aktarma veya silme hakkına sahipsiniz. Ayrıca ayarlarınızdan pazarlama e-postalarını almamayı seçebilirsiniz.",
       "section5_title": "5. İletişim",
-      "section5_content": "Bu politika hakkında herhangi bir sorunuz varsa, lütfen privacy@lingdb.com adresinden bizimle iletişime geçin."
+      "section5_content": "Bu politika hakkında herhangi bir sorunuz varsa, lütfen privacy@lingdb.com adresinden bizimle iletişime geçin.",
+      "section6_title": "6. Sözlük İçeriğinin Yapay Zeka ile İşlenmesi",
+      "section6_content": "Herkese açık bir sözlük minimum kelime eşiğine ulaştığında, yapay zeka sistemimiz (OpenAI tarafından desteklenen) sözlüğün başlığını, dilini ve kelime listesini işleyerek SEO için optimize edilmiş başlık ve açıklama gibi meta veriler oluşturabilir. Bu meta veriler veritabanımızda saklanır ve kütüphane sayfalarında herkese açık olarak gösterilir. Herkese açık kullanıcı adınız dışında hiçbir kişisel veri bu süreçte yer almaz."
     },
     "terms": {
       "title": "Kullanım Koşulları",
@@ -296,7 +305,9 @@
       "section4_title": "4. Fikri Mülkiyet",
       "section4_content": "Lingdb uygulaması ve orijinal içeriği Lingdb'ye aittir ve uluslararası telif hakkı yasalarıyla korunmaktadır.",
       "section5_title": "5. Fesih",
-      "section5_content": "Bu koşulların ihlali durumunda hesabınızı feshetme veya askıya alma hakkımızı saklı tutarız."
+      "section5_content": "Bu koşulların ihlali durumunda hesabınızı feshetme veya askıya alma hakkımızı saklı tutarız.",
+      "section6_title": "6. Herkese Açık Sözlükler ve SEO",
+      "section6_content": "Bir sözlüğü herkese açık olarak ayarladığınızda, başlığı, açıklaması, kelimeleri ve çevirileri herkese açık olarak görüntülenecek ve arama motorları tarafından dizine eklenebilecektir. Keşfedilebilirliği artırmak amacıyla yapay zeka tarafından otomatik olarak optimize edilmiş başlık ve zengin açıklama gibi meta veriler oluşturulabilir. Bir sözlüğü herkese açık hale getirerek, içeriğinizin bu şekilde işlenmesini kabul etmiş olursunuz."
     },
     "cookies": {
       "title": "Çerez Politikası",
@@ -314,5 +325,20 @@
     "dashboard": "Kontrol Paneli",
     "library": "Kütüphane",
     "profile": "Profil"
+  },
+  "tutorial": {
+    "welcome_title": "Lingdb'ye Hoşgeldiniz! 🚀",
+    "welcome_desc": "Herhangi bir dilde ustalaşmanıza yardımcı olacak hızlı bir 1 dakikalık tur atalım.",
+    "library_title": "Kütüphaneniz",
+    "library_desc": "Tüm kişisel sözlükleriniz kolay erişim için burada görünecek.",
+    "profile_title": "Profiliniz",
+    "profile_desc": "Öğrenme serilerinizi, istatistiklerinizi buradan takip edin ve hesap ayarlarınızı yönetin.",
+    "premium_title": "Premium Özellikler",
+    "premium_desc": "Sınırsız yapay zeka kredisi, reklamsız öğrenme ve gelişmiş istatistikler için yükseltin.",
+    "create_title": "İlk Sözlüğünüzü Oluşturun",
+    "create_desc": "Kelime listenizi oluşturmaya başlamak için buraya tıklayın.",
+    "next_btn": "İleri",
+    "prev_btn": "Geri",
+    "done_btn": "Bitti"
   }
 }

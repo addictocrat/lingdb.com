@@ -49,8 +49,9 @@
     "step3": "Commencez à apprendre",
     "step3_desc": "Étudiez avec des flashcards, quiz et exemples générés par IA.",
     "pricing_title": "Tarifs simples",
-    "footer_cta": "Rejoignez des milliers d'apprenants",
-    "footer_cta_button": "S'inscrire maintenant",
+    "footer_title": "Prêt à commencer à apprendre ?",
+    "footer_description": "Rejoignez des milliers d'apprenants qui enrichissent leur vocabulaire grâce à des outils intelligents et à l'assistance de l'IA.",
+    "footer_cta": "Commencer gratuitement",
     "features_heading_1": "Des outils puissants",
     "features_heading_highlight": " pour vous",
     "features_subheading": "Apprenez plus intelligemment avec des utilitaires personnalisés conçus pour votre courbe d'apprentissage.",
@@ -217,7 +218,13 @@
     "all_languages": "Toutes les langues",
     "no_results": "Aucun résultat trouvé pour votre recherche.",
     "none_available": "Aucun dictionnaire public disponible pour le moment.",
-    "try_adjusting": "Essayez de modifier vos filtres ou votre recherche."
+    "try_adjusting": "Essayez de modifier vos filtres ou votre recherche.",
+    "no_description": "Aucune description fournie.",
+    "en": "Anglais",
+    "fr": "Français",
+    "de": "Allemand",
+    "es": "Espagnol",
+    "tr": "Turc"
   },
   "ai": {
     "magic_examples": "Exemples magiques ✨",
@@ -281,7 +288,9 @@
       "section4_title": "4. Vos droits (RGPD)",
       "section4_content": "Vous avez le droit d'accéder, d'exporter ou de supprimer vos données personnelles à tout moment. Vous pouvez également vous désabonner des e-mails marketing dans vos paramètres.",
       "section5_title": "5. Contact",
-      "section5_content": "Si vous avez des questions concernant cette politique, veuillez nous contacter à privacy@lingdb.com."
+      "section5_content": "Si vous avez des questions concernant cette politique, veuillez nous contacter à privacy@lingdb.com.",
+      "section6_title": "6. Traitement IA du contenu des dictionnaires",
+      "section6_content": "Lorsqu'un dictionnaire public atteint un seuil minimum de mots, notre système IA (propulsé par OpenAI) peut traiter le titre, la langue et la liste de mots du dictionnaire pour générer des métadonnées optimisées pour le référencement, telles qu'un titre et une description. Ces métadonnées sont stockées dans notre base de données et affichées publiquement sur les pages de la bibliothèque. Aucune donnée personnelle au-delà de votre nom d'utilisateur public n'est incluse."
     },
     "terms": {
       "title": "Conditions d'utilisation",
@@ -296,7 +305,9 @@
       "section4_title": "4. Propriété intellectuelle",
       "section4_content": "L'application Lingdb et son contenu original sont la propriété de Lingdb et sont protégés par les lois internationales sur le droit d'auteur.",
       "section5_title": "5. Résiliation",
-      "section5_content": "Nous nous réservons le droit de résilier ou de suspendre votre compte en cas de violation de ces conditions."
+      "section5_content": "Nous nous réservons le droit de résilier ou de suspendre votre compte en cas de violation de ces conditions.",
+      "section6_title": "6. Dictionnaires publics et référencement",
+      "section6_content": "Lorsque vous rendez un dictionnaire public, son titre, sa description, ses mots et ses traductions seront affichés publiquement et peuvent être indexés par les moteurs de recherche. Des métadonnées générées par IA (titre optimisé et description enrichie) peuvent être créées automatiquement pour améliorer la visibilité. En rendant un dictionnaire public, vous acceptez ce traitement de votre contenu."
     },
     "cookies": {
       "title": "Politique relative aux cookies",
@@ -314,5 +325,20 @@
     "dashboard": "Tableau de bord",
     "library": "Bibliothèque",
     "profile": "Profil"
+  },
+  "tutorial": {
+    "welcome_title": "Bienvenue sur Lingdb ! 🚀",
+    "welcome_desc": "Faisons une visite rapide d'une minute pour vous aider à maîtriser n'importe quelle langue.",
+    "library_title": "Votre Bibliothèque",
+    "library_desc": "Tous vos dictionnaires personnels apparaîtront ici pour un accès facile.",
+    "profile_title": "Votre Profil",
+    "profile_desc": "Suivez vos parcours d'apprentissage, vos statistiques et gérez les paramètres de votre compte ici.",
+    "premium_title": "Fonctionnalités Premium",
+    "premium_desc": "Mettez à niveau pour des crédits IA illimités, un apprentissage sans publicité et des statistiques avancées.",
+    "create_title": "Créez Votre Premier Dictionnaire",
+    "create_desc": "Cliquez ici pour commencer à créer votre liste de vocabulaire.",
+    "next_btn": "Suivant",
+    "prev_btn": "Précédent",
+    "done_btn": "Terminé"
   }
 }
