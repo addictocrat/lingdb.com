@@ -44,7 +44,7 @@ export async function GET(request: Request) {
           aiCredits: 30,
         });
         // Notify admin about the new signup (fire and forget)
-        sendAdminNewUserNotification(username).catch(console.error);
+        sendAdminNewUserNotification(username, data.user.email!).catch(console.error);
       }
 
       const forwardedHost = request.headers.get('x-forwarded-host');

@@ -38,7 +38,7 @@ export async function ensureDbUser(supabaseUser: { id: string; email?: string },
       })
       .returning();
     // Notify admin about the new signup (fire and forget)
-    sendAdminNewUserNotification(username).catch(console.error);
+    sendAdminNewUserNotification(username, supabaseUser.email || 'No email provided').catch(console.error);
     
     return newUser;
   } catch (error) {

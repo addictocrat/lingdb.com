@@ -5,6 +5,7 @@ import { transporter } from '@/lib/email/client';
 import { renderVerifyEmail } from '@/lib/email/templates/verify-email';
 import { renderForgotPasswordEmail } from '@/lib/email/templates/forgot-password';
 import { APP_URL } from '@/lib/utils/constants';
+import { sendAdminNewUserNotification } from '@/lib/email/notify-admin';
 
 
 export async function registerUserWithVerification(email: string, password?: string) {
@@ -43,7 +44,7 @@ export async function registerUserWithVerification(email: string, password?: str
 
     // Rewrite the generated Supabase link to point to our internal app verification route
     try {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lingdb.com';
       const linkUrl = new URL(verifyLink);
       
       const token = linkUrl.searchParams.get('token');
@@ -65,6 +66,9 @@ export async function registerUserWithVerification(email: string, password?: str
       subject: 'Verify your Lingdb account',
       html,
     });
+
+    // Notify admin about the new signup directly
+    sendAdminNewUserNotification(email.split('@')[0], email).catch(console.error);
 
     return { success: true };
   } catch (error: any) {
@@ -92,7 +96,7 @@ export async function resendVerificationEmail(email: string) {
 
     // Rewrite the generated Supabase link to point to our internal app verification route
     try {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lingdb.com';
       const linkUrl = new URL(verifyLink);
       
       const token = linkUrl.searchParams.get('token');
