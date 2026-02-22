@@ -2,6 +2,7 @@ import { db } from './client';
 import { users } from './schema';
 import { eq } from 'drizzle-orm';
 import { generateRandomUsername } from '../utils/random-username';
+import { sendAdminNewUserNotification } from '../email/notify-admin';
 
 export async function ensureDbUser(supabaseUser: { id: string; email?: string }, locale: string = 'en') {
   // 1. Try to find the user
@@ -36,6 +37,9 @@ export async function ensureDbUser(supabaseUser: { id: string; email?: string },
         aiCredits: 30,
       })
       .returning();
+      
+    // Notify admin about the new signup
+    await sendAdminNewUserNotification(username);
     
     return newUser;
   } catch (error) {

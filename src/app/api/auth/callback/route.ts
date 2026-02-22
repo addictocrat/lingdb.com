@@ -4,6 +4,7 @@ import { db } from '@/lib/db/client';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { generateRandomUsername } from '@/lib/utils/random-username';
+import { sendAdminNewUserNotification } from '@/lib/email/notify-admin';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -41,6 +42,9 @@ export async function GET(request: Request) {
           tier: 'FREE',
           aiCredits: 30,
         });
+        
+        // Notify admin about the new signup
+        await sendAdminNewUserNotification(username);
       }
 
       const forwardedHost = request.headers.get('x-forwarded-host');
