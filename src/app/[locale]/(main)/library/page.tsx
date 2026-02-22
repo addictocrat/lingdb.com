@@ -20,9 +20,7 @@ export default async function LibraryPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect(`/${locale}/login`);
-  }
+  // No mandatory redirect - library is public
 
   const q = typeof resolvedParams.q === 'string' ? resolvedParams.q : '';
   const lang = typeof resolvedParams.lang === 'string' ? resolvedParams.lang : '';

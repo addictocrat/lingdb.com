@@ -43,7 +43,7 @@ export async function updateSession(request: NextRequest, response?: NextRespons
   // Check if the route is in a protected group (main)
   const isProtectedRoute =
     pathname.includes('/dashboard') ||
-    pathname.includes('/dictionary') ||
+    (pathname.includes('/dictionary') && pathSegments.length <= 2) ||
     pathname.includes('/profile') ||
     pathname.includes('/payment') ||
     pathname.includes('/tiers');

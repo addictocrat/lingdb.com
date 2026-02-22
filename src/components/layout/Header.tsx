@@ -48,8 +48,9 @@ export default function Header({ locale = 'en' }: { locale?: string }) {
           </Link>
           {/* Desktop Nav */}
           <nav className="hidden items-center gap-1 md:flex">
-            {user &&
-              navLinks.map((link) => (
+            {navLinks
+              .filter(link => user || link.href.includes('/library'))
+              .map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -140,7 +141,7 @@ export default function Header({ locale = 'en' }: { locale?: string }) {
           )}
 
           {/* Mobile hamburger */}
-          {/* <MobileNav locale={locale} isLoggedIn={!!user} navLinks={navLinks} /> */}
+          <MobileNav locale={locale} isLoggedIn={!!user} navLinks={navLinks} />
         </div>
       </div>
     </header>

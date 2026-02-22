@@ -16,13 +16,12 @@ export default async function DictionaryPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect(`/${locale}/login`);
+  // Get DB user if authenticated
+  let dbUser = null;
+  if (user) {
+    const { ensureDbUser } = await import('@/lib/db/auth-helper');
+    dbUser = await ensureDbUser(user, locale);
   }
-
-  // Get DB user using helper to prevent loops if DB record is missing
-  const { ensureDbUser } = await import('@/lib/db/auth-helper');
-  const dbUser = await ensureDbUser(user, locale);
 
   const dict = await db.query.dictionaries.findFirst({
     where: eq(dictionaries.id, id),

@@ -56,8 +56,9 @@ export default function MobileNav({
             </button>
 
             <nav className="mt-12 flex flex-col gap-2">
-              {isLoggedIn ? (
-                navLinks.map((link) => (
+              {navLinks
+                .filter(link => isLoggedIn || link.href.includes('/library'))
+                .map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -67,9 +68,9 @@ export default function MobileNav({
                     <link.icon className="h-5 w-5 text-[var(--fg)]/60" />
                     {link.label}
                   </Link>
-                ))
-              ) : (
-                <>
+                ))}
+              {!isLoggedIn && (
+                <div className="mt-4 flex flex-col gap-2 border-t border-[var(--border-color)] pt-4">
                   <Link
                     href={`/${locale}/login`}
                     onClick={() => setIsOpen(false)}
@@ -84,7 +85,7 @@ export default function MobileNav({
                   >
                     {t('signup')}
                   </Link>
-                </>
+                </div>
               )}
             </nav>
           </div>
