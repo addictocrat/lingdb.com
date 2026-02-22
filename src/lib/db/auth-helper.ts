@@ -37,9 +37,8 @@ export async function ensureDbUser(supabaseUser: { id: string; email?: string },
         aiCredits: 30,
       })
       .returning();
-      
-    // Notify admin about the new signup
-    await sendAdminNewUserNotification(username);
+    // Notify admin about the new signup (fire and forget)
+    sendAdminNewUserNotification(username).catch(console.error);
     
     return newUser;
   } catch (error) {

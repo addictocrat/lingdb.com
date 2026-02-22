@@ -42,9 +42,8 @@ export async function GET(request: Request) {
           tier: 'FREE',
           aiCredits: 30,
         });
-        
-        // Notify admin about the new signup
-        await sendAdminNewUserNotification(username);
+        // Notify admin about the new signup (fire and forget)
+        sendAdminNewUserNotification(username).catch(console.error);
       }
 
       const forwardedHost = request.headers.get('x-forwarded-host');
