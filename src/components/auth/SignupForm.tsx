@@ -7,9 +7,12 @@ import OAuthButton from './OAuthButton';
 import { cn } from '@/lib/utils/cn';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export default function SignupForm({ locale = 'en' }: { locale?: string }) {
   const supabase = createClient();
+  const t = useTranslations('auth');
+  const tCommon = useTranslations('common');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,7 +29,25 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
     // Validate with Zod
     const result = signupSchema.safeParse({ email, password });
     if (!result.success) {
-      setError(result.error.issues[0].message);
+      const issue = result.error.issues[0];
+      // Safely check properties for narrowing
+      if ('validation' in issue && issue.validation === 'email') {
+        setError(t('errors.invalid_email'));
+      } else if ('minimum' in issue && issue.minimum === 8) {
+        setError(t('errors.password_min'));
+      } else if ('validation' in issue && issue.validation === 'regex') {
+        // Match specific regex patterns from signupSchema
+        const message = String(issue.message || '');
+        if (message.includes('uppercase')) {
+          setError(t('errors.password_uppercase'));
+        } else if (message.includes('number')) {
+          setError(t('errors.password_number'));
+        } else {
+          setError(issue.message);
+        }
+      } else {
+        setError(issue.message);
+      }
       setIsLoading(false);
       return;
     }
@@ -36,13 +57,13 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
       const registerResult = await signUp(email, password);
 
       if (!registerResult.success) {
-        setError(registerResult.error || 'Failed to create account.');
+        setError(registerResult.error || t('errors.signup_failed'));
         return;
       }
 
       setSuccess(true);
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError(tCommon('errors.generic'));
     } finally {
       setIsLoading(false);
     }
@@ -53,18 +74,20 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
       <div className="w-full max-w-sm space-y-6 text-center">
         <div className="rounded-xl bg-green-50 p-6 dark:bg-green-900/20">
           <h2 className="mb-2 text-2xl font-bold text-green-700 dark:text-green-400">
-            Check your email
+            {t('check_email_title')}
           </h2>
           <p className="text-lg text-green-600 dark:text-green-300">
-            We've sent a verification link to <strong>{email}</strong>.
-            Please verify your account before logging in.
+            {t.rich('check_email_body', {
+              email: email,
+              strong: (chunks) => <strong>{chunks}</strong>
+            })}
           </p>
         </div>
         <Link
           href={`/${locale}/login`}
           className="inline-block w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] py-3 text-lg font-medium transition-colors hover:bg-[var(--border-color)]"
         >
-          Return to login
+          {t('return_to_login')}
         </Link>
       </div>
     );
@@ -73,8 +96,8 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
   return (
     <div className="w-full max-w-sm space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight">Create Account</h1>
-        <p className="mt-1 text-lg text-[var(--fg)]/60">Start learning today</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('signup_title')}</h1>
+        <p className="mt-1 text-lg text-[var(--fg)]/60">{t('signup_subtitle')}</p>
       </div>
 
       <OAuthButton provider="google" redirectTo={`/${locale}/dashboard`} />
@@ -84,7 +107,7 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
           <span className="w-full border-t border-[var(--border-color)]" />
         </div>
         <div className="relative flex justify-center text-sm uppercase">
-          <span className="bg-[var(--bg)] px-2 text-[var(--fg)]/40">or</span>
+          <span className="bg-[var(--bg)] px-2 text-[var(--fg)]/40">{t('or')}</span>
         </div>
       </div>
 
@@ -97,7 +120,7 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
 
         <div className="space-y-1.5">
           <label htmlFor="email" className="text-lg font-medium">
-            Email
+            {t('email_label')}
           </label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg)]/40" />
@@ -106,7 +129,7 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder={t('email_placeholder')}
               required
               className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] py-3 pl-10 pr-4 text-lg transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
@@ -115,7 +138,7 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
 
         <div className="space-y-1.5">
           <label htmlFor="password" className="text-lg font-medium">
-            Password
+            {t('password_label')}
           </label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg)]/40" />
@@ -124,7 +147,7 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Min. 8 characters"
+              placeholder={t('password_placeholder_signup')}
               required
               className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] py-3 pl-10 pr-12 text-lg transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
@@ -137,7 +160,7 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
             </button>
           </div>
           <p className="text-sm text-[var(--fg)]/40">
-            Must contain 8+ characters, 1 uppercase letter, and 1 number.
+            {t('errors.password_hint')}
           </p>
         </div>
 
@@ -152,21 +175,21 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Creating account...
+              {t('creating_account')}
             </>
           ) : (
-            'Sign Up'
+            t('signup_btn')
           )}
         </button>
       </form>
 
       <p className="text-center text-lg text-[var(--fg)]/60">
-        Already have an account?{' '}
+        {t('have_account')}{' '}
         <Link
           href={`/${locale}/login`}
           className="font-medium text-primary-500 hover:text-primary-600 hover:underline"
         >
-          Log in
+          {tCommon('login')}
         </Link>
       </p>
     </div>

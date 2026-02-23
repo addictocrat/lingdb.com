@@ -1,8 +1,14 @@
 import ResetPasswordForm from '@/components/auth/ResetPasswordForm';
 
-export const metadata = {
-  title: 'Reset Password',
-};
+import { getTranslations } from 'next-intl/server';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'auth' });
+  return {
+    title: t('reset_password_title'),
+  };
+}
 
 export default async function ResetPasswordPage({
   params,

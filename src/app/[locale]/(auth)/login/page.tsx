@@ -1,8 +1,14 @@
 import LoginForm from '@/components/auth/LoginForm';
 
-export const metadata = {
-  title: 'Log In',
-};
+import { getTranslations } from 'next-intl/server';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'auth' });
+  return {
+    title: t('login_title'),
+  };
+}
 
 export default async function LoginPage(
   props: {

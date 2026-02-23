@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils/cn';
+import { useTranslations } from 'next-intl';
 
 interface OAuthButtonProps {
   provider: 'google';
@@ -15,6 +16,7 @@ export default function OAuthButton({
   className,
 }: OAuthButtonProps) {
   const supabase = createClient();
+  const t = useTranslations('auth');
 
   const handleOAuth = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
@@ -58,7 +60,7 @@ export default function OAuthButton({
           fill="#EA4335"
         />
       </svg>
-      Continue with Google
+      {t('google_login')}
     </button>
   );
 }

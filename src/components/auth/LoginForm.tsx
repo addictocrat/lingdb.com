@@ -8,10 +8,13 @@ import OAuthButton from './OAuthButton';
 import { cn } from '@/lib/utils/cn';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export default function LoginForm({ locale = 'en', initialError }: { locale?: string; initialError?: string }) {
   const router = useRouter();
   const supabase = createClient();
+  const t = useTranslations('auth');
+  const tCommon = useTranslations('common');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,13 +23,13 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
   const [isResetting, setIsResetting] = useState(false);
   const [error, setError] = useState<string | null>(() => {
     if (initialError === 'account_exists') {
-      return 'This account was registered with a password.';
+      return t('errors.account_exists');
     }
     if (initialError === 'auth_callback_failed') {
-      return 'Authentication failed. Please try again.';
+      return t('errors.auth_failed');
     }
     if (initialError === 'verification_failed') {
-      return 'Email verification failed. Please try again.';
+      return t('errors.verification_failed');
     }
     return initialError || null;
   });
@@ -41,7 +44,15 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
 
     const result = loginSchema.safeParse({ email, password });
     if (!result.success) {
-      setError(result.error.issues[0].message);
+      const issue = result.error.issues[0];
+      // Safely check properties for narrowing
+      if ('validation' in issue && issue.validation === 'email') {
+        setError(t('errors.invalid_email'));
+      } else if ('minimum' in issue && issue.minimum === 8) {
+        setError(t('errors.password_min'));
+      } else {
+        setError(issue.message);
+      }
       setIsLoading(false);
       return;
     }
@@ -54,7 +65,7 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
 
       if (signInError) {
         if (signInError.message === 'Email not confirmed') {
-          setError('Please verify your email address to continue.');
+          setError(t('email_not_confirmed'));
         } else {
           setError(signInError.message);
         }
@@ -64,7 +75,7 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
       router.push(`/${locale}/dashboard`);
       router.refresh();
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError(tCommon('errors.generic'));
     } finally {
       setIsLoading(false);
     }
@@ -81,7 +92,7 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
       
       if (timeElapsed < twoMinutes) {
         const minutesLeft = Math.ceil((twoMinutes - timeElapsed) / 60000);
-        setError(`You can only request a verification email every 2 minutes. Please try again in ${minutesLeft} minute(s).`);
+        setError(t('cooldown_error', { type: t('type_verification'), minutes: minutesLeft }));
         return;
       }
     }
@@ -95,13 +106,13 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
       const res = await resendVerificationEmail(email);
       
       if (!res.success) {
-        setError(res.error || 'Failed to resend verification email.');
+        setError(res.error || t('errors.auth_failed'));
       } else {
         setVerificationSent(true);
         localStorage.setItem('lastVerificationResendRequest', Date.now().toString());
       }
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError(tCommon('errors.generic'));
     } finally {
       setIsResending(false);
     }
@@ -109,7 +120,7 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
 
   const handleForgotPassword = async () => {
     if (!email) {
-      setError('Please enter your email address first.');
+      setError(t('enter_email_first'));
       return;
     }
 
@@ -121,7 +132,7 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
       
       if (timeElapsed < twoMinutes) {
         const minutesLeft = Math.ceil((twoMinutes - timeElapsed) / 60000);
-        setError(`You can only request a password reset every 2 minutes. Please try again in ${minutesLeft} minute(s).`);
+        setError(t('cooldown_error', { type: t('type_reset'), minutes: minutesLeft }));
         return;
       }
     }
@@ -134,13 +145,13 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
       const res = await sendPasswordResetEmail(email);
 
       if (!res.success) {
-        setError(res.error || 'Failed to send reset email.');
+        setError(res.error || t('errors.reset_failed'));
       } else {
         setResetSent(true);
         localStorage.setItem('lastPasswordResetRequest', Date.now().toString());
       }
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError(tCommon('errors.generic'));
     } finally {
       setIsResetting(false);
     }
@@ -149,8 +160,8 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
   return (
     <div className="w-full max-w-sm space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight">Welcome Back</h1>
-        <p className="mt-1 text-lg text-[var(--fg)]/60">Log in to your account</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('login_title')}</h1>
+        <p className="mt-1 text-lg text-[var(--fg)]/60">{t('login_subtitle')}</p>
       </div>
 
       <OAuthButton provider="google" redirectTo={`/${locale}/dashboard`} />
@@ -160,7 +171,7 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
           <span className="w-full border-t border-[var(--border-color)]" />
         </div>
         <div className="relative flex justify-center text-sm uppercase">
-          <span className="bg-[var(--bg)] px-2 text-[var(--fg)]/40">or</span>
+          <span className="bg-[var(--bg)] px-2 text-[var(--fg)]/40">{t('or')}</span>
         </div>
       </div>
 
@@ -169,14 +180,14 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
           <div className="rounded-lg bg-red-50 p-3 text-lg text-red-600 dark:bg-red-900/20 dark:text-red-400">
             <div className="flex flex-col gap-2">
               <span>{error}</span>
-              {error === 'Please verify your email address to continue.' && (
+              {(error === t('email_not_confirmed') || error === 'Please verify your email address to continue.') && (
                 <button
                   type="button"
                   onClick={handleResendVerification}
                   disabled={isResending}
                   className="w-fit text-left text-sm font-medium underline hover:text-red-700 dark:hover:text-red-300 disabled:opacity-50"
                 >
-                  {isResending ? 'Sending...' : 'Resend verification email'}
+                  {isResending ? t('sending') : t('resend_verification')}
                 </button>
               )}
             </div>
@@ -185,19 +196,19 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
 
         {verificationSent && (
           <div className="rounded-lg bg-green-50 p-3 text-lg text-green-600 dark:bg-green-900/20 dark:text-green-400">
-            Verification email sent! Check your inbox.
+            {t('verification_sent')}
           </div>
         )}
 
         {resetSent && (
           <div className="rounded-lg bg-green-50 p-3 text-lg text-green-600 dark:bg-green-900/20 dark:text-green-400">
-            Password reset email sent! Check your inbox.
+            {t('password_reset_sent')}
           </div>
         )}
 
         <div className="space-y-1.5">
           <label htmlFor="email" className="text-lg font-medium">
-            Email
+            {t('email_label')}
           </label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg)]/40" />
@@ -206,7 +217,7 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              placeholder={t('email_placeholder')}
               required
               className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] py-3 pl-10 pr-4 text-lg transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
@@ -216,7 +227,7 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label htmlFor="password" className="text-lg font-medium">
-              Password
+              {t('password_label')}
             </label>
             <button
               type="button"
@@ -224,7 +235,7 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
               disabled={isResetting}
               className="text-sm text-primary-500 hover:text-primary-600 hover:underline disabled:opacity-50"
             >
-              {isResetting ? 'Sending...' : 'Forgot password?'}
+              {isResetting ? t('sending') : t('forgot_password')}
             </button>
           </div>
           <div className="relative">
@@ -234,7 +245,7 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
+              placeholder={t('password_placeholder')}
               required
               className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] py-3 pl-10 pr-12 text-lg transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
@@ -259,21 +270,21 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Logging in...
+              {t('logging_in')}
             </>
           ) : (
-            'Log In'
+            t('login_btn')
           )}
         </button>
       </form>
 
       <p className="text-center text-lg text-[var(--fg)]/60">
-        Don&apos;t have an account?{' '}
+        {t('no_account')}{' '}
         <Link
           href={`/${locale}/signup`}
           className="font-medium text-primary-500 hover:text-primary-600 hover:underline"
         >
-          Sign up
+          {tCommon('signup')}
         </Link>
       </p>
     </div>

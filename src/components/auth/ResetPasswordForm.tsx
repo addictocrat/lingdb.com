@@ -6,22 +6,25 @@ import { createClient } from '@/lib/supabase/client';
 import { z } from 'zod';
 import { cn } from '@/lib/utils/cn';
 import { Eye, EyeOff, Lock, Loader2 } from 'lucide-react';
-
-const resetSchema = z.object({
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least 1 uppercase letter')
-    .regex(/[0-9]/, 'Password must contain at least 1 number'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword'],
-});
+import { useTranslations } from 'next-intl';
 
 export default function ResetPasswordForm({ locale = 'en' }: { locale?: string }) {
   const router = useRouter();
   const supabase = createClient();
+  const t = useTranslations('auth');
+  const tCommon = useTranslations('common');
+
+  const resetSchema = z.object({
+    password: z
+      .string()
+      .min(8, t('errors.password_min'))
+      .regex(/[A-Z]/, t('errors.password_uppercase'))
+      .regex(/[0-9]/, t('errors.password_number')),
+    confirmPassword: z.string(),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: t('errors.passwords_mismatch'),
+    path: ['confirmPassword'],
+  });
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -59,7 +62,7 @@ export default function ResetPasswordForm({ locale = 'en' }: { locale?: string }
         router.refresh();
       }, 2000);
     } catch {
-      setError('Something went wrong. Please try again.');
+      setError(tCommon('errors.generic'));
     } finally {
       setIsLoading(false);
     }
@@ -70,10 +73,10 @@ export default function ResetPasswordForm({ locale = 'en' }: { locale?: string }
       <div className="w-full max-w-sm space-y-6 text-center">
         <div className="rounded-xl bg-green-50 p-6 dark:bg-green-900/20">
           <h2 className="mb-2 text-2xl font-bold text-green-700 dark:text-green-400">
-            Password updated!
+            {t('password_updated_title')}
           </h2>
           <p className="text-lg text-green-600 dark:text-green-300">
-            Your password has been successfully reset. Redirecting to your dashboard...
+            {t('password_updated_body')}
           </p>
         </div>
       </div>
@@ -83,8 +86,8 @@ export default function ResetPasswordForm({ locale = 'en' }: { locale?: string }
   return (
     <div className="w-full max-w-sm space-y-6">
       <div className="text-center">
-        <h1 className="text-3xl font-bold tracking-tight">Set New Password</h1>
-        <p className="mt-1 text-lg text-[var(--fg)]/60">Enter your new secure password</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('reset_password_title')}</h1>
+        <p className="mt-1 text-lg text-[var(--fg)]/60">{t('reset_password_subtitle')}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -96,7 +99,7 @@ export default function ResetPasswordForm({ locale = 'en' }: { locale?: string }
 
         <div className="space-y-1.5">
           <label htmlFor="password" className="text-lg font-medium">
-            New Password
+            {t('new_password_label')}
           </label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg)]/40" />
@@ -105,7 +108,7 @@ export default function ResetPasswordForm({ locale = 'en' }: { locale?: string }
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Min. 8 characters"
+              placeholder={t('password_placeholder_signup')}
               required
               className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] py-3 pl-10 pr-12 text-lg transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
@@ -118,13 +121,13 @@ export default function ResetPasswordForm({ locale = 'en' }: { locale?: string }
             </button>
           </div>
           <p className="text-sm text-[var(--fg)]/40">
-            Must contain 8+ characters, 1 uppercase letter, and 1 number.
+            {t('errors.password_hint')}
           </p>
         </div>
 
         <div className="space-y-1.5">
           <label htmlFor="confirmPassword" className="text-lg font-medium">
-            Confirm Password
+            {t('confirm_password_label')}
           </label>
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg)]/40" />
@@ -133,7 +136,7 @@ export default function ResetPasswordForm({ locale = 'en' }: { locale?: string }
               type={showConfirmPassword ? 'text' : 'password'}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Re-enter your password"
+              placeholder={t('password_placeholder_confirm')}
               required
               className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] py-3 pl-10 pr-12 text-lg transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
             />
@@ -158,10 +161,10 @@ export default function ResetPasswordForm({ locale = 'en' }: { locale?: string }
           {isLoading ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Updating...
+              {t('updating')}
             </>
           ) : (
-            'Update Password'
+            t('update_password_btn')
           )}
         </button>
       </form>
