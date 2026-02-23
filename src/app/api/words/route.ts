@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db/client';
 import { words, dictionaries, users, dictionaryEditors } from '@/lib/db/schema';
-import { eq, and, sql, or } from 'drizzle-orm';
+import { eq, and, sql, or, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 import { transporter, EMAILS } from '@/lib/email/client';
 import { getDictionaryUpdateEmailHtml } from '@/lib/email/templates';
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     })
     .where(eq(users.id, dbUser.id));
 
-  // Update dictionary timestamp and possibly email editors
+  // Update dictionary timestamp and possibly email co-editors + owner
   const now = new Date();
   let latestEmailSent = dictToEdit.lastDailyUpdateSentAt;
   
@@ -110,27 +110,44 @@ export async function POST(request: NextRequest) {
   const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const shouldSendEmail = !latestEmailSent || latestEmailSent < oneDayAgo;
 
-  if (shouldSendEmail && dictToEdit.dictionaryEditors.length > 0) {
-    latestEmailSent = now;
-    // Send email without blocking response
-    const editorUserIds = dictToEdit.dictionaryEditors
-      .filter((ed) => ed.userId !== dbUser.id) // Don't email the one adding the word
-      .map((ed) => ed.userId);
+  console.log(`[Word Email] shouldSendEmail=${shouldSendEmail}, lastDailyUpdateSentAt=${latestEmailSent?.toISOString() || 'null'}, oneDayAgo=${oneDayAgo.toISOString()}`);
+  console.log(`[Word Email] editors count=${dictToEdit.dictionaryEditors.length}, ownerId=${dictToEdit.userId}, adderId=${dbUser.id}`);
 
-    if (editorUserIds.length > 0) {
-      const editorEmails = await db.query.users.findMany({
-        where: sql`${users.id} IN ${editorUserIds}`,
+  if (shouldSendEmail) {
+    // Collect all user IDs to notify: editors + owner, excluding the person adding the word
+    const recipientUserIds: string[] = [];
+    
+    // Add editors (excluding the person adding the word)
+    dictToEdit.dictionaryEditors
+      .filter((ed) => ed.userId !== dbUser.id)
+      .forEach((ed) => recipientUserIds.push(ed.userId));
+    
+    // Add owner (if the person adding is not the owner)
+    if (dictToEdit.userId !== dbUser.id) {
+      recipientUserIds.push(dictToEdit.userId);
+    }
+
+    console.log(`[Word Email] recipientUserIds=${JSON.stringify(recipientUserIds)}`);
+
+    if (recipientUserIds.length > 0) {
+      latestEmailSent = now;
+      // Send email without blocking response
+      const recipientEmails = await db.query.users.findMany({
+        where: inArray(users.id, recipientUserIds),
         columns: { email: true }
       });
 
-      const dictionaryLink = `${APP_URL}/en/dictionary/${dictToEdit.id}`;
+      console.log(`[Word Email] recipientEmails=${JSON.stringify(recipientEmails)}`);
+
+      const dictPath = dictToEdit.slug || dictToEdit.id;
+      const dictionaryLink = `${APP_URL}/en/dictionary/${dictPath}`;
       
       Promise.all(
-        editorEmails.map((ed) =>
+        recipientEmails.map((recipient) =>
           transporter.sendMail({
             from: `"LingDB" <${EMAILS.NOREPLY}>`,
-            to: ed.email,
-            subject: `${dbUser.username} added a new word to "${dictToEdit.title}"`,
+            to: recipient.email,
+            subject: `${dbUser.username} added ${result.data.title} to the ${dictToEdit.title} dictionary.`,
             html: getDictionaryUpdateEmailHtml(
               dbUser.username,
               dictToEdit.title,
@@ -138,8 +155,16 @@ export async function POST(request: NextRequest) {
             ),
           })
         )
-      ).catch(console.error); // Silently catch email errors
+      ).then((results) => {
+        console.log(`[Word Email] Successfully sent ${results.length} emails`);
+      }).catch((err) => {
+        console.error(`[Word Email] Failed to send emails:`, err);
+      });
+    } else {
+      console.log(`[Word Email] No recipients to email`);
     }
+  } else {
+    console.log(`[Word Email] Skipped — last email was sent less than 24h ago`);
   }
 
   await db
@@ -157,7 +182,7 @@ export async function POST(request: NextRequest) {
   // Auto-generate SEO metadata when dictionary reaches 5 words
   if (dictToEdit.isPublic && !dictToEdit.seoGeneratedAt && count + 1 === 5) {
     // Fire-and-forget: don't block the response
-    fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/dictionaries/generate-seo`, {
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://lingdb.com'}/api/dictionaries/generate-seo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Cookie: request.headers.get('cookie') || '' },
       body: JSON.stringify({ dictionaryId: dictToEdit.id }),
