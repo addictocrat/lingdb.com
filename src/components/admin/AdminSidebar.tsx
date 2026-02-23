@@ -5,7 +5,8 @@ import {
   BookOpen, 
   Settings, 
   LayoutDashboard,
-  LogOut
+  LogOut,
+  Ticket
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -15,6 +16,7 @@ export default function AdminSidebar({ locale }: { locale: string }) {
     { href: `/${locale}/admin/overview`, label: 'Overview', icon: BarChart3 },
     { href: `/${locale}/admin/users`, label: 'Users', icon: Users },
     { href: `/${locale}/admin/dictionaries`, label: 'Dictionaries', icon: BookOpen },
+    { href: `/${locale}/admin/coupons`, label: 'Coupons', icon: Ticket },
   ];
 
   return (

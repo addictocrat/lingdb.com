@@ -17,6 +17,7 @@ import {
   Settings,
   Coins,
   Trophy,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function Header({ locale = 'en' }: { locale?: string }) {
@@ -114,6 +115,16 @@ export default function Header({ locale = 'en' }: { locale?: string }) {
                   >
                     <UserIcon className="h-4 w-4" />
                     {tNav('profile')}
+                  </DropdownItem>
+                  <DropdownItem
+                    onClick={() =>
+                      (window.location.href = `/${locale}/payment`)
+                    }
+                    id="upgrade-dropdown-item"
+                    className="text-primary-600 dark:text-primary-400 font-semibold"
+                  >
+                    <ShieldCheck className="h-4 w-4" />
+                    {t('upgrade_cta') || 'Upgrade'}
                   </DropdownItem>
                   <DropdownItem
                     onClick={() =>

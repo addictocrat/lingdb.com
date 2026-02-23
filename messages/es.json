@@ -26,7 +26,9 @@
     "weekdays_short": "Dom,Lun,Mar,Mié,Jue,Vie,Sáb",
     "credits": "Créditos",
     "theme": "Tema",
-    "language": "Idioma"
+    "language": "Idioma",
+    "back_to_dashboard": "Volver al Panel",
+    "upgrade_cta": "Mejorar"
   },
   "landing": {
     "badge_text": "La forma más inteligente de aprender idiomas",
@@ -446,5 +448,25 @@
     "next_btn": "Siguiente",
     "prev_btn": "Anterior",
     "done_btn": "Hecho"
+  },
+  "payment": {
+    "coupon_section": "¿Tienes un código de cupón?",
+    "coupon_placeholder": "Introduce el código...",
+    "apply_button": "Aplicar",
+    "applying": "Aplicando...",
+    "success_title": "¡Premium concedido! 🎉",
+    "success_message": "¡Felicidades! Has canjeado con éxito tu cupón. Tu cuenta ahora es Premium por 1 mes.",
+    "perks_title": "Tus nuevas ventajas:",
+    "unlimited_dictionaries": "Diccionarios ilimitados",
+    "ai_credits": "100 Créditos IA",
+    "no_ads": "Sin anuncios",
+    "errors": {
+      "CODE_REQUIRED": "Se requiere un código",
+      "INVALID_CODE": "Código de cupón inválido",
+      "EXPIRED_CODE": "Este cupón ha caducado",
+      "MAX_USES_REACHED": "Este cupón ha alcanzado su uso máximo",
+      "ALREADY_REDEEMED": "Ya has canjeado este cupón",
+      "INTERNAL_ERROR": "Ocurrió un error. Por favor, inténtalo de nuevo más tarde."
+    }
   }
 }

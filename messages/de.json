@@ -26,7 +26,9 @@
     "weekdays_short": "So,Mo,Di,Mi,Do,Fr,Sa",
     "credits": "Credits",
     "theme": "Thema",
-    "language": "Sprache"
+    "language": "Sprache",
+    "back_to_dashboard": "Zurück zum Dashboard",
+    "upgrade_cta": "Upgrade"
   },
   "landing": {
     "badge_text": "Die smartere Art, Sprachen zu lernen",
@@ -446,5 +448,25 @@
     "next_btn": "Weiter",
     "prev_btn": "Zurück",
     "done_btn": "Fertig"
+  },
+  "payment": {
+    "coupon_section": "Hast du einen Gutscheincode?",
+    "coupon_placeholder": "Code eingeben...",
+    "apply_button": "Anwenden",
+    "applying": "Wird angewendet...",
+    "success_title": "Premium gewährt! 🎉",
+    "success_message": "Herzlichen Glückwunsch! Du hast deinen Gutschein erfolgreich eingelöst. Dein Konto ist nun für 1 Monat Premium.",
+    "perks_title": "Deine neuen Vorteile:",
+    "unlimited_dictionaries": "Unbegrenzte Wörterbücher",
+    "ai_credits": "100 KI-Credits",
+    "no_ads": "Keine Werbung",
+    "errors": {
+      "CODE_REQUIRED": "Code ist erforderlich",
+      "INVALID_CODE": "Ungültiger Gutscheincode",
+      "EXPIRED_CODE": "Dieser Gutschein ist abgelaufen",
+      "MAX_USES_REACHED": "Dieser Gutschein hat seine maximale Nutzung erreicht",
+      "ALREADY_REDEEMED": "Du hast diesen Gutschein bereits eingelöst",
+      "INTERNAL_ERROR": "Ein Fehler ist aufgetreten. Bitte versuche es später erneut."
+    }
   }
 }

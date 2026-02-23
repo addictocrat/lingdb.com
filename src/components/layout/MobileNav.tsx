@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils/cn';
-import { Menu, X, LayoutDashboard, Library, User as UserIcon, Settings, LogOut, Coins } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Library, User as UserIcon, Settings, LogOut, Coins, ShieldCheck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import gsap from 'gsap';
 import ThemeToggle from '@/components/common/ThemeToggle';
@@ -136,6 +136,19 @@ export default function MobileNav({
               >
                 <UserIcon className="h-6 w-6" />
                 {tNav('profile')}
+              </Link>
+              <Link
+                href={`/${locale}/payment`}
+                onClick={closeMenu}
+                className={cn(
+                  'flex items-center gap-4 rounded-2xl p-4 text-xl font-bold transition-all active:scale-[0.98]',
+                  isActive('payment')
+                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
+                    : 'bg-primary-500/10 text-primary-600 dark:text-primary-400 hover:bg-primary-500/20'
+                )}
+              >
+                <ShieldCheck className="h-6 w-6" />
+                {t('upgrade_cta') || 'Upgrade'}
               </Link>
               <Link
                 href={`/${locale}/profile/settings`}

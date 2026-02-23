@@ -26,7 +26,9 @@
     "weekdays_short": "Paz,Pzt,Sal,Çar,Per,Cum,Cts",
     "credits": "Krediler",
     "theme": "Tema",
-    "language": "Dil"
+    "language": "Dil",
+    "back_to_dashboard": "Panele Dön",
+    "upgrade_cta": "Yükselt"
   },
   "landing": {
     "badge_text": "Dil öğrenmenin daha akıllı yolu",

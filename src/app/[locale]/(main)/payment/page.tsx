@@ -6,11 +6,19 @@ import { useLocale } from 'next-intl';
 import Button from '@/components/ui/Button';
 import { ArrowLeft, ShieldCheck, CreditCard, Lock } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import Modal from '@/components/ui/Modal';
 
 export default function PaymentPage() {
+  const t = useTranslations('payment');
+  const commonT = useTranslations('common');
   const router = useRouter();
   const locale = useLocale();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // This is a placeholder for the actual Iyzico integration
   const handleSimulatedPayment = async () => {
@@ -29,6 +37,34 @@ export default function PaymentPage() {
         setIsProcessing(false);
       }
     }, 2000);
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    
+    setIsApplyingCoupon(true);
+    setCouponError(null);
+
+    try {
+      const res = await fetch('/api/coupons/redeem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponCode }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setShowSuccessModal(true);
+      } else {
+        setCouponError(t(`errors.${data.error}`) || t('errors.INTERNAL_ERROR'));
+      }
+    } catch (error) {
+      console.error('Coupon redemption failed:', error);
+      setCouponError(t('errors.INTERNAL_ERROR'));
+    } finally {
+      setIsApplyingCoupon(false);
+    }
   };
 
   return (
@@ -126,8 +162,82 @@ export default function PaymentPage() {
               </li>
             </ul>
           </div>
+
+          {/* Coupon Code Section */}
+          <div className="mt-6 rounded-3xl border border-[var(--border-color)] bg-[var(--surface)] p-6 shadow-sm">
+            <h3 className="mb-4 text-xl font-bold">{t('coupon_section')}</h3>
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                placeholder={t('coupon_placeholder')}
+                className="flex-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                disabled={isApplyingCoupon}
+              />
+              <Button 
+                onClick={handleApplyCoupon} 
+                isLoading={isApplyingCoupon}
+                disabled={!couponCode.trim() || isApplyingCoupon}
+              >
+                {t('apply_button')}
+              </Button>
+            </div>
+            {couponError && (
+              <p className="mt-2 text-sm text-red-500">{couponError}</p>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      <Modal isOpen={showSuccessModal} onClose={() => {
+        setShowSuccessModal(false);
+        router.push(`/${locale}/dashboard`);
+      }}>
+        <div className="p-6 text-center">
+          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
+            <ShieldCheck className="h-10 w-10" />
+          </div>
+          <h2 className="mb-2 text-3xl font-bold text-[var(--fg)]">{t('success_title')}</h2>
+          <p className="mb-6 text-lg text-[var(--fg)]/60">{t('success_message')}</p>
+          
+          <div className="mb-8 rounded-2xl bg-[var(--bg)]/50 p-6 text-left">
+            <h3 className="mb-4 font-bold uppercase tracking-wider text-[var(--fg)]/40">{t('perks_title')}</h3>
+            <ul className="space-y-3">
+              <li className="flex items-center gap-3 text-lg">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-500/10 text-primary-500">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                {t('unlimited_dictionaries')}
+              </li>
+              <li className="flex items-center gap-3 text-lg">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-500/10 text-primary-500">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                {t('ai_credits')}
+              </li>
+              <li className="flex items-center gap-3 text-lg">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-500/10 text-primary-500">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                {t('no_ads')}
+              </li>
+            </ul>
+          </div>
+
+          <Button 
+            className="w-full text-xl" 
+            size="lg"
+            onClick={() => {
+              setShowSuccessModal(false);
+              router.push(`/${locale}/dashboard`);
+            }}
+          >
+            {commonT('back_to_dashboard') || 'Go to Dashboard'}
+          </Button>
+        </div>
+      </Modal>
     </main>
   );
 }

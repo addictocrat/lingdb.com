@@ -283,6 +283,41 @@ export const quizHistory = pgTable(
   (table) => [index('quiz_history_user_id_idx').on(table.userId)]
 );
 
+// ─── Coupons ────────────────────────────────────────────────
+
+export const coupons = pgTable('coupons', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  code: text('code').notNull().unique(),
+  maxUses: integer('max_uses').notNull().default(1),
+  usedCount: integer('used_count').notNull().default(0),
+  expiresAt: timestamp('expires_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// ─── Coupon Redemptions ─────────────────────────────────────
+
+export const couponRedemptions = pgTable(
+  'coupon_redemptions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    couponId: uuid('coupon_id')
+      .notNull()
+      .references(() => coupons.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    redeemedAt: timestamp('redeemed_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    unique('coupon_redemptions_user_coupon_unique').on(table.couponId, table.userId),
+    index('coupon_redemptions_user_id_idx').on(table.userId),
+  ]
+);
+
 // ─── Relations ──────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -293,6 +328,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   flashcardProgress: many(flashcardProgress),
   quizHistory: many(quizHistory),
   modifiedWords: many(words, { relationName: 'modifier' }),
+  couponRedemptions: many(couponRedemptions),
 }));
 
 export const dictionariesRelations = relations(
@@ -397,6 +433,24 @@ export const quizHistoryRelations = relations(quizHistory, ({ one }) => ({
   }),
 }));
 
+export const couponsRelations = relations(coupons, ({ many }) => ({
+  redemptions: many(couponRedemptions),
+}));
+
+export const couponRedemptionsRelations = relations(
+  couponRedemptions,
+  ({ one }) => ({
+    coupon: one(coupons, {
+      fields: [couponRedemptions.couponId],
+      references: [coupons.id],
+    }),
+    user: one(users, {
+      fields: [couponRedemptions.userId],
+      references: [users.id],
+    }),
+  })
+);
+
 // ─── Type Exports ───────────────────────────────────────────
 
 export type User = typeof users.$inferSelect;
@@ -414,3 +468,7 @@ export type Subscription = typeof subscriptions.$inferSelect;
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type FlashcardProgress = typeof flashcardProgress.$inferSelect;
 export type QuizHistory = typeof quizHistory.$inferSelect;
+export type Coupon = typeof coupons.$inferSelect;
+export type NewCoupon = typeof coupons.$inferInsert;
+export type CouponRedemption = typeof couponRedemptions.$inferSelect;
+export type NewCouponRedemption = typeof couponRedemptions.$inferInsert;

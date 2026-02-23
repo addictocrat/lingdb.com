@@ -26,7 +26,9 @@
     "weekdays_short": "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
     "credits": "Credits",
     "theme": "Theme",
-    "language": "Language"
+    "language": "Language",
+    "back_to_dashboard": "Back to Dashboard",
+    "upgrade_cta": "Upgrade"
   },
   "landing": {
     "badge_text": "The smarter way to learn languages",
@@ -446,6 +448,25 @@
     "next_btn": "Next",
     "prev_btn": "Previous",
     "done_btn": "Done"
+  },
+  "payment": {
+    "coupon_section": "Have a coupon code?",
+    "coupon_placeholder": "Enter code...",
+    "apply_button": "Apply",
+    "applying": "Applying...",
+    "success_title": "Premium Granted! 🎉",
+    "success_message": "Congratulations! You've successfully redeemed your coupon. Your account is now Premium for 1 month.",
+    "perks_title": "Your New Perks:",
+    "unlimited_dictionaries": "Unlimited Dictionaries",
+    "ai_credits": "100 AI Credits",
+    "no_ads": "No Advertisements",
+    "errors": {
+      "CODE_REQUIRED": "Special code is required",
+      "INVALID_CODE": "Invalid coupon code",
+      "EXPIRED_CODE": "This coupon has expired",
+      "MAX_USES_REACHED": "This coupon has reached its maximum usage",
+      "ALREADY_REDEEMED": "You have already redeemed this coupon",
+      "INTERNAL_ERROR": "An error occurred. Please try again later."
+    }
   }
-  
 }

@@ -26,7 +26,9 @@
     "weekdays_short": "Dim,Lun,Mar,Mer,Jeu,Ven,Sam",
     "credits": "Crédits",
     "theme": "Thème",
-    "language": "Langue"
+    "language": "Langue",
+    "back_to_dashboard": "Retour au tableau de bord",
+    "upgrade_cta": "Améliorer"
   },
   "landing": {
     "badge_text": "La façon la plus intelligente d'apprendre des langues",
@@ -446,5 +448,25 @@
     "next_btn": "Suivant",
     "prev_btn": "Précédent",
     "done_btn": "Terminé"
+  },
+  "payment": {
+    "coupon_section": "Avez-vous un code promo ?",
+    "coupon_placeholder": "Entrez le code...",
+    "apply_button": "Appliquer",
+    "applying": "Application...",
+    "success_title": "Premium accordé ! 🎉",
+    "success_message": "Félicitations ! Vous avez utilisé votre coupon avec succès. Votre compte est désormais Premium pendant 1 mois.",
+    "perks_title": "Vos nouveaux avantages :",
+    "unlimited_dictionaries": "Dictionnaires illimités",
+    "ai_credits": "100 Crédits IA",
+    "no_ads": "Sans publicité",
+    "errors": {
+      "CODE_REQUIRED": "Le code est requis",
+      "INVALID_CODE": "Code promo invalide",
+      "EXPIRED_CODE": "Ce coupon a expiré",
+      "MAX_USES_REACHED": "Ce coupon a atteint son utilisation maximale",
+      "ALREADY_REDEEMED": "Vous avez déjà utilisé ce coupon",
+      "INTERNAL_ERROR": "Une erreur est survenue. Veuillez réessayer plus tard."
+    }
   }
 }
