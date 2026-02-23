@@ -16,6 +16,7 @@ import {
   LogOut,
   Settings,
   BookOpen,
+  Coins,
 } from 'lucide-react';
 
 export default function Header({ locale = 'en' }: { locale?: string }) {
@@ -70,20 +71,32 @@ export default function Header({ locale = 'en' }: { locale?: string }) {
         </div>
 
         {/* Right Side */}
-        <div className="flex items-center gap-2">
-          <LocaleSwitcher />
-          <ThemeToggle />
+        <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3">
+            <LocaleSwitcher />
+            <ThemeToggle />
+          </div>
 
           {!isLoading && (
             <>
               {user ? (
-                <Dropdown
-                  trigger={
-                    <button className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 text-lg font-bold text-primary-600 transition-all hover:shadow-md dark:bg-primary-900/30 dark:text-primary-400">
-                      {profile?.username?.[0]?.toUpperCase() || 'U'}
-                    </button>
-                  }
-                >
+                <div className="hidden items-center gap-3 md:flex">
+                
+                  <Dropdown
+                    trigger={
+                      <button className="cursor-pointer  flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-primary-100 text-lg font-bold text-primary-600 transition-all hover:shadow-md dark:bg-primary-900/30 dark:text-primary-400">
+                        {user.user_metadata?.avatar_url ? (
+                          <img
+                            src={user.user_metadata.avatar_url}
+                            alt={profile?.username || 'User'}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          profile?.username?.[0]?.toUpperCase() || 'U'
+                        )}
+                      </button>
+                    }
+                  >
                   <div className="border-b border-[var(--border-color)] px-4 py-2">
                     <p className="text-lg font-semibold">
                       {profile?.username || 'User'}
@@ -120,7 +133,12 @@ export default function Header({ locale = 'en' }: { locale?: string }) {
                     <LogOut className="h-4 w-4" />
                     {t('logout')}
                   </DropdownItem>
-                </Dropdown>
+                  </Dropdown>
+                    <div className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-600 transition-colors dark:bg-amber-900/20 dark:text-amber-400">
+                    <Coins className="h-4 w-4" />
+                    <span>{profile?.aiCredits ?? 0}</span>
+                  </div>
+                </div>
               ) : (
                 <div className="hidden items-center gap-2 sm:flex">
                   <Link
@@ -141,7 +159,14 @@ export default function Header({ locale = 'en' }: { locale?: string }) {
           )}
 
           {/* Mobile hamburger */}
-          <MobileNav locale={locale} isLoggedIn={!!user} navLinks={navLinks} />
+          <MobileNav
+            locale={locale}
+            isLoggedIn={!!user}
+            navLinks={navLinks}
+            profile={profile}
+            user={user}
+            signOut={signOut}
+          />
         </div>
       </div>
     </header>

@@ -46,7 +46,7 @@ export default function LocaleSwitcher() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-full border border-[var(--border-color)] bg-[var(--surface)] px-3 py-2 text-lg transition-all duration-200 hover:shadow-md"
+        className="cursor-pointer flex items-center gap-2 rounded-full border border-[var(--border-color)] bg-[var(--surface)] px-3 py-2 text-lg transition-all duration-200 hover:shadow-md"
         aria-label="Change language"
       >
         <Globe className="h-4 w-4 text-[var(--fg)]/60" />
@@ -71,6 +71,7 @@ export default function LocaleSwitcher() {
                   'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
               )}
             >
+
               <span className="text-xl">{lang.flag}</span>
               <span>{lang.name}</span>
             </button>

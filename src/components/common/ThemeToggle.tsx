@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils/cn';
 const themes = [
   { value: 'light', icon: Sun, label: 'Light' },
   { value: 'dark', icon: Moon, label: 'Dark' },
-  // { value: 'system', icon: Monitor, label: 'System' },
+  { value: 'system', icon: Monitor, label: 'System' },
 ] as const;
 
 export default function ThemeToggle() {
@@ -35,7 +35,7 @@ export default function ThemeToggle() {
           key={value}
           onClick={() => setTheme(value)}
           className={cn(
-            'flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200',
+            'cursor-pointer  flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200',
             theme === value
               ? 'bg-primary-500 text-white shadow-md scale-110'
               : 'text-[var(--fg)] opacity-50 hover:opacity-100 hover:scale-105'
