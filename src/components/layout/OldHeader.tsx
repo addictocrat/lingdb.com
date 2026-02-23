@@ -134,7 +134,14 @@ export default function Header({ locale = 'en' }: { locale?: string }) {
           )}
 
           {/* Mobile hamburger */}
-          <MobileNav locale={locale} isLoggedIn={!!user} navLinks={navLinks} />
+          <MobileNav
+            locale={locale}
+            isLoggedIn={!!user}
+            navLinks={navLinks}
+            profile={profile}
+            user={user}
+            signOut={signOut}
+          />
         </div>
       </div>
     </header>
