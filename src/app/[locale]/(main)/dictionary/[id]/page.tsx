@@ -19,8 +19,8 @@ export default async function DictionaryPage({
   // Get DB user if authenticated
   let dbUser = null;
   if (user) {
-    const { ensureDbUser } = await import('@/lib/db/auth-helper');
-    dbUser = await ensureDbUser(user, locale);
+    const { getDbUser } = await import('@/lib/db/auth-helper');
+    dbUser = await getDbUser(user.id);
   }
 
   const dict = await db.query.dictionaries.findFirst({

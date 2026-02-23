@@ -7,59 +7,49 @@ import { renderForgotPasswordEmail } from '@/lib/email/templates/forgot-password
 import { APP_URL } from '@/lib/utils/constants';
 import { sendAdminNewUserNotification } from '@/lib/email/notify-admin';
 
-
-export async function registerUserWithVerification(email: string, password?: string) {
+/**
+ * Sign up a new user with email + password.
+ * Creates the user (unconfirmed) via admin API, generates a verification link,
+ * and sends a custom email via SMTP.
+ */
+export async function signUp(email: string, password: string) {
   try {
-    const supabaseAdmin = createAdminClient();
+    const admin = createAdminClient();
 
-    // 1. Create the user using the Admin API, forcing email_confirm to false
-    const { data: createUserResult, error: createError } = await supabaseAdmin.auth.admin.createUser({
+    // Create user with email_confirm: false
+    const { error: createError } = await admin.auth.admin.createUser({
       email,
       password,
       email_confirm: false,
     });
 
     if (createError) {
+      // If user already exists, return a friendly message
+      if (createError.message.includes('already been registered')) {
+        return { success: false, error: 'An account with this email already exists.' };
+      }
       console.error('Error creating user:', createError);
       return { success: false, error: createError.message };
     }
 
-    // 2. Generate the signup verification link
-    const linkParams: any = {
+    // Generate signup confirmation link
+    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: 'signup',
       email,
-    };
-    if (password) {
-      linkParams.password = password;
+      password,
+    });
+
+    if (linkError || !linkData) {
+      console.error('Error generating verification link:', linkError);
+      return { success: false, error: 'Failed to generate verification link.' };
     }
 
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink(linkParams);
+    // Build the verify URL using the hashed_token from the link properties
+    const tokenHash = linkData.properties.hashed_token;
+    const verifyUrl = `${APP_URL}/api/auth/verify?token_hash=${encodeURIComponent(tokenHash)}&type=signup`;
 
-    if (linkError) {
-      console.error('Error generating link:', linkError);
-      return { success: false, error: 'Failed to generate verification link' };
-    }
-
-    let verifyLink = linkData.properties.action_link;
-
-    // Rewrite the generated Supabase link to point to our internal app verification route
-    try {
-      const appUrl = APP_URL;
-      const linkUrl = new URL(verifyLink);
-      
-      const token = linkUrl.searchParams.get('token');
-      const type = linkUrl.searchParams.get('type') || 'signup';
-
-      if (token) {
-        verifyLink = `${appUrl}/api/auth/verify?token=${encodeURIComponent(token)}&type=${encodeURIComponent(type)}`;
-      }
-    } catch (e) {
-      console.error('Failed to rewrite verification URL:', e);
-    }
-
-    // 3. Send the verification email using Spacemail / Nodemailer
-    const html = renderVerifyEmail(email.split('@')[0], verifyLink);
-
+    // Send verification email
+    const html = renderVerifyEmail(email.split('@')[0], verifyUrl);
     await transporter.sendMail({
       from: `"Lingdb" <${process.env.SMTP_USER}>`,
       to: email,
@@ -67,51 +57,37 @@ export async function registerUserWithVerification(email: string, password?: str
       html,
     });
 
-    // Notify admin about the new signup directly
+    // Notify admin (fire and forget)
     sendAdminNewUserNotification(email.split('@')[0], email).catch(console.error);
 
     return { success: true };
   } catch (error: any) {
-    console.error('Unexpected error in registerUserWithVerification:', error);
-    return { success: false, error: error.message || 'Something went wrong' };
+    console.error('Unexpected error in signUp:', error);
+    return { success: false, error: error.message || 'Something went wrong.' };
   }
 }
 
+/**
+ * Resend verification email for an existing unconfirmed user.
+ */
 export async function resendVerificationEmail(email: string) {
   try {
-    const supabaseAdmin = createAdminClient();
+    const admin = createAdminClient();
 
-    // 1. Generate the magiclink verification link again for the existing user
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: 'magiclink',
       email,
     });
 
-    if (linkError) {
-      console.error('Error generating link:', linkError);
-      return { success: false, error: 'Failed to generate verification link' };
+    if (linkError || !linkData) {
+      console.error('Error generating verification link:', linkError);
+      return { success: false, error: 'Failed to generate verification link.' };
     }
 
-    let verifyLink = linkData.properties.action_link;
+    const tokenHash = linkData.properties.hashed_token;
+    const verifyUrl = `${APP_URL}/api/auth/verify?token_hash=${encodeURIComponent(tokenHash)}&type=magiclink`;
 
-    // Rewrite the generated Supabase link to point to our internal app verification route
-    try {
-      const appUrl = APP_URL;
-      const linkUrl = new URL(verifyLink);
-      
-      const token = linkUrl.searchParams.get('token');
-      const type = linkUrl.searchParams.get('type') || 'magiclink';
-
-      if (token) {
-        verifyLink = `${appUrl}/api/auth/verify?token=${encodeURIComponent(token)}&type=${encodeURIComponent(type)}`;
-      }
-    } catch (e) {
-      console.error('Failed to rewrite verification URL:', e);
-    }
-
-    // 2. Send the verification email using Spacemail / Nodemailer
-    const html = renderVerifyEmail(email.split('@')[0], verifyLink);
-
+    const html = renderVerifyEmail(email.split('@')[0], verifyUrl);
     await transporter.sendMail({
       from: `"Lingdb" <${process.env.SMTP_USER}>`,
       to: email,
@@ -122,45 +98,31 @@ export async function resendVerificationEmail(email: string) {
     return { success: true };
   } catch (error: any) {
     console.error('Unexpected error in resendVerificationEmail:', error);
-    return { success: false, error: error.message || 'Something went wrong' };
+    return { success: false, error: error.message || 'Something went wrong.' };
   }
 }
 
+/**
+ * Send a password reset email with a recovery link.
+ */
 export async function sendPasswordResetEmail(email: string) {
   try {
-    const supabaseAdmin = createAdminClient();
+    const admin = createAdminClient();
 
-    // 1. Generate the recovery verification link for the existing user
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+    const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: 'recovery',
       email,
     });
 
-    if (linkError) {
-      console.error('Error generating link:', linkError);
-      return { success: false, error: 'Failed to generate reset link' };
+    if (linkError || !linkData) {
+      console.error('Error generating recovery link:', linkError);
+      return { success: false, error: 'Failed to generate reset link.' };
     }
 
-    let verifyLink = linkData.properties.action_link;
+    const tokenHash = linkData.properties.hashed_token;
+    const verifyUrl = `${APP_URL}/api/auth/verify?token_hash=${encodeURIComponent(tokenHash)}&type=recovery`;
 
-    // Rewrite the generated Supabase link to point to our internal app verification route
-    try {
-      const appUrl = APP_URL;
-      const linkUrl = new URL(verifyLink);
-      
-      const token = linkUrl.searchParams.get('token');
-      const type = linkUrl.searchParams.get('type') || 'recovery';
-
-      if (token) {
-        verifyLink = `${appUrl}/api/auth/verify?token=${encodeURIComponent(token)}&type=${encodeURIComponent(type)}`;
-      }
-    } catch (e) {
-      console.error('Failed to rewrite verification URL:', e);
-    }
-
-    // 2. Send the verification email using Spacemail / Nodemailer
-    const html = renderForgotPasswordEmail(email.split('@')[0], verifyLink);
-
+    const html = renderForgotPasswordEmail(email.split('@')[0], verifyUrl);
     await transporter.sendMail({
       from: `"Lingdb" <${process.env.SMTP_USER}>`,
       to: email,
@@ -171,6 +133,6 @@ export async function sendPasswordResetEmail(email: string) {
     return { success: true };
   } catch (error: any) {
     console.error('Unexpected error in sendPasswordResetEmail:', error);
-    return { success: false, error: error.message || 'Something went wrong' };
+    return { success: false, error: error.message || 'Something went wrong.' };
   }
 }

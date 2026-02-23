@@ -50,8 +50,8 @@ export default async function LibraryPage({
   else whereCondition = sql`${conditions.shift()} and ${conditions.join(' and ')}`;
 
   // Get DB user to check ownership
-  const { ensureDbUser } = await import('@/lib/db/auth-helper');
-  const dbUser = user ? await ensureDbUser(user, locale) : null;
+  const { getDbUser } = await import('@/lib/db/auth-helper');
+  const dbUser = user ? await getDbUser(user.id) : null;
 
   const t = await import('next-intl/server').then(m => m.getTranslations('library'));
   const tCommon = await import('next-intl/server').then(m => m.getTranslations('common'));

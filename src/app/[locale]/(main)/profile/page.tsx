@@ -26,9 +26,9 @@ export default async function ProfilePage({
     redirect(`/${locale}/login`);
   }
 
-  // Get DB user using helper to prevent loops if DB record is missing
-  const { ensureDbUser } = await import('@/lib/db/auth-helper');
-  const dbUser = await ensureDbUser(user, locale);
+  // Get DB user
+  const { getDbUser } = await import('@/lib/db/auth-helper');
+  const dbUser = await getDbUser(user.id);
   
   if (!dbUser) {
     redirect(`/${locale}/login?error=db_sync_failed`);
