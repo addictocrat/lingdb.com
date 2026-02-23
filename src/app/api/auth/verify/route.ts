@@ -25,6 +25,17 @@ export async function GET(request: Request) {
       });
 
       if (!existingUser) {
+        const existingEmailUser = await db.query.users.findFirst({
+          where: eq(users.email, data.user.email!),
+        });
+
+        if (existingEmailUser) {
+          const forwardedHost = request.headers.get('x-forwarded-host');
+          const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
+          const baseUrl = forwardedHost ? `${forwardedProto}://${forwardedHost}` : origin;
+          return NextResponse.redirect(`${baseUrl}/en/login?error=account_exists`);
+        }
+
         // First login — create user record with random username
         let username = generateRandomUsername();
 

@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils/cn';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function LoginForm({ locale = 'en' }: { locale?: string }) {
+export default function LoginForm({ locale = 'en', initialError }: { locale?: string; initialError?: string }) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -18,7 +18,18 @@ export default function LoginForm({ locale = 'en' }: { locale?: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(() => {
+    if (initialError === 'account_exists') {
+      return 'This account was registered with a password.';
+    }
+    if (initialError === 'auth_callback_failed') {
+      return 'Authentication failed. Please try again.';
+    }
+    if (initialError === 'verification_failed') {
+      return 'Email verification failed. Please try again.';
+    }
+    return initialError || null;
+  });
   const [resetSent, setResetSent] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
