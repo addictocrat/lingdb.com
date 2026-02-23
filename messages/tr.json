@@ -410,7 +410,27 @@
   "nav": {
     "dashboard": "Sözlüklerim",
     "library": "Kütüphane",
-    "profile": "Profil"
+    "profile": "Profil",
+    "leaderboards": "Liderlik Tabloları"
+  },
+  "leaderboards": {
+    "title": "Liderlik Tabloları",
+    "subtitle": "Topluluğumuzdaki en aktif öğrencileri keşfedin.",
+    "top_performers": "En İyiler",
+    "most_words": "En Çok Kelime",
+    "most_quizzes": "En Çok Test",
+    "daily_streak": "Günlük Seri",
+    "top_10": "En İyi 10 Öğrenci",
+    "rank": "Sıralama",
+    "user": "Kullanıcı",
+    "words": "Kelime",
+    "quizzes": "Test",
+    "streak": "Seri",
+    "your_rank": "Sıralamanız",
+    "no_rank": "Sıralamanızı görmek için katılın!",
+    "most_words_desc": "Kaydedilen en yüksek toplam kelime sayısı",
+    "most_quizzes_desc": "Tamamlanan en çok test",
+    "daily_streak_desc": "En uzun aktif öğrenme serisi"
   },
   "tutorial": {
     "welcome_title": "Lingdb'ye Hoşgeldiniz! 🚀",

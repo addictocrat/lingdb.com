@@ -410,7 +410,27 @@
   "nav": {
     "dashboard": "Tableau de bord",
     "library": "Bibliothèque",
-    "profile": "Profil"
+    "profile": "Profil",
+    "leaderboards": "Classements"
+  },
+  "leaderboards": {
+    "title": "Classements",
+    "subtitle": "Découvrez les apprenants les plus actifs de notre communauté.",
+    "top_performers": "Meilleurs performeurs",
+    "most_words": "Plus de mots",
+    "most_quizzes": "Plus de quiz",
+    "daily_streak": "Série quotidienne",
+    "top_10": "Top 10 Apprenants",
+    "rank": "Rang",
+    "user": "Utilisateur",
+    "words": "Mots",
+    "quizzes": "Quiz",
+    "streak": "Série",
+    "your_rank": "Votre rang",
+    "no_rank": "Participez pour voir votre rang !",
+    "most_words_desc": "Total le plus élevé de mots enregistrés",
+    "most_quizzes_desc": "Le plus de quiz terminés",
+    "daily_streak_desc": "Plus longue série d'apprentissage active"
   },
   "tutorial": {
     "welcome_title": "Bienvenue sur Lingdb ! 🚀",

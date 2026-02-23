@@ -15,8 +15,8 @@ import {
   User as UserIcon,
   LogOut,
   Settings,
-  BookOpen,
   Coins,
+  Trophy,
 } from 'lucide-react';
 
 export default function Header({ locale = 'en' }: { locale?: string }) {
@@ -31,6 +31,7 @@ export default function Header({ locale = 'en' }: { locale?: string }) {
   const navLinks = [
     { href: `/${locale}/dashboard`, label: tNav('dashboard'), icon: LayoutDashboard },
     { href: `/${locale}/library`, label: tNav('library'), icon: Library },
+    { href: `/${locale}/leaderboards`, label: tNav('leaderboards'), icon: Trophy },
   ];
 
   return (
@@ -44,13 +45,13 @@ export default function Header({ locale = 'en' }: { locale?: string }) {
           >
             {/* <BookOpen className="h-6 w-6 text-primary-500" /> */}
             <span>
-              {profile?.tier === 'PREMIUM' ? t('premium') : t('appName')}
+              {profile?.tier === 'PREMIUM' ? `${t('appName')} ${t('premium')}` : t('appName')}
             </span>
           </Link>
           {/* Desktop Nav */}
           <nav className="hidden items-center gap-1 md:flex">
             {navLinks
-              .filter(link => user || link.href.includes('/library'))
+              .filter(link => user || link.href.includes('/library') || link.href.includes('/leaderboards'))
               .map((link) => (
                 <Link
                   key={link.href}
