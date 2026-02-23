@@ -19,7 +19,7 @@ const plans = [
     ctaKey: 'free_cta',
     ctaVariant: 'secondary' as const,
     features: [
-      { textKey: 'feature_20_dict', included: true },
+      { textKey: 'feature_10_dict', included: true },
     
       { textKey: 'feature_30_ai', included: true },
       { textKey: 'feature_flashcards', included: true },

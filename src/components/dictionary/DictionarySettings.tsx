@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
@@ -26,6 +26,8 @@ export default function DictionarySettings({
   const locale = useLocale();
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations('dictionary');
+  const tCommon = useTranslations('common');
 
   const [editTitle, setEditTitle] = useState(dictionary.title);
   const [editDescription, setEditDescription] = useState(dictionary.description || '');
@@ -78,10 +80,10 @@ export default function DictionarySettings({
         }),
       });
       if (res.ok) {
-        toast('Settings saved successfully', 'success');
+        toast(t('settings.success_saved'), 'success');
         onUpdate();
       } else {
-        toast('Failed to save settings', 'error');
+        toast(t('settings.error_saved'), 'error');
       }
     } finally {
       setIsSaving(false);
@@ -102,7 +104,7 @@ export default function DictionarySettings({
       method: 'DELETE',
     });
     if (res.ok) {
-      toast('Dictionary deleted', 'success');
+      toast(t('settings.success_deleted'), 'success');
       router.push(`/${locale}/dashboard`);
     }
   };
@@ -117,7 +119,7 @@ export default function DictionarySettings({
       
       const data = await res.json();
       if (res.ok) {
-        toast('Invitation sent!', 'success');
+        toast(t('settings.success_invited'), 'success');
         setSearchQuery('');
         // Optimistic update
         const invitedUser = searchResults.find(u => u.id === userId);
@@ -134,44 +136,44 @@ export default function DictionarySettings({
           } as any]);
         }
       } else {
-        toast(data.error || 'Failed to invite user', 'error');
+        toast(data.error || t('settings.error_saved'), 'error');
       }
     } catch (error) {
-      toast('Something went wrong', 'error');
+      toast(t('settings.error_saved'), 'error');
     }
   };
 
   const handleRemoveEditor = async (userId: string) => {
-    if (!confirm('Are you sure you want to remove this editor? They will lose access to add or edit words.')) return;
+    if (!confirm(t('settings.confirm_remove'))) return;
     
     try {
       const res = await fetch(`/api/dictionaries/${dictionary.id}/editors/${userId}`, {
         method: 'DELETE',
       });
       if (res.ok) {
-        toast('Editor removed', 'success');
+        toast(t('settings.success_removed'), 'success');
         setEditors(editors.filter(e => e.userId !== userId));
       } else {
-        toast('Failed to remove editor', 'error');
+        toast(t('settings.error_saved'), 'error');
       }
     } catch (error) {
-      toast('Something went wrong', 'error');
+      toast(t('settings.error_saved'), 'error');
     }
   };
 
   const handleQuit = async () => {
-    if (!confirm('Are you sure you want to quit this dictionary? You will lose access, but your words will remain.')) return;
+    if (!confirm(t('settings.confirm_quit'))) return;
     try {
       // The backend uses the same endpoint for both owners removing and editors quitting
       const res = await fetch(`/api/dictionaries/${dictionary.id}/editors/me`, {
         method: 'DELETE',
       });
       if (res.ok) {
-        toast('You left the dictionary', 'success');
+        toast(t('settings.success_left'), 'success');
         router.push(`/${locale}/dashboard`);
       }
     } catch (error) {
-      toast('Something went wrong', 'error');
+      toast(t('settings.error_saved'), 'error');
     }
   }
 
@@ -180,12 +182,12 @@ export default function DictionarySettings({
       {/* General Settings */}
       {isOwner && (
         <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] p-6">
-          <h2 className="mb-4 text-xl font-bold">General Settings</h2>
+          <h2 className="mb-4 text-xl font-bold">{t('settings.general')}</h2>
           
           <div className="space-y-4">
             <div>
               <label className="mb-1 block text-sm font-medium text-[var(--fg)]/70">
-                Title
+                {t('settings.title')}
               </label>
               <input
                 value={editTitle}
@@ -196,7 +198,7 @@ export default function DictionarySettings({
             
             <div>
               <label className="mb-1 block text-sm font-medium text-[var(--fg)]/70">
-                Description
+                {t('settings.description')}
               </label>
               <textarea
                 value={editDescription}
@@ -207,11 +209,11 @@ export default function DictionarySettings({
 
             <div className="flex items-center justify-between pt-2 border-t border-[var(--border-color)]">
               <div>
-                <p className="font-medium">Visibility</p>
+                <p className="font-medium">{t('settings.visibility')}</p>
                 <p className="text-sm text-[var(--fg)]/60">
                   {dictionary.isPublic 
-                    ? "Anyone can view and fork this dictionary. Excellent for sharing your learning."
-                    : "Only you and your editors can see this dictionary."}
+                    ? t('settings.public_description')
+                    : t('settings.private_description')}
                 </p>
               </div>
               <Button
@@ -220,16 +222,16 @@ export default function DictionarySettings({
                 className="min-w-[120px]"
               >
                 {dictionary.isPublic ? (
-                  <><Lock className="mr-2 h-4 w-4" /> Make Private</>
+                  <><Lock className="mr-2 h-4 w-4" /> {t('settings.make_private')}</>
                 ) : (
-                  <><Globe className="mr-2 h-4 w-4" /> Make Public</>
+                  <><Globe className="mr-2 h-4 w-4" /> {t('settings.make_public')}</>
                 )}
               </Button>
             </div>
 
             <div className="pt-4 flex justify-end">
               <Button onClick={handleSaveGeneral} disabled={isSaving}>
-                {isSaving ? 'Saving...' : 'Save Changes'}
+                {isSaving ? tCommon('loading') : t('settings.save_changes')}
               </Button>
             </div>
           </div>
@@ -238,12 +240,12 @@ export default function DictionarySettings({
 
       {/* Co-Editors Section */}
       <section className="rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] p-6">
-        <h2 className="mb-4 text-xl font-bold">Co-Editors</h2>
+        <h2 className="mb-4 text-xl font-bold">{t('settings.co_editors')}</h2>
         
         {isOwner ? (
           <>
             <p className="mb-4 text-sm text-[var(--fg)]/70">
-              Invite other users to collaborate on this dictionary. Editors can add, edit, and delete words.
+              {t('settings.co_editors_description')}
             </p>
 
             {/* Invite Search */}
@@ -252,7 +254,7 @@ export default function DictionarySettings({
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--fg)]/40" />
                 <input
                   type="text"
-                  placeholder="Search users by username to invite..."
+                  placeholder={t('settings.search_placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg)] pl-10 pr-3 py-2.5 focus:border-primary-500 focus:outline-none"
@@ -263,7 +265,7 @@ export default function DictionarySettings({
               {searchQuery.length >= 2 && (
                 <div className="absolute z-10 mt-1 w-full rounded-lg border border-[var(--border-color)] bg-[var(--surface)] shadow-lg overflow-hidden">
                   {isSearching ? (
-                    <div className="p-3 text-center text-sm text-[var(--fg)]/50">Searching...</div>
+                    <div className="p-3 text-center text-sm text-[var(--fg)]/50">{tCommon('loading')}</div>
                   ) : searchResults.length > 0 ? (
                     <ul className="max-h-60 overflow-y-auto">
                       {searchResults.map((user) => {
@@ -278,9 +280,9 @@ export default function DictionarySettings({
                               onClick={() => handleInvite(user.id)}
                             >
                               {isAlreadyEditor ? (
-                                <><Check className="mr-1 h-3 w-3" /> Invited</>
+                                <><Check className="mr-1 h-3 w-3" /> {t('settings.invited')}</>
                               ) : (
-                                <><UserPlus className="mr-1 h-3 w-3" /> Invite</>
+                                <><UserPlus className="mr-1 h-3 w-3" /> {t('settings.invite')}</>
                               )}
                             </Button>
                           </li>
@@ -288,7 +290,7 @@ export default function DictionarySettings({
                       })}
                     </ul>
                   ) : (
-                    <div className="p-3 text-center text-sm text-[var(--fg)]/50">No users found matching "{searchQuery}"</div>
+                    <div className="p-3 text-center text-sm text-[var(--fg)]/50">{t('settings.no_users_found', { query: searchQuery })}</div>
                   )}
                 </div>
               )}
@@ -296,9 +298,9 @@ export default function DictionarySettings({
 
             {/* Editors List */}
             <div className="space-y-3">
-              <h3 className="font-medium text-[var(--fg)]/80">Current Editors</h3>
+              <h3 className="font-medium text-[var(--fg)]/80">{t('settings.current_editors')}</h3>
               {editors.length === 0 ? (
-                <p className="text-sm text-[var(--fg)]/50 italic">No co-editors have been added yet.</p>
+                <p className="text-sm text-[var(--fg)]/50 italic">{t('settings.no_editors')}</p>
               ) : (
                 <div className="divide-y divide-[var(--border-color)] border border-[var(--border-color)] rounded-lg">
                   {editors.map((editor) => (
@@ -310,7 +312,7 @@ export default function DictionarySettings({
                         <div>
                           <p className="font-medium">{editor.user?.username || 'Unknown User'}</p>
                           <p className="text-xs text-[var(--fg)]/50">
-                            {editor.status === 'PENDING' ? 'Invitation Sent (Pending)' : 'Accepted'}
+                            {editor.status === 'PENDING' ? t('settings.invitation_pending') : t('settings.invitation_accepted')}
                           </p>
                         </div>
                       </div>
@@ -330,9 +332,9 @@ export default function DictionarySettings({
           </>
         ) : (
           <div className="flex flex-col items-center justify-center py-6 text-center">
-            <p className="mb-4">You are an editor of this shared dictionary.</p>
+            <p className="mb-4">{t('settings.editor_quit_description')}</p>
             <Button variant="danger" onClick={handleQuit}>
-              Quit Dictionary
+              {t('settings.quit_button')}
             </Button>
           </div>
         )}
@@ -341,15 +343,15 @@ export default function DictionarySettings({
       {/* Danger Zone */}
       {isOwner && (
         <section className="rounded-2xl border border-red-200 p-6 dark:border-red-900/30 bg-[var(--surface)]">
-          <h2 className="mb-2 text-xl font-bold text-red-600 dark:text-red-200">Danger Zone</h2>
+          <h2 className="mb-2 text-xl font-bold text-red-600 dark:text-red-200">{t('settings.danger_zone')}</h2>
           <p className="mb-4 text-sm text-red-600/80 dark:text-red-200/80">
-            Once you delete a dictionary, there is no going back. Please be certain.
+            {t('settings.delete_warning')}
           </p>
           <Button
             variant="danger"
             onClick={() => setShowDeleteConfirm(true)}
           >
-            <Trash2 className="mr-2 h-4 w-4" /> Delete Dictionary
+            <Trash2 className="mr-2 h-4 w-4" /> {t('settings.delete_dictionary')}
           </Button>
         </section>
       )}
@@ -358,12 +360,11 @@ export default function DictionarySettings({
       <Modal
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
-        title="Delete Dictionary"
+        title={t('settings.modal_title')}
         size="sm"
       >
         <p className="mb-6 text-lg text-[var(--fg)]/60">
-          This will permanently delete <strong>{dictionary.title}</strong> and
-          all its words. This action cannot be undone.
+          {t('settings.modal_body', { title: dictionary.title })}
         </p>
         <div className="flex gap-3">
           <Button
@@ -371,10 +372,10 @@ export default function DictionarySettings({
             onClick={() => setShowDeleteConfirm(false)}
             className="flex-1"
           >
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <Button variant="danger" onClick={handleDelete} className="flex-1">
-            Delete
+            {tCommon('delete')}
           </Button>
         </div>
       </Modal>

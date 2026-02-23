@@ -71,9 +71,7 @@ export default function HowItWorks() {
           <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
             {t('how_it_works')}
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-xl text-[var(--fg)]/60">
-            Get started in 3 simple steps
-          </p>
+
         </div>
 
         <div className="grid gap-8 md:grid-cols-3">

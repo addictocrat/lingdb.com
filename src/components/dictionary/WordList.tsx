@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/Toast';
+import { useTranslations } from 'next-intl';
 import {
   Pencil,
   Trash2,
@@ -48,6 +49,7 @@ function SortableWordItem({
   canEdit,
 }: WordItemProps) {
   const { toast } = useToast();
+  const t = useTranslations('dictionary');
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(word.title);
   const [editTranslation, setEditTranslation] = useState(word.translation);
@@ -83,14 +85,14 @@ function SortableWordItem({
       });
 
       if (!res.ok) {
-        toast('Failed to update word', 'error');
+        toast(t('settings.error_saved'), 'error');
         return;
       }
 
       setIsEditing(false);
       onUpdate();
     } catch {
-      toast('Something went wrong', 'error');
+      toast(t('settings.error_saved'), 'error');
     }
   };
 
@@ -99,12 +101,12 @@ function SortableWordItem({
     try {
       const res = await fetch(`/api/words/${word.id}`, { method: 'DELETE' });
       if (!res.ok) {
-        toast('Failed to delete word', 'error');
+        toast(t('settings.error_saved'), 'error');
         return;
       }
       onDelete();
     } catch {
-      toast('Something went wrong', 'error');
+      toast(t('settings.error_saved'), 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -238,6 +240,7 @@ export default function WordList({
   canEdit = true,
 }: WordListProps) {
   const { toast } = useToast();
+  const t = useTranslations('dictionary');
   const [items, setItems] = useState(initialWords);
 
   useEffect(() => {
@@ -287,11 +290,11 @@ export default function WordList({
       });
 
       if (!res.ok) {
-        toast('Failed to save order', 'error');
+        toast(t('settings.error_saved'), 'error');
         onUpdate(); // Revert back to original on failure
       }
     } catch {
-      toast('Failed to save order', 'error');
+      toast(t('settings.error_saved'), 'error');
       onUpdate();
     }
   };
@@ -299,7 +302,7 @@ export default function WordList({
   if (items.length === 0) {
     return (
       <div className="py-12 text-center text-xl text-[var(--fg)]/40">
-        No words yet. Add your first word above!
+        {t('no_words')}
       </div>
     );
   }

@@ -5,7 +5,7 @@ import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import { Plus } from 'lucide-react';
 import { z } from 'zod';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import AutoSuggest from './AutoSuggest';
 
 import Dropdown, { DropdownItem } from '@/components/ui/Dropdown';
@@ -38,6 +38,7 @@ export default function AddWordForm({
 }: AddWordFormProps) {
   const { toast } = useToast();
   const locale = useLocale();
+  const t = useTranslations('dictionary');
   const [title, setTitle] = useState('');
   const [translation, setTranslation] = useState('');
   const [targetLang, setTargetLang] = useState(locale);
@@ -60,7 +61,7 @@ export default function AddWordForm({
     }
 
     if (wordCount >= 500) {
-      toast('Maximum 500 words per dictionary', 'warning');
+      toast(t('word_limit', { max: 500 }), 'warning');
       return;
     }
 
@@ -74,7 +75,7 @@ export default function AddWordForm({
 
       if (!res.ok) {
         const data = await res.json();
-        toast(data.error || 'Failed to add word', 'error');
+        toast(data.error || t('settings.error_saved'), 'error');
         return;
       }
 
@@ -83,7 +84,7 @@ export default function AddWordForm({
       titleRef.current?.focus(); // Actually AutoSuggest input ref might not be exposed, but that's fine
       onWordAdded();
     } catch {
-      toast('Something went wrong', 'error');
+      toast(t('settings.error_saved'), 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -95,12 +96,12 @@ export default function AddWordForm({
       className="flex flex-col gap-3 rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] p-4 sm:flex-row sm:items-end"
     >
       <div className="flex-1 space-y-1">
-        <label className="text-sm font-medium text-[var(--fg)]/60">Word</label>
+        <label className="text-sm font-medium text-[var(--fg)]/60">{t('word')}</label>
         <AutoSuggest
           language={dictionaryLanguage}
           value={title}
           onChange={setTitle}
-          placeholder="Enter a word..."
+          placeholder={t('word_placeholder')}
           className={errors.title ? 'border-accent-400' : ''}
         />
         {errors.title && (
@@ -110,7 +111,7 @@ export default function AddWordForm({
 
       <div className="flex-1 space-y-1">
         <label className="text-sm font-medium text-[var(--fg)]/60">
-          Translation
+          {t('translation')}
         </label>
         <AutoSuggest
           language={dictionaryLanguage}
@@ -119,7 +120,7 @@ export default function AddWordForm({
           apiEndpoint="/api/words/translate-suggest"
           value={translation}
           onChange={setTranslation}
-          placeholder="Enter translation..."
+          placeholder={t('translation_placeholder')}
           className={errors.translation ? 'border-accent-400' : ''}
           rightElement={
             <Dropdown
@@ -161,7 +162,7 @@ export default function AddWordForm({
 
       <Button type="submit" className="cursor-pointer" isLoading={isSubmitting} size="md">
         <Plus className="h-4 w-4" />
-        Add
+        {t('add')}
       </Button>
     </form>
   );
