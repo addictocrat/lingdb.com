@@ -3,6 +3,7 @@ import { db } from '@/lib/db/client';
 import { dictionaryEditors } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { cookies } from 'next/headers';
+import { APP_URL } from '@/lib/utils/constants';
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,8 +22,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!editorLog) {
-      // Possibly already accepted or invalid token
-      return NextResponse.redirect(new URL('/en/dashboard?error=invalid_or_expired_invite', request.url));
+      return NextResponse.redirect(`${APP_URL}/en/dashboard?error=invalid_or_expired_invite`);
     }
 
     // Accept the invite
@@ -30,14 +30,14 @@ export async function GET(request: NextRequest) {
       .update(dictionaryEditors)
       .set({
         status: 'ACCEPTED',
-        inviteToken: null, // Clear token after use
+        inviteToken: null,
         updatedAt: new Date(),
       })
       .where(eq(dictionaryEditors.id, editorLog.id));
 
     // Redirect user to the dictionary page
     const locale = (await cookies()).get('NEXT_LOCALE')?.value || 'en';
-    return NextResponse.redirect(new URL(`/${locale}/dictionary/${editorLog.dictionaryId}`, request.url));
+    return NextResponse.redirect(`${APP_URL}/${locale}/dictionary/${editorLog.dictionaryId}`);
   } catch (error) {
     console.error('Error accepting invite:', error);
     return NextResponse.json(
