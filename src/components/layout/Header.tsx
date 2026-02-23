@@ -18,6 +18,7 @@ import {
   Coins,
   Trophy,
   ShieldCheck,
+  FileText
 } from 'lucide-react';
 
 export default function Header({ locale = 'en' }: { locale?: string }) {
@@ -32,6 +33,7 @@ export default function Header({ locale = 'en' }: { locale?: string }) {
   const navLinks = [
     { href: `/${locale}/dashboard`, label: tNav('dashboard'), icon: LayoutDashboard },
     { href: `/${locale}/library`, label: tNav('library'), icon: Library },
+    { href: `/${locale}/blogs`, label: tNav('blogs'), icon: FileText },
     { href: `/${locale}/leaderboards`, label: tNav('leaderboards'), icon: Trophy },
   ];
 
@@ -52,7 +54,7 @@ export default function Header({ locale = 'en' }: { locale?: string }) {
           {/* Desktop Nav */}
           <nav className="hidden items-center gap-1 md:flex">
             {navLinks
-              .filter(link => user || link.href.includes('/library') || link.href.includes('/leaderboards'))
+              .filter(link => user || link.href.includes('/library') || link.href.includes('/leaderboards') || link.href.includes('/blogs'))
               .map((link) => (
                 <Link
                   key={link.href}

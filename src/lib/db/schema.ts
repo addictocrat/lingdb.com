@@ -32,6 +32,7 @@ export const dictionaryEditorStatusEnum = pgEnum('dictionary_editor_status', [
   'PENDING',
   'ACCEPTED',
 ]);
+export const blogStatusEnum = pgEnum('blog_status', ['DRAFT', 'PUBLISHED']);
 
 // ─── Users ──────────────────────────────────────────────────
 
@@ -296,6 +297,38 @@ export const coupons = pgTable('coupons', {
     .defaultNow(),
 });
 
+// ─── Blogs ──────────────────────────────────────────────────
+
+export const blogs = pgTable(
+  'blogs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    title: text('title').notNull(),
+    slug: text('slug').notNull().unique(),
+    description: text('description'),
+    content: jsonb('content').notNull(), // Rich text JSON
+    keywords: text('keywords'), // Comma separated or JSON array
+    authorId: uuid('author_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    status: blogStatusEnum('status').notNull().default('DRAFT'),
+    seoTitle: text('seo_title'),
+    seoDescription: text('seo_description'),
+    schemaData: jsonb('schema_data'),
+    publishedAt: timestamp('published_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index('blogs_slug_idx').on(table.slug),
+    index('blogs_author_id_idx').on(table.authorId),
+  ]
+);
+
 // ─── Coupon Redemptions ─────────────────────────────────────
 
 export const couponRedemptions = pgTable(
@@ -451,6 +484,13 @@ export const couponRedemptionsRelations = relations(
   })
 );
 
+export const blogsRelations = relations(blogs, ({ one }) => ({
+  author: one(users, {
+    fields: [blogs.authorId],
+    references: [users.id],
+  }),
+}));
+
 // ─── Type Exports ───────────────────────────────────────────
 
 export type User = typeof users.$inferSelect;
@@ -472,3 +512,5 @@ export type Coupon = typeof coupons.$inferSelect;
 export type NewCoupon = typeof coupons.$inferInsert;
 export type CouponRedemption = typeof couponRedemptions.$inferSelect;
 export type NewCouponRedemption = typeof couponRedemptions.$inferInsert;
+export type Blog = typeof blogs.$inferSelect;
+export type NewBlog = typeof blogs.$inferInsert;

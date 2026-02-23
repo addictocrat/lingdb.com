@@ -412,6 +412,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "library": "Library",
+    "blogs": "Blogs",
     "profile": "Profile",
     "leaderboards": "Leaderboards"
   },

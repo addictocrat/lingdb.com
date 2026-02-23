@@ -412,6 +412,7 @@
   "nav": {
     "dashboard": "Panel de control",
     "library": "Biblioteca",
+    "blogs": "Blogs",
     "profile": "Perfil",
     "leaderboards": "Tablas de clasificación"
   },

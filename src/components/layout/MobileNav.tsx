@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils/cn';
-import { Menu, X, LayoutDashboard, Library, User as UserIcon, Settings, LogOut, Coins, ShieldCheck } from 'lucide-react';
+import { Menu, X, LayoutDashboard, Library, User as UserIcon, Settings, LogOut, Coins, ShieldCheck, FileText } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import gsap from 'gsap';
 import ThemeToggle from '@/components/common/ThemeToggle';
