@@ -12,6 +12,7 @@ import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import Modal from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
+import { useTranslations } from 'next-intl';
 import {
   Globe,
   Lock,
@@ -33,16 +34,20 @@ interface DictionaryDetailClientProps {
   };
   isOwner: boolean;
   currentUserId?: string;
+  userCredits: number;
 }
 
 export default function DictionaryDetailClient({
   dictionary: initialDict,
   isOwner,
   currentUserId,
+  userCredits,
 }: DictionaryDetailClientProps) {
   const locale = useLocale();
   const router = useRouter();
   const { toast } = useToast();
+  const t = useTranslations('dictionary');
+  const tCommon = useTranslations('common');
   const [dictionary, setDictionary] = useState(initialDict);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editTitle, setEditTitle] = useState(initialDict.title);
@@ -80,15 +85,15 @@ export default function DictionaryDetailClient({
       method: 'DELETE',
     });
     if (res.ok) {
-      toast('Dictionary deleted', 'success');
+      toast(t('settings.success_deleted'), 'success');
       router.push(`/${locale}/dashboard`);
     }
   };
 
   const tabs = [
-    { id: 'words' as const, label: 'Words', icon: BookOpen },
-    { id: 'flashcards' as const, label: 'Flashcards', icon: Layers },
-    { id: 'quiz' as const, label: 'Quiz', icon: Brain },
+    { id: 'words' as const, label: t('words_tab'), icon: BookOpen },
+    { id: 'flashcards' as const, label: t('flashcards_tab'), icon: Layers },
+    { id: 'quiz' as const, label: t('quiz_tab'), icon: Brain },
   ];
 
   const languageFlags: Record<string, string> = {
@@ -148,16 +153,16 @@ export default function DictionaryDetailClient({
             {dictionary.isPublic ? (
               <Badge variant="default">
                 <Globe className="mr-1 h-3 w-3" />
-                Public
+                {t('public')}
               </Badge>
             ) : (
               <Badge variant="warning">
                 <Lock className="mr-1 h-3 w-3" />
-                Private
+                {t('private')}
               </Badge>
             )}
             <span className="text-sm text-[var(--fg)]/40">
-              {dictionary.words.length} / 500 words
+              {t('stats', { count: dictionary.words.length, max: 500 })}
             </span>
           </div>
         </div>
@@ -170,7 +175,7 @@ export default function DictionaryDetailClient({
             className={activeTab === 'settings' ? 'bg-[var(--surface-hover)]' : ''}
           >
             <Settings className="mr-2 h-4 w-4" />
-            Settings
+            {tCommon('settings')}
           </Button>
         )}
       </div>
@@ -225,6 +230,7 @@ export default function DictionaryDetailClient({
                 existingWords={existingWords}
                 initialSuggestions={dictionary.activeMagicWords}
                 onWordAdded={refreshDictionary}
+                userCredits={userCredits}
               />
             </>
           )}

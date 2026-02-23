@@ -20,6 +20,7 @@ interface MagicWordsProps {
   existingWords: { title: string; translation: string }[];
   initialSuggestions?: MagicWord[] | null;
   onWordAdded: () => void;
+  userCredits: number;
 }
 
 export default function MagicWords({
@@ -31,15 +32,20 @@ export default function MagicWords({
   existingWords,
   initialSuggestions,
   onWordAdded,
+  userCredits,
 }: MagicWordsProps) {
   const { toast } = useToast();
   const [suggestions, setSuggestions] = useState<MagicWord[]>(initialSuggestions || []);
   const [isLoading, setIsLoading] = useState(false);
   const [isAdding, setIsAdding] = useState<string | null>(null);
-  const lastFetchedLength = useRef<number>(initialSuggestions?.length ? existingWords.length : -1);
+  const hasFetchedOnce = useRef(!!initialSuggestions?.length);
 
-  const fetchSuggestions = useCallback(async () => {
-    lastFetchedLength.current = existingWords.length;
+  const fetchSuggestions = useCallback(async (isRefresh = false) => {
+    if (isRefresh && userCredits <= 0) {
+      toast('No AI credits remaining. Upgrade to Premium for more.', 'warning');
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await fetch('/api/ai/suggest-words', {
@@ -52,31 +58,38 @@ export default function MagicWords({
           language,
           sourceLanguage,
           existingWords,
+          isRefresh,
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
         setSuggestions(data.suggestions || []);
+        hasFetchedOnce.current = true;
+        if (isRefresh) {
+          toast('Magic words refreshed! (-1 credit)', 'success');
+        }
       } else {
-        toast('Failed to get magic suggestions', 'error');
+        const data = await res.json();
+        toast(data.error || 'Failed to get magic suggestions', 'error');
       }
     } catch {
       toast('Something went wrong', 'error');
     } finally {
       setIsLoading(false);
     }
-  }, [dictionaryId, title, description, language, existingWords, toast]);
+  }, [dictionaryId, title, description, language, sourceLanguage, existingWords, userCredits, toast]);
 
-  // Fetch suggestions when the word count changes (e.g., a new word is added)
+  // Fetch suggestions once when threshold (2 words) is reached
   useEffect(() => {
     const shouldFetch = 
-      existingWords.length >= 1 && 
+      existingWords.length >= 2 && 
       !isLoading && 
-      (existingWords.length !== lastFetchedLength.current || suggestions.length === 0);
+      !hasFetchedOnce.current &&
+      suggestions.length === 0;
 
     if (shouldFetch) {
-      fetchSuggestions();
+      fetchSuggestions(false);
     }
   }, [existingWords.length, fetchSuggestions, isLoading, suggestions.length]);
 
@@ -123,52 +136,61 @@ export default function MagicWords({
     }
   };
 
-  if (existingWords.length < 1 || (!isLoading && (!suggestions || suggestions.length === 0))) return null;
+  if (existingWords.length < 2 || (!isLoading && suggestions.length === 0 && hasFetchedOnce.current)) return null;
 
   return (
-    <div className="flex items-center gap-2 py-1">
-      <div className="flex items-center gap-2 overflow-hidden">
-        {suggestions.map((magic, i) => (
-          <button
-            key={magic.word}
-            onClick={() => handleAddWord(magic)}
-            disabled={magic.isAdded || isAdding !== null}
-            style={{ 
-              animation: suggestions.length > 0 && !magic.isAdded ? `magic-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.1}s both` : 'none'
-            }}
-            className={`cursor-pointer group relative flex items-center gap-2 rounded-full border px-3 py-1.5 transition-all active:scale-95 ${
-              magic.isAdded
-                ? 'border-green-500/30 bg-green-500/5 text-green-600'
-                : 'border-primary-500/30 bg-primary-500/5 text-primary-600 hover:border-primary-500 hover:bg-primary-500 hover:text-white'
-            } disabled:cursor-not-allowed`}
-          >
-            {isAdding === magic.word ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : magic.isAdded ? (
-              <Check className="h-4 w-4" />
-            ) : (
-              <Sparkles className="h-4 w-4 group-hover:animate-pulse" />
+    <div>
+      { (isLoading || suggestions.length > 0) && (
+        <div className="flex items-center gap-2 py-1">
+          <div className="flex items-center gap-2 overflow-hidden">
+            {suggestions.map((magic, i) => (
+              <button
+                key={magic.word}
+                onClick={() => handleAddWord(magic)}
+                disabled={magic.isAdded || isAdding !== null}
+                style={{
+                  animation: !magic.isAdded ? `magic-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.1}s both` : 'none'
+                }}
+                className={`cursor-pointer group relative flex items-center gap-2 rounded-full border px-3 py-1.5 transition-all active:scale-95 ${
+                  magic.isAdded
+                    ? 'border-green-500/30 bg-green-500/5 text-green-600'
+                    : 'border-primary-500/30 bg-primary-500/5 text-primary-600 hover:border-primary-500 hover:bg-primary-500 hover:text-white'
+                } disabled:cursor-not-allowed`}
+              >
+                {isAdding === magic.word ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : magic.isAdded ? (
+                  <Check className="h-4 w-4" />
+                ) : (
+                  <Sparkles className="h-4 w-4 group-hover:animate-pulse" />
+                )}
+                <span className="text-md font-bold leading-none">{magic.word}</span>
+              </button>
+            ))}
+            {isLoading && suggestions.length === 0 && (
+               <div className="flex items-center gap-2 px-3 py-1.5 text-primary-500/50">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-md font-medium">Generating magic words...</span>
+               </div>
             )}
-            <span className="text-md font-bold leading-none">{magic.word}</span>
+          </div>
+        
+          <button
+            onClick={() => fetchSuggestions(true)}
+            disabled={isLoading}
+            title={`Refresh magic words (Costs 1 AI Credit. You have ${userCredits})`}
+            className="cursor-pointer flex h-7 w-7 items-center justify-center rounded-full text-[var(--fg)]/30 transition-colors hover:bg-[var(--surface)] hover:text-primary-500 disabled:opacity-50"
+          >
+            <RefreshCw className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
-        ))}
-      </div>
-
-      <button
-        onClick={fetchSuggestions}
-        disabled={isLoading}
-        title="Respin magic words"
-        className="cursor-pointer flex h-7 w-7 items-center justify-center rounded-full text-[var(--fg)]/30 transition-colors hover:bg-[var(--surface)] hover:text-primary-500 disabled:opacity-50"
-      >
-        <RefreshCw className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
-      </button>
-
-      <style jsx global>{`
-        @keyframes magic-pop {
-          0% { transform: scale(0.5); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-      `}</style>
+          <style jsx global>{`
+            @keyframes magic-pop {
+              0% { transform: scale(0.5); opacity: 0; }
+              100% { transform: scale(1); opacity: 1; }
+            }
+          `}</style>
+        </div>
+      )}
     </div>
   );
 }

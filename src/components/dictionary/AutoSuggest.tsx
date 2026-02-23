@@ -119,7 +119,7 @@ export default function AutoSuggest({
     }
   }, [value, allTranslations, isTranslationMode]);
 
-  // Retrigger fetch if targetLang changes and we have a source word
+  // Retrigger fetch if targetLang changes (but not when sourceWord changes while typing)
   useEffect(() => {
     if (isTranslationMode && sourceWord) {
       fetchTranslations(sourceWord);

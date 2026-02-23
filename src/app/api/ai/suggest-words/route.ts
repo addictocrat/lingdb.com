@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { createClient } from '@/lib/supabase/server';
+import { db } from '@/lib/db/client';
+import { users, dictionaries } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 
 const suggestSchema = z.object({
   dictionaryId: z.string().uuid(),
@@ -11,10 +15,18 @@ const suggestSchema = z.object({
     title: z.string(),
     translation: z.string(),
   })),
+  isRefresh: z.boolean().optional(),
 });
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const result = suggestSchema.safeParse(body);
 
@@ -25,9 +37,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { title, description, language, sourceLanguage, existingWords } = result.data;
+    const { dictionaryId, title, description, language, sourceLanguage, existingWords, isRefresh } = result.data;
 
-const wordListString = existingWords.map(w => `${w.title} (${w.translation})`).join(', ');
+    // Minimum words check
+    if (existingWords.length < 2) {
+      return NextResponse.json({ error: 'Add at least 2 words to get magic suggestions' }, { status: 400 });
+    }
+
+    // Get DB user for credits
+    const dbUser = await db.query.users.findFirst({
+      where: eq(users.supabaseId, user.id),
+    });
+
+    if (!dbUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Credit check for refresh
+    if (isRefresh) {
+      if (dbUser.aiCredits <= 0) {
+        return NextResponse.json({ error: 'No AI credits remaining' }, { status: 403 });
+      }
+    }
+
+    const wordListString = existingWords.map(w => `${w.title} (${w.translation})`).join(', ');
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -51,8 +84,8 @@ Dictionary Context:
 - Existing Vocabulary: ${wordListString}
 
 CRITICAL INSTRUCTIONS:
-1. SEMANTIC PRIORITY: Analyze the existing vocabulary words. Identify the dominant semantic theme or cluster (e.g., if there are words about "war", suggest more war words).
-2. DOMINANCE RULE: The theme of the EXISTING WORDS is MORE IMPORTANT than the Title or Description. If the Title is random (like "qwerty") but the words are about "Cybersecurity", suggest "Cybersecurity" words.
+1. SEMANTIC PRIORITY: Analyze the existing vocabulary words. Identify the dominant semantic theme or cluster.
+2. DOMINANCE RULE: The theme of the EXISTING WORDS is MORE IMPORTANT than the Title or Description.
 3. UNIQUENESS: Suggested words MUST NOT be any of the existing words or their close synonyms.
 4. FORMAT: Return ONLY a JSON array of 3 objects: {"word": "...", "translation": "..."}.
 5. LANGUAGE: "word" must be in ${language}, "translation" must be in ${sourceLanguage}. Keep translations concise (1-2 words).
@@ -88,17 +121,24 @@ No markdown, no explanations.`
     }
 
     if (suggestions.length > 0) {
-      const { db } = await import('@/lib/db/client');
-      const { dictionaries } = await import('@/lib/db/schema');
-      const { eq } = await import('drizzle-orm');
-
+      // Use transaction or separate updates
       await db
         .update(dictionaries)
         .set({ activeMagicWords: suggestions })
-        .where(eq(dictionaries.id, result.data.dictionaryId));
+        .where(eq(dictionaries.id, dictionaryId));
+
+      if (isRefresh) {
+        await db
+          .update(users)
+          .set({ aiCredits: dbUser.aiCredits - 1 })
+          .where(eq(users.id, dbUser.id));
+      }
     }
 
-    return NextResponse.json({ suggestions });
+    return NextResponse.json({ 
+      suggestions, 
+      creditsRemaining: isRefresh ? dbUser.aiCredits - 1 : dbUser.aiCredits 
+    });
   } catch (error) {
     console.error('Magic words API error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

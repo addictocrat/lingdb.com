@@ -91,18 +91,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Check dictionary limit for free users (3 max)
+  // Check dictionary limit for free users (10 max)
   if (dbUser.tier === 'FREE') {
     const count = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(dictionaries)
       .where(eq(dictionaries.userId, dbUser.id));
 
-    if (count[0].count >= 3) {
+    if (count[0].count >= 10) {
       return NextResponse.json(
         {
           error:
-            'Free users can create up to 3 dictionaries. Upgrade to Premium for unlimited.',
+            'Free users can create up to 10 dictionaries. Upgrade to Premium for unlimited.',
         },
         { status: 403 }
       );
