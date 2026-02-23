@@ -7,7 +7,6 @@ import { eq, and, sql } from 'drizzle-orm';
 import { APP_URL } from '@/lib/utils/constants';
 import DictionaryPreviewClient from '@/components/library/DictionaryPreviewClient';
 import DictionaryJsonLd from '@/components/seo/DictionaryJsonLd';
-import AdminSeoEditor from '@/components/library/AdminSeoEditor';
 
 export const revalidate = false; // Only revalidate on-demand
 
@@ -125,8 +124,6 @@ export default async function DictionaryLibraryPreviewPage({
     hasForked = !!forkCheck;
   }
 
-  const isAdmin = dbUser?.role === 'ADMIN';
-
   const processedDict = {
     ...dict,
     _count: { forks: forksData[0]?.count || 0 },
@@ -151,14 +148,6 @@ export default async function DictionaryLibraryPreviewPage({
         />
       )}
 
-      {isAdmin && (
-        <AdminSeoEditor 
-          dictionaryId={dict.id}
-          currentSeoTitle={dict.seoTitle}
-          currentSeoDescription={dict.seoDescription}
-          seoGeneratedAt={dict.seoGeneratedAt?.toISOString() || null}
-        />
-      )}
     </main>
   );
 }

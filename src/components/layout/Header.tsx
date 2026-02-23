@@ -69,6 +69,20 @@ export default function Header({ locale = 'en' }: { locale?: string }) {
                   {link.label}
                 </Link>
               ))}
+            {profile?.role === 'ADMIN' && (
+              <Link
+                href={`/${locale}/admin/overview`}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-3 py-2 text-lg font-medium transition-colors',
+                  isActive('admin')
+                    ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
+                    : 'text-[var(--fg)]/60 hover:bg-[var(--surface)] hover:text-[var(--fg)]'
+                )}
+              >
+                <ShieldCheck className="h-4 w-4" />
+                Admin
+              </Link>
+            )}
           </nav>
         </div>
 

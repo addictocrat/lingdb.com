@@ -21,11 +21,7 @@ export default function AdminSidebar({ locale }: { locale: string }) {
 
   return (
     <aside className="hidden h-screen w-64 flex-col border-r border-[var(--border-color)] bg-[var(--surface)] lg:flex">
-      <div className="flex h-16 items-center px-6 border-b border-[var(--border-color)]">
-        <span className="text-2xl font-bold">
-          Ling<span className="text-primary-500">db</span> <span className="text-sm uppercase text-[var(--fg)]/40 ml-1">Admin</span>
-        </span>
-      </div>
+
 
       <nav className="flex-1 space-y-1 p-4">
         {navItems.map((item) => (

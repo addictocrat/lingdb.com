@@ -16,6 +16,7 @@ interface UserProfile {
   totalQuizzes: number;
   streakCount: number;
   hasCompletedTour: boolean;
+  role: 'USER' | 'ADMIN';
 }
 
 interface UseUserReturn {

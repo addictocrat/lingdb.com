@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
         totalQuizzes: true,
         streakCount: true,
         hasCompletedTour: true,
+        role: true,
       },
     });
 

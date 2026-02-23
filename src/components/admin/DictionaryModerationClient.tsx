@@ -8,12 +8,14 @@ import {
   Eye, 
   EyeOff,
   ExternalLink,
-  BookOpen
+  BookOpen,
+  Settings
 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
+import AdminSeoEditor from './AdminSeoEditor';
 
 type ModerationDictionary = Dictionary & {
   user: { username: string; email: string };
@@ -24,6 +26,7 @@ export default function DictionaryModerationClient({ initialDictionaries }: { in
   const { toast } = useToast();
   const [dicts, setDicts] = useState(initialDictionaries);
   const [search, setSearch] = useState('');
+  const [seoEditingId, setSeoEditingId] = useState<string | null>(null);
   const locale = useLocale();
 
   const filteredDicts = dicts.filter(d => 
@@ -91,7 +94,8 @@ export default function DictionaryModerationClient({ initialDictionaries }: { in
           </thead>
           <tbody className="divide-y divide-[var(--border-color)]">
             {filteredDicts.map((dict) => (
-              <tr key={dict.id} className="transition-colors hover:bg-[var(--bg)]/30">
+              <>
+                <tr key={dict.id} className={`transition-colors hover:bg-[var(--bg)]/30 ${seoEditingId === dict.id ? 'bg-amber-500/5' : ''}`}>
                 <td className="px-6 py-4">
                   <div>
                     <p className="font-semibold text-[var(--fg)]">{dict.title}</p>
@@ -121,6 +125,13 @@ export default function DictionaryModerationClient({ initialDictionaries }: { in
                 <td className="px-6 py-4 text-right">
                   <div className="flex justify-end gap-2">
                     <button 
+                      onClick={() => setSeoEditingId(seoEditingId === dict.id ? null : dict.id)}
+                      className={`p-2 transition-colors ${seoEditingId === dict.id ? 'text-amber-500' : 'text-[var(--fg)]/40 hover:text-amber-500'}`}
+                      title="Manage SEO"
+                    >
+                      <Settings className="h-4 w-4" />
+                    </button>
+                    <button 
                       onClick={() => togglePublic(dict)}
                       className="p-2 text-[var(--fg)]/40 hover:text-primary-500 transition-colors"
                       title={dict.isPublic ? 'Make Private' : 'Make Public'}
@@ -145,6 +156,19 @@ export default function DictionaryModerationClient({ initialDictionaries }: { in
                   </div>
                 </td>
               </tr>
+              {seoEditingId === dict.id && (
+                <tr key={`${dict.id}-seo`} className="bg-amber-500/5">
+                  <td colSpan={5} className="px-6 pb-6 pt-0">
+                    <AdminSeoEditor 
+                      dictionaryId={dict.id}
+                      currentSeoTitle={dict.seoTitle}
+                      currentSeoDescription={dict.seoDescription}
+                      seoGeneratedAt={dict.seoGeneratedAt?.toISOString() || (dict.seoGeneratedAt as unknown as string) || null}
+                    />
+                  </td>
+                </tr>
+              )}
+              </>
             ))}
           </tbody>
         </table>

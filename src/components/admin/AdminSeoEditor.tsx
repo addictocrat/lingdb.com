@@ -63,7 +63,7 @@ export default function AdminSeoEditor({
   };
 
   return (
-    <div className="mt-8 rounded-2xl border-2 border-dashed border-amber-500/50 bg-amber-500/5 p-6">
+    <div className="mt-4 rounded-2xl border-2 border-dashed border-amber-500/50 bg-amber-500/5 p-6">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex w-full items-center justify-between text-left"

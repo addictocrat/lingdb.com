@@ -163,6 +163,21 @@ export default function MobileNav({
                 <Settings className="h-6 w-6" />
                 {t('settings')}
               </Link>
+              {profile?.role === 'ADMIN' && (
+                <Link
+                  href={`/${locale}/admin/overview`}
+                  onClick={closeMenu}
+                  className={cn(
+                    'flex items-center gap-4 rounded-2xl p-4 text-xl font-medium transition-all active:scale-[0.98]',
+                    isActive('admin')
+                      ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
+                      : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20'
+                  )}
+                >
+                  <ShieldCheck className="h-6 w-6" />
+                  Admin
+                </Link>
+              )}
             </>
           )}
         </div>
