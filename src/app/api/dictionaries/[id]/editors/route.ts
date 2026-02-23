@@ -166,7 +166,11 @@ export async function POST(
     });
 
     // Send email
-    const inviteLink = `${APP_URL}/api/dictionaries/invite/accept?token=${inviteToken}`;
+    const protocol = request.headers.get('x-forwarded-proto') || 'https';
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+    const origin = host ? `${protocol}://${host}` : APP_URL;
+    
+    const inviteLink = `${origin}/api/dictionaries/invite/accept?token=${inviteToken}`;
     
     await transporter.sendMail({
       from: `"LingDB" <${EMAILS.NOREPLY}>`,

@@ -43,20 +43,15 @@ export async function GET(request: Request) {
           tier: 'FREE',
           aiCredits: 30,
         });
-        // Notify admin about the new signup (fire and forget)
-        sendAdminNewUserNotification(username, data.user.email!).catch(console.error);
+        // Notify admin about the new signup
+        try {
+          await sendAdminNewUserNotification(username, data.user.email!);
+        } catch (e) {
+          console.error('Failed to send admin notification:', e);
+        }
       }
 
-      const forwardedHost = request.headers.get('x-forwarded-host');
-      const isLocalEnv = process.env.NODE_ENV === 'development';
-
-      if (isLocalEnv) {
-        return NextResponse.redirect(`${APP_URL}${next}`);
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
-      } else {
-        return NextResponse.redirect(`${APP_URL}${next}`);
-      }
+      return NextResponse.redirect(`${APP_URL}${next}`);
     }
   }
 

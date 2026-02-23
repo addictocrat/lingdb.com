@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { APP_URL } from '@/lib/utils/constants';
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db/client';
 import { users } from '@/lib/db/schema';
@@ -43,28 +44,31 @@ export async function GET(request: Request) {
           tier: 'FREE',
           aiCredits: 30,
         });
-        // Notify admin about the new signup (fire and forget)
-        sendAdminNewUserNotification(username, data.user.email!).catch(console.error);
+        // Notify admin about the new signup
+        try {
+          await sendAdminNewUserNotification(username, data.user.email!);
+        } catch (e) {
+          console.error('Failed to send admin notification:', e);
+        }
       }
 
       const forwardedHost = request.headers.get('x-forwarded-host');
-      const isLocalEnv = process.env.NODE_ENV === 'development';
+      const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
       
       let redirectPath = next;
       if (type === 'recovery') {
         redirectPath = '/en/reset-password';
       }
 
-      const redirectUrl = isLocalEnv 
-        ? `${origin}${redirectPath}` 
-        : forwardedHost 
-          ? `https://${forwardedHost}${redirectPath}` 
-          : `${origin}${redirectPath}`;
-
-      return NextResponse.redirect(redirectUrl);
+      const baseUrl = forwardedHost ? `${forwardedProto}://${forwardedHost}` : origin;
+      return NextResponse.redirect(`${baseUrl}${redirectPath}`);
     }
   }
 
   // Return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/en/login?error=verification_failed`);
+  const forwardedHost = request.headers.get('x-forwarded-host');
+  const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
+  const baseUrl = forwardedHost ? `${forwardedProto}://${forwardedHost}` : origin;
+  
+  return NextResponse.redirect(`${baseUrl}/en/login?error=verification_failed`);
 }
