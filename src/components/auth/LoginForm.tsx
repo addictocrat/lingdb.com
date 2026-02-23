@@ -73,6 +73,19 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
   const handleResendVerification = async () => {
     if (!email) return;
     
+    // Check if a request was made in the last 2 minutes
+    const lastRequestTime = localStorage.getItem('lastVerificationResendRequest');
+    if (lastRequestTime) {
+      const twoMinutes = 2 * 60 * 1000;
+      const timeElapsed = Date.now() - parseInt(lastRequestTime, 10);
+      
+      if (timeElapsed < twoMinutes) {
+        const minutesLeft = Math.ceil((twoMinutes - timeElapsed) / 60000);
+        setError(`You can only request a verification email every 2 minutes. Please try again in ${minutesLeft} minute(s).`);
+        return;
+      }
+    }
+
     setIsResending(true);
     setError(null);
     setVerificationSent(false);
@@ -85,6 +98,7 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
         setError(res.error || 'Failed to resend verification email.');
       } else {
         setVerificationSent(true);
+        localStorage.setItem('lastVerificationResendRequest', Date.now().toString());
       }
     } catch {
       setError('Something went wrong. Please try again.');
@@ -99,15 +113,15 @@ export default function LoginForm({ locale = 'en', initialError }: { locale?: st
       return;
     }
 
-    // Check if a request was made in the last 10 minutes
+    // Check if a request was made in the last 2 minutes
     const lastRequestTime = localStorage.getItem('lastPasswordResetRequest');
     if (lastRequestTime) {
-      const tenMinutes = 10 * 60 * 1000;
+      const twoMinutes = 2 * 60 * 1000;
       const timeElapsed = Date.now() - parseInt(lastRequestTime, 10);
       
-      if (timeElapsed < tenMinutes) {
-        const minutesLeft = Math.ceil((tenMinutes - timeElapsed) / 60000);
-        setError(`You can only request a password reset every 10 minutes. Please try again in ${minutesLeft} minute(s).`);
+      if (timeElapsed < twoMinutes) {
+        const minutesLeft = Math.ceil((twoMinutes - timeElapsed) / 60000);
+        setError(`You can only request a password reset every 2 minutes. Please try again in ${minutesLeft} minute(s).`);
         return;
       }
     }
