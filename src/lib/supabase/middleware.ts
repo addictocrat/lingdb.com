@@ -55,10 +55,11 @@ export async function updateSession(request: NextRequest, response?: NextRespons
   }
 
   // If user is logged in and trying to access auth pages, redirect to dashboard
+  // BUT: don't redirect if there's an error param (e.g. db_sync_failed) to avoid infinite loop
   const isAuthRoute =
     pathname.includes('/login') || pathname.includes('/signup');
 
-  if (user && isAuthRoute) {
+  if (user && isAuthRoute && !request.nextUrl.searchParams.has('error')) {
     return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
   }
 

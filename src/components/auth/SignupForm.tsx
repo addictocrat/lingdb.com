@@ -32,8 +32,8 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
     }
 
     try {
-      const { registerUserWithVerification } = await import('@/actions/auth');
-      const registerResult = await registerUserWithVerification(email, password);
+      const { signUp } = await import('@/actions/auth');
+      const registerResult = await signUp(email, password);
 
       if (!registerResult.success) {
         setError(registerResult.error || 'Failed to create account.');
