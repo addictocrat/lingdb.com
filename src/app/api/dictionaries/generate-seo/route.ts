@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-5-mini',
         messages: [
           {
             role: 'system',
@@ -135,7 +135,7 @@ INSTRUCTIONS:
    - Include one <h2> heading related to the theme
    - Use <strong> to highlight key terms
    - Include a short paragraph introducing the dictionary theme (2-3 sentences)
-   - Include a bullet list of 5 featured words with their translations
+   - Include a numbered list of 5 featured words with synonyms
    - Write naturally, as if a human blogger wrote it. You can include minor stylistic variation
    - Keep total length under 500 characters
    - Use plain HTML only (<h2>, <p>, <strong>, <ul>, <li>)
@@ -148,7 +148,6 @@ No markdown, no code fences, just the raw JSON object.`,
             content: `Generate SEO metadata for this ${langName} dictionary titled "${dict.title}" with words: ${wordListString}`,
           },
         ],
-        temperature: 0.8,
       }),
     });
 
