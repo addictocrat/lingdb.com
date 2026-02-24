@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db/client';
 import { dictionaries, users, words, forks } from '@/lib/db/schema';
-import { eq, ilike, sql, desc } from 'drizzle-orm';
+import { eq, ilike, sql, desc, and } from 'drizzle-orm';
 import LibraryControls from '@/components/library/LibraryControls';
 import LibraryCard from '@/components/library/LibraryCard';
 
@@ -45,9 +45,7 @@ export default async function LibraryPage({
   if (sort === 'most_words') sortOrder = desc(sql`count(distinct ${words.id})`);
   if (sort === 'most_forked') sortOrder = desc(sql`count(distinct ${forks.id})`);
 
-  let whereCondition;
-  if (conditions.length === 1) whereCondition = conditions[0];
-  else whereCondition = sql`${conditions.shift()} and ${conditions.join(' and ')}`;
+  const whereCondition = and(...conditions);
 
   // Get DB user to check ownership
   const { getDbUser } = await import('@/lib/db/auth-helper');

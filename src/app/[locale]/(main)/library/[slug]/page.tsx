@@ -3,12 +3,14 @@ import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { db } from '@/lib/db/client';
 import { dictionaries, users, forks } from '@/lib/db/schema';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, sql, or } from 'drizzle-orm';
 import { APP_URL } from '@/lib/utils/constants';
 import DictionaryPreviewClient from '@/components/library/DictionaryPreviewClient';
 import DictionaryJsonLd from '@/components/seo/DictionaryJsonLd';
 
 export const revalidate = false; // Only revalidate on-demand
+
+const isUuid = (val: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
 
 export async function generateStaticParams() {
   try {
@@ -37,7 +39,12 @@ export async function generateMetadata({
   const { slug, locale } = await params;
   
   const dict = await db.query.dictionaries.findFirst({
-    where: and(eq(dictionaries.slug, slug), eq(dictionaries.isPublic, true)),
+    where: and(
+      isUuid(slug)
+        ? or(eq(dictionaries.slug, slug), eq(dictionaries.id, slug))
+        : eq(dictionaries.slug, slug),
+      eq(dictionaries.isPublic, true)
+    ),
     with: {
       user: { columns: { username: true } },
       words: { columns: { id: true } }
@@ -50,7 +57,7 @@ export async function generateMetadata({
   const title = dict.seoTitle || `${dict.title} - Lingdb Library`;
   const description = dict.seoDescription 
     ? dict.seoDescription.replace(/<[^>]*>/g, '').slice(0, 160) // Strip HTML for meta
-    : `Learn ${dict.language} with ${dict.words.length} words. Created by ${dict.user.username}. ${dict.description || ''}`;
+    : `Learn ${dict.language} with ${dict.words.length} words. Created by ${dict.user?.username || 'Anonymous'}. ${dict.description || ''}`;
 
   return {
     title,
@@ -83,7 +90,7 @@ export default async function DictionaryLibraryPreviewPage({
   const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
 
   // DB User is optional for public viewing
   let dbUser = null;
@@ -94,7 +101,12 @@ export default async function DictionaryLibraryPreviewPage({
   }
 
   const dict = await db.query.dictionaries.findFirst({
-    where: and(eq(dictionaries.slug, slug), eq(dictionaries.isPublic, true)),
+    where: and(
+      isUuid(slug)
+        ? or(eq(dictionaries.slug, slug), eq(dictionaries.id, slug))
+        : eq(dictionaries.slug, slug),
+      eq(dictionaries.isPublic, true)
+    ),
     with: {
       user: { columns: { username: true } },
       words: {
