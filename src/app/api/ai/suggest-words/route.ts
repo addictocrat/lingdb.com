@@ -16,6 +16,7 @@ const suggestSchema = z.object({
     translation: z.string(),
   })),
   isRefresh: z.boolean().optional(),
+  excludedWords: z.array(z.string()).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { dictionaryId, title, description, language, sourceLanguage, existingWords, isRefresh } = result.data;
+    const { dictionaryId, title, description, language, sourceLanguage, existingWords, isRefresh, excludedWords } = result.data;
 
     // Minimum words check
     if (existingWords.length < 2) {
@@ -82,11 +83,12 @@ Dictionary Context:
 - Title: ${title}
 - Description: ${description || 'No description'}
 - Existing Vocabulary: ${wordListString}
+${excludedWords && excludedWords.length > 0 ? `- Words to EXCLUDE (Already shown, do not suggest): ${excludedWords.join(', ')}` : ''}
 
 CRITICAL INSTRUCTIONS:
 1. SEMANTIC PRIORITY: Analyze the existing vocabulary words. Identify the dominant semantic theme or cluster.
 2. DOMINANCE RULE: The theme of the EXISTING WORDS is MORE IMPORTANT than the Title or Description.
-3. UNIQUENESS: Suggested words MUST NOT be any of the existing words or their close synonyms.
+3. UNIQUENESS: Suggested words MUST NOT be any of the existing words, their close synonyms, or listed excluded words.
 4. FORMAT: Return ONLY a JSON array of 3 objects: {"word": "...", "translation": "..."}.
 5. LANGUAGE: "word" must be in ${language}, "translation" must be in ${sourceLanguage}. Keep translations concise (1-2 words).
 

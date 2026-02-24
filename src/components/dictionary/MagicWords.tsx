@@ -59,6 +59,7 @@ export default function MagicWords({
           sourceLanguage,
           existingWords,
           isRefresh,
+          excludedWords: isRefresh ? suggestions.map(s => s.word) : undefined,
         }),
       });
 

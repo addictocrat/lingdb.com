@@ -177,7 +177,7 @@ export default function Header({ locale = 'en' }: { locale?: string }) {
           <MobileNav
             locale={locale}
             isLoggedIn={!!user}
-            navLinks={navLinks}
+            navLinks={navLinks.filter(link => !link.href.includes('/blogs') && !link.href.includes('/leaderboards'))}
             profile={profile}
             user={user}
             signOut={signOut}
