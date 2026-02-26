@@ -1,7 +1,7 @@
-import { db } from '@/lib/db/client';
-import { blogs } from '@/lib/db/schema';
-import { eq, desc } from 'drizzle-orm';
-import BlogCard from '@/components/blogs/BlogCard';
+import { db } from "@/lib/db/client";
+import { blogs, blogTranslations } from "@/lib/db/schema";
+import { eq, desc } from "drizzle-orm";
+import BlogCard from "@/components/blogs/BlogCard";
 
 export default async function BlogsPage({
   params,
@@ -11,13 +11,36 @@ export default async function BlogsPage({
   const { locale } = await params;
 
   const allBlogs = await db.query.blogs.findMany({
-    where: eq(blogs.status, 'PUBLISHED'),
+    where: eq(blogs.status, "PUBLISHED"),
     orderBy: [desc(blogs.createdAt)],
     with: {
       author: {
-        columns: { username: true }
-      }
+        columns: { username: true },
+      },
+      translations: true,
+    },
+  });
+
+  // Map blogs with locale-specific content
+  const localizedBlogs = allBlogs.map((blog) => {
+    if (locale === "en") {
+      const { translations, ...rest } = blog;
+      return rest;
     }
+    const translation = blog.translations.find((t) => t.locale === locale);
+    if (!translation) {
+      const { translations, ...rest } = blog;
+      return rest;
+    }
+    const { translations, ...rest } = blog;
+    return {
+      ...rest,
+      title: translation.title,
+      description: translation.description ?? rest.description,
+      keywords: translation.keywords ?? rest.keywords,
+      seoTitle: translation.seoTitle ?? rest.seoTitle,
+      seoDescription: translation.seoDescription ?? rest.seoDescription,
+    };
   });
 
   return (
@@ -27,7 +50,8 @@ export default async function BlogsPage({
           Lingdb <span className="text-primary-500">Blog</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-xl leading-relaxed text-[var(--fg)]/60">
-          Deep dives into language learning, linguistics, and the stories behind the words we love.
+          Deep dives into language learning, linguistics, and the stories behind
+          the words we love.
         </p>
       </div>
 
@@ -43,7 +67,7 @@ export default async function BlogsPage({
         </div>
       ) : (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {allBlogs.map((blog) => (
+          {localizedBlogs.map((blog) => (
             <BlogCard key={blog.id} blog={blog} locale={locale} />
           ))}
         </div>

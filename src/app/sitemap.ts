@@ -1,12 +1,12 @@
-import { MetadataRoute } from 'next';
-import { db } from '@/lib/db/client';
-import { dictionaries } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
-import { APP_URL } from '@/lib/utils/constants';
+import { MetadataRoute } from "next";
+import { db } from "@/lib/db/client";
+import { dictionaries, blogs } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { APP_URL } from "@/lib/utils/constants";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = APP_URL;
-  const locales = ['en', 'fr', 'de', 'es', 'tr'];
+  const locales = ["en", "fr", "de", "es", "tr"];
 
   // Fetch all public dictionaries with slugs
   const publicDicts = await db.query.dictionaries.findMany({
@@ -14,15 +14,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     columns: { slug: true, updatedAt: true },
   });
 
+  // Fetch all published blogs
+  const publishedBlogs = await db.query.blogs.findMany({
+    where: eq(blogs.status, "PUBLISHED"),
+    columns: { slug: true, updatedAt: true },
+  });
+
   const routes = [
-    '',
-    '/library',
-    '/tiers',
-    '/login',
-    '/signup',
-    '/privacy',
-    '/terms',
-    '/cookies',
+    "",
+    "/library",
+    "/tiers",
+    "/login",
+    "/signup",
+    "/privacy",
+    "/terms",
+    "/cookies",
   ];
 
   const sitemapEntries: MetadataRoute.Sitemap = [];
@@ -33,9 +39,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       sitemapEntries.push({
         url: `${baseUrl}/${locale}${route}`,
         lastModified: new Date(),
-        changeFrequency: 'daily',
-        priority: route === '' ? 1 : 0.8,
+        changeFrequency: "daily",
+        priority: route === "" ? 1 : 0.8,
       });
+    }
+
+    // Blog list page — all locales
+    sitemapEntries.push({
+      url: `${baseUrl}/${locale}/blogs`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+    });
+
+    // Individual blog posts — all locales
+    for (const blog of publishedBlogs) {
+      if (blog.slug) {
+        sitemapEntries.push({
+          url: `${baseUrl}/${locale}/blogs/${blog.slug}`,
+          lastModified: blog.updatedAt || new Date(),
+          changeFrequency: "weekly",
+          priority: 0.7,
+        });
+      }
     }
   }
 
@@ -45,7 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       sitemapEntries.push({
         url: `${baseUrl}/en/library/${dict.slug}`,
         lastModified: dict.updatedAt || new Date(),
-        changeFrequency: 'weekly',
+        changeFrequency: "weekly",
         priority: 0.6,
       });
     }

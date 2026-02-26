@@ -1,6 +1,6 @@
 import { db } from "@/lib/db/client";
-import { blogs } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { blogs, blogTranslations } from "@/lib/db/schema";
+import { eq, and } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import BlogJsonLd from "@/components/seo/BlogJsonLd";
 import BlogContent from "@/components/blogs/BlogContent";
@@ -12,33 +12,7 @@ interface BlogDetailPageProps {
   params: Promise<{ locale: string; slug: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: BlogDetailPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const blog = await db.query.blogs.findFirst({
-    where: eq(blogs.slug, slug),
-  });
-
-  if (!blog) return { title: "Not Found" };
-
-  return {
-    title: blog.seoTitle || blog.title,
-    description: (blog.seoDescription || blog.description) ?? undefined,
-    keywords: blog.keywords ?? undefined,
-    openGraph: {
-      title: blog.seoTitle || blog.title,
-      description: (blog.seoDescription || blog.description) ?? undefined,
-      type: "article",
-      publishedTime: (blog.publishedAt || blog.createdAt).toISOString(),
-      modifiedTime: blog.updatedAt.toISOString(),
-    },
-  };
-}
-
-export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
-  const { locale, slug } = await params;
-
+async function getBlogWithTranslation(slug: string, locale: string) {
   const blog = await db.query.blogs.findFirst({
     where: eq(blogs.slug, slug),
     with: {
@@ -47,6 +21,70 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
       },
     },
   });
+
+  if (!blog) return null;
+
+  // If locale is English, return the blog as-is
+  if (locale === "en") return blog;
+
+  // Look up translation for the locale
+  const translation = await db.query.blogTranslations.findFirst({
+    where: and(
+      eq(blogTranslations.blogId, blog.id),
+      eq(blogTranslations.locale, locale),
+    ),
+  });
+
+  if (!translation) return blog; // Fallback to English
+
+  // Merge translation into the blog object
+  return {
+    ...blog,
+    title: translation.title,
+    description: translation.description ?? blog.description,
+    content: translation.content,
+    keywords: translation.keywords ?? blog.keywords,
+    seoTitle: translation.seoTitle ?? blog.seoTitle,
+    seoDescription: translation.seoDescription ?? blog.seoDescription,
+  };
+}
+
+export async function generateMetadata({
+  params,
+}: BlogDetailPageProps): Promise<Metadata> {
+  const { slug, locale } = await params;
+  const blog = await getBlogWithTranslation(slug, locale);
+
+  if (!blog) return { title: "Not Found" };
+
+  return {
+    title: blog.seoTitle || blog.title,
+    description: (blog.seoDescription || blog.description) ?? undefined,
+    keywords: blog.keywords ?? undefined,
+    alternates: {
+      languages: {
+        en: `/en/blogs/${blog.slug}`,
+        fr: `/fr/blogs/${blog.slug}`,
+        es: `/es/blogs/${blog.slug}`,
+        de: `/de/blogs/${blog.slug}`,
+        tr: `/tr/blogs/${blog.slug}`,
+      },
+    },
+    openGraph: {
+      title: blog.seoTitle || blog.title,
+      description: (blog.seoDescription || blog.description) ?? undefined,
+      type: "article",
+      publishedTime: (blog.publishedAt || blog.createdAt).toISOString(),
+      modifiedTime: blog.updatedAt.toISOString(),
+      locale: locale,
+    },
+  };
+}
+
+export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
+  const { locale, slug } = await params;
+
+  const blog = await getBlogWithTranslation(slug, locale);
 
   if (
     !blog ||
@@ -57,7 +95,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
 
   return (
     <article className="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:py-20">
-      <BlogJsonLd blog={blog} />
+      <BlogJsonLd blog={blog} locale={locale} />
 
       <Link
         href={`/${locale}/blogs`}

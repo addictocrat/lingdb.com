@@ -1,32 +1,34 @@
-import type { Blog } from '@/lib/db/schema';
+import type { Blog } from "@/lib/db/schema";
 
 interface BlogJsonLdProps {
   blog: Blog & { author?: { username: string | null } };
+  locale?: string;
 }
 
-export default function BlogJsonLd({ blog }: BlogJsonLdProps) {
+export default function BlogJsonLd({ blog, locale = "en" }: BlogJsonLdProps) {
   const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
     headline: blog.seoTitle || blog.title,
     description: blog.seoDescription || blog.description,
+    inLanguage: locale,
     author: {
-      '@type': 'Person',
-      name: blog.author?.username || 'Lingdb Team',
+      "@type": "Person",
+      name: blog.author?.username || "Lingdb Team",
     },
     datePublished: blog.publishedAt || blog.createdAt,
     dateModified: blog.updatedAt,
     keywords: blog.keywords,
     mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `https://lingdb.com/blogs/${blog.slug}`,
+      "@type": "WebPage",
+      "@id": `https://lingdb.com/${locale}/blogs/${blog.slug}`,
     },
     publisher: {
-      '@type': 'Organization',
-      name: 'Lingdb',
+      "@type": "Organization",
+      name: "Lingdb",
       logo: {
-        '@type': 'ImageObject',
-        url: 'https://lingdb.com/logo.png', // Replace with actual logo URL if available
+        "@type": "ImageObject",
+        url: "https://lingdb.com/logo.png",
       },
     },
   };

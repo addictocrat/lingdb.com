@@ -1,77 +1,120 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useToast } from '@/components/ui/Toast';
-import Button from '@/components/ui/Button';
-import { 
-  Save, 
-  ArrowLeft, 
-  Sparkles, 
-  Globe, 
-  Search, 
-  Code,
-  Eye,
-  Type
-} from 'lucide-react';
-import type { Blog } from '@/lib/db/schema';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/Toast";
+import Button from "@/components/ui/Button";
+import { Save, ArrowLeft, Sparkles, Globe, Languages } from "lucide-react";
+import type { Blog } from "@/lib/db/schema";
+
+const LOCALES = ["en", "fr", "es", "de", "tr"] as const;
+const LOCALE_LABELS: Record<string, string> = {
+  en: "🇬🇧 English",
+  fr: "🇫🇷 Français",
+  es: "🇪🇸 Español",
+  de: "🇩🇪 Deutsch",
+  tr: "🇹🇷 Türkçe",
+};
+
+interface TranslationData {
+  title: string;
+  description: string;
+  content: string;
+  keywords: string;
+  seoTitle: string;
+  seoDescription: string;
+}
 
 interface BlogEditorProps {
   blog?: Blog;
   locale: string;
+  initialTranslations?: Record<string, TranslationData>;
 }
 
-export default function BlogEditor({ blog, locale }: BlogEditorProps) {
+export default function BlogEditor({
+  blog,
+  locale,
+  initialTranslations,
+}: BlogEditorProps) {
   const { toast } = useToast();
   const router = useRouter();
-  
+
   const [isSaving, setIsSaving] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [prompt, setPrompt] = useState('');
-  
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [prompt, setPrompt] = useState("");
+
+  // English (primary) form data
   const [formData, setFormData] = useState({
-    title: blog?.title || '',
-    slug: blog?.slug || '',
-    description: blog?.description || '',
-    content: blog?.content as string || '',
-    keywords: blog?.keywords || '',
-    status: blog?.status || 'DRAFT',
-    seoTitle: blog?.seoTitle || '',
-    seoDescription: blog?.seoDescription || '',
+    title: blog?.title || "",
+    slug: blog?.slug || "",
+    description: blog?.description || "",
+    content: (blog?.content as string) || "",
+    keywords: blog?.keywords || "",
+    status: blog?.status || "DRAFT",
+    seoTitle: blog?.seoTitle || "",
+    seoDescription: blog?.seoDescription || "",
     schemaData: blog?.schemaData || {},
   });
 
-  const [activeTab, setActiveTab] = useState<'content' | 'seo' | 'preview'>('content');
+  // Translations state keyed by locale
+  const [translations, setTranslations] = useState<
+    Record<string, TranslationData>
+  >(() => {
+    const initial: Record<string, TranslationData> = {};
+    for (const loc of ["fr", "es", "de", "tr"]) {
+      initial[loc] = initialTranslations?.[loc] || {
+        title: "",
+        description: "",
+        content: "",
+        keywords: "",
+        seoTitle: "",
+        seoDescription: "",
+      };
+    }
+    return initial;
+  });
+
+  const [activeTab, setActiveTab] = useState<"content" | "seo" | "preview">(
+    "content",
+  );
+  const [activeLang, setActiveLang] = useState<string>("en");
 
   const handleSave = async () => {
     if (!formData.title || !formData.slug) {
-      toast('Title and Slug are required', 'error');
+      toast("Title and Slug are required", "error");
       return;
     }
 
     setIsSaving(true);
     try {
-      const url = blog ? `/api/admin/blogs/${blog.id}` : '/api/admin/blogs';
-      const method = blog ? 'PATCH' : 'POST';
-      
+      const url = blog ? `/api/admin/blogs/${blog.id}` : "/api/admin/blogs";
+      const method = blog ? "PATCH" : "POST";
+
+      // Include translations in the save payload (only for updates)
+      const payload = blog ? { ...formData, translations } : formData;
+
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Failed to save');
+        throw new Error(data.error || "Failed to save");
       }
 
-      toast(`Blog post ${blog ? 'updated' : 'created'} successfully!`, 'success');
+      toast(
+        `Blog post ${blog ? "updated" : "created"} successfully!`,
+        "success",
+      );
       if (!blog) {
         router.push(`/${locale}/admin/blogs`);
       }
       router.refresh();
     } catch (error) {
-      toast((error as Error).message, 'error');
+      toast((error as Error).message, "error");
     } finally {
       setIsSaving(false);
     }
@@ -79,20 +122,20 @@ export default function BlogEditor({ blog, locale }: BlogEditorProps) {
 
   const handleGenerate = async () => {
     if (!prompt) {
-      toast('Please enter a prompt for the AI', 'error');
+      toast("Please enter a prompt for the AI", "error");
       return;
     }
 
     setIsGenerating(true);
     try {
-      const res = await fetch('/api/admin/blogs/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/admin/blogs/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
       });
 
-      if (!res.ok) throw new Error('Failed to generate content');
-      
+      if (!res.ok) throw new Error("Failed to generate content");
+
       const data = await res.json();
       setFormData({
         ...formData,
@@ -105,12 +148,69 @@ export default function BlogEditor({ blog, locale }: BlogEditorProps) {
         seoDescription: data.seoDescription || formData.seoDescription,
         schemaData: data.schemaData || formData.schemaData,
       });
-      
-      toast('Blog content generated by AI!', 'success');
+
+      // Switch to English tab to show generated content
+      setActiveLang("en");
+      toast("Blog content generated by AI!", "success");
     } catch (error) {
-      toast('AI generation failed', 'error');
+      toast("AI generation failed", "error");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleTranslate = async () => {
+    if (!blog?.id) {
+      toast("Please save the blog first before translating", "error");
+      return;
+    }
+
+    if (!formData.title || !formData.content) {
+      toast(
+        "English title and content are required before translating",
+        "error",
+      );
+      return;
+    }
+
+    setIsTranslating(true);
+    try {
+      const res = await fetch("/api/admin/blogs/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ blogId: blog.id }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Translation failed");
+      }
+
+      const data = await res.json();
+
+      // Update local translations state
+      setTranslations((prev) => ({
+        ...prev,
+        ...Object.fromEntries(
+          Object.entries(data.translations).map(([loc, t]: [string, any]) => [
+            loc,
+            {
+              title: t.title || "",
+              description: t.description || "",
+              content: t.content || "",
+              keywords: t.keywords || "",
+              seoTitle: t.seoTitle || "",
+              seoDescription: t.seoDescription || "",
+            },
+          ]),
+        ),
+      }));
+
+      toast("All translations generated successfully!", "success");
+    } catch (error) {
+      toast((error as Error).message, "error");
+    } finally {
+      setIsTranslating(false);
     }
   };
 
@@ -119,11 +219,48 @@ export default function BlogEditor({ blog, locale }: BlogEditorProps) {
     if (!blog && formData.title && !formData.slug) {
       const suggestedSlug = formData.title
         .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      setFormData(prev => ({ ...prev, slug: suggestedSlug }));
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+      setFormData((prev) => ({ ...prev, slug: suggestedSlug }));
     }
   }, [formData.title, blog]);
+
+  // Helper to get/set the active language data
+  const getActiveData = () => {
+    if (activeLang === "en") return formData;
+    return (
+      translations[activeLang] || {
+        title: "",
+        description: "",
+        content: "",
+        keywords: "",
+        seoTitle: "",
+        seoDescription: "",
+      }
+    );
+  };
+
+  const updateActiveData = (field: string, value: string) => {
+    if (activeLang === "en") {
+      setFormData({ ...formData, [field]: value });
+    } else {
+      setTranslations((prev) => ({
+        ...prev,
+        [activeLang]: {
+          ...prev[activeLang],
+          [field]: value,
+        },
+      }));
+    }
+  };
+
+  const activeData = getActiveData();
+  const isTranslation = activeLang !== "en";
+  const hasTranslation = (loc: string) => {
+    if (loc === "en") return true;
+    const t = translations[loc];
+    return t && t.title && t.content;
+  };
 
   return (
     <div className="space-y-6">
@@ -137,9 +274,21 @@ export default function BlogEditor({ blog, locale }: BlogEditorProps) {
           Back to list
         </button>
         <div className="flex items-center gap-3">
+          {blog && (
+            <Button
+              variant="secondary"
+              onClick={handleTranslate}
+              isLoading={isTranslating}
+            >
+              <Languages className="mr-2 h-5 w-5" />
+              Translate All
+            </Button>
+          )}
           <select
             value={formData.status}
-            onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+            onChange={(e) =>
+              setFormData({ ...formData, status: e.target.value as any })
+            }
             className="rounded-xl border border-[var(--border-color)] bg-[var(--surface)] px-3 py-2 outline-none"
           >
             <option value="DRAFT">Draft</option>
@@ -147,90 +296,134 @@ export default function BlogEditor({ blog, locale }: BlogEditorProps) {
           </select>
           <Button onClick={handleSave} isLoading={isSaving}>
             <Save className="mr-2 h-5 w-5" />
-            {blog ? 'Update Blog' : 'Create Blog'}
+            {blog ? "Update Blog" : "Create Blog"}
           </Button>
         </div>
       </div>
 
+      {/* Language Selector */}
+      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] p-3">
+        <Globe className="h-5 w-5 text-[var(--fg)]/40" />
+        {LOCALES.map((loc) => (
+          <button
+            key={loc}
+            onClick={() => setActiveLang(loc)}
+            className={cn(
+              "relative rounded-xl px-4 py-2 text-sm font-semibold transition-all",
+              activeLang === loc
+                ? "bg-primary-500 text-white shadow-lg shadow-primary-500/20"
+                : "text-[var(--fg)]/60 hover:bg-[var(--bg)] hover:text-[var(--fg)]",
+            )}
+          >
+            {LOCALE_LABELS[loc]}
+            {hasTranslation(loc) && loc !== "en" && (
+              <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-green-500" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {isTranslation && !hasTranslation(activeLang) && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-700 dark:text-amber-400">
+          No translation available for {LOCALE_LABELS[activeLang]}. Click
+          &quot;Translate All&quot; to auto-translate from English, or fill in
+          manually.
+        </div>
+      )}
+
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Main Content Area */}
         <div className="lg:col-span-2 space-y-6">
-          {/* AI Generator Box */}
-          <div className="rounded-2xl border-2 border-dashed border-primary-500/30 bg-primary-500/5 p-6">
-            <h3 className="flex items-center gap-2 text-lg font-bold text-primary-600 dark:text-primary-400">
-              <Sparkles className="h-5 w-5" />
-              AI Blog Generator
-            </h3>
-            <p className="mt-1 text-sm text-[var(--fg)]/60">
-              Enter a topic or outline and let GPT-5-mini write the blog, SEO settings, and schemas for you.
-            </p>
-            <div className="mt-4 flex gap-2">
-              <textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="e.g. Write a comprehensive guide about 10 essential French medical terms for travelers..."
-                className="flex-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg)] p-3 text-sm outline-none focus:border-primary-500"
-                rows={2}
-              />
-              <Button
-                variant="secondary"
-                onClick={handleGenerate}
-                isLoading={isGenerating}
-                className="h-auto"
-              >
-                Generate
-              </Button>
+          {/* AI Generator Box — only show on English tab */}
+          {!isTranslation && (
+            <div className="rounded-2xl border-2 border-dashed border-primary-500/30 bg-primary-500/5 p-6">
+              <h3 className="flex items-center gap-2 text-lg font-bold text-primary-600 dark:text-primary-400">
+                <Sparkles className="h-5 w-5" />
+                AI Blog Generator
+              </h3>
+              <p className="mt-1 text-sm text-[var(--fg)]/60">
+                Enter a topic or outline and let GPT-5-mini write the blog, SEO
+                settings, and schemas for you.
+              </p>
+              <div className="mt-4 flex gap-2">
+                <textarea
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="e.g. Write a comprehensive guide about 10 essential French medical terms for travelers..."
+                  className="flex-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg)] p-3 text-sm outline-none focus:border-primary-500"
+                  rows={2}
+                />
+                <Button
+                  variant="secondary"
+                  onClick={handleGenerate}
+                  isLoading={isGenerating}
+                  className="h-auto"
+                >
+                  Generate
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Form Tabs */}
           <div className="flex border-b border-[var(--border-color)]">
             <button
-              onClick={() => setActiveTab('content')}
+              onClick={() => setActiveTab("content")}
               className={cn(
                 "px-6 py-3 font-semibold transition-colors",
-                activeTab === 'content' ? "border-b-2 border-primary-500 text-primary-500" : "text-[var(--fg)]/40 hover:text-[var(--fg)]"
+                activeTab === "content"
+                  ? "border-b-2 border-primary-500 text-primary-500"
+                  : "text-[var(--fg)]/40 hover:text-[var(--fg)]",
               )}
             >
               Content
             </button>
             <button
-              onClick={() => setActiveTab('seo')}
+              onClick={() => setActiveTab("seo")}
               className={cn(
                 "px-6 py-3 font-semibold transition-colors",
-                activeTab === 'seo' ? "border-b-2 border-primary-500 text-primary-500" : "text-[var(--fg)]/40 hover:text-[var(--fg)]"
+                activeTab === "seo"
+                  ? "border-b-2 border-primary-500 text-primary-500"
+                  : "text-[var(--fg)]/40 hover:text-[var(--fg)]",
               )}
             >
-              SEO & Schema
+              SEO{!isTranslation && " & Schema"}
             </button>
             <button
-              onClick={() => setActiveTab('preview')}
+              onClick={() => setActiveTab("preview")}
               className={cn(
                 "px-6 py-3 font-semibold transition-colors",
-                activeTab === 'preview' ? "border-b-2 border-primary-500 text-primary-500" : "text-[var(--fg)]/40 hover:text-[var(--fg)]"
+                activeTab === "preview"
+                  ? "border-b-2 border-primary-500 text-primary-500"
+                  : "text-[var(--fg)]/40 hover:text-[var(--fg)]",
               )}
             >
               Live Preview
             </button>
           </div>
 
-          {activeTab === 'content' && (
+          {activeTab === "content" && (
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
               <div>
-                <label className="mb-1 block text-sm font-bold text-[var(--fg)]/60">Blog Title</label>
+                <label className="mb-1 block text-sm font-bold text-[var(--fg)]/60">
+                  Blog Title {isTranslation && `(${LOCALE_LABELS[activeLang]})`}
+                </label>
                 <input
                   type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  value={activeData.title}
+                  onChange={(e) => updateActiveData("title", e.target.value)}
                   placeholder="The Ultimate Guide to..."
                   className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] p-4 text-xl font-bold outline-none focus:border-primary-500"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-bold text-[var(--fg)]/60">Full Content (HTML)</label>
+                <label className="mb-1 block text-sm font-bold text-[var(--fg)]/60">
+                  Full Content (HTML){" "}
+                  {isTranslation && `(${LOCALE_LABELS[activeLang]})`}
+                </label>
                 <textarea
-                  value={formData.content}
-                  onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  value={activeData.content as string}
+                  onChange={(e) => updateActiveData("content", e.target.value)}
                   placeholder="<p>Welcome to our blog...</p> <h2>Chapter 1</h2>..."
                   className="h-[500px] w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] p-4 font-mono text-sm outline-none focus:border-primary-500"
                 />
@@ -238,59 +431,80 @@ export default function BlogEditor({ blog, locale }: BlogEditorProps) {
             </div>
           )}
 
-          {activeTab === 'seo' && (
+          {activeTab === "seo" && (
             <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1 block text-sm font-bold text-[var(--fg)]/60">SEO Title</label>
+                  <label className="mb-1 block text-sm font-bold text-[var(--fg)]/60">
+                    SEO Title
+                  </label>
                   <input
                     type="text"
-                    value={formData.seoTitle}
-                    onChange={(e) => setFormData({ ...formData, seoTitle: e.target.value })}
+                    value={activeData.seoTitle}
+                    onChange={(e) =>
+                      updateActiveData("seoTitle", e.target.value)
+                    }
                     className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] p-3 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-bold text-[var(--fg)]/60">Keywords</label>
+                  <label className="mb-1 block text-sm font-bold text-[var(--fg)]/60">
+                    Keywords
+                  </label>
                   <input
                     type="text"
-                    value={formData.keywords}
-                    onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
+                    value={activeData.keywords}
+                    onChange={(e) =>
+                      updateActiveData("keywords", e.target.value)
+                    }
                     placeholder="french, medical, vocabulary"
                     className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] p-3 outline-none"
                   />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-sm font-bold text-[var(--fg)]/60">SEO Description</label>
+                <label className="mb-1 block text-sm font-bold text-[var(--fg)]/60">
+                  SEO Description
+                </label>
                 <textarea
-                  value={formData.seoDescription}
-                  onChange={(e) => setFormData({ ...formData, seoDescription: e.target.value })}
+                  value={activeData.seoDescription}
+                  onChange={(e) =>
+                    updateActiveData("seoDescription", e.target.value)
+                  }
                   rows={3}
                   className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] p-3 outline-none"
                 />
               </div>
-              <div>
-                <label className="mb-1 block text-sm font-bold text-[var(--fg)]/60">Schema Data (JSON-LD)</label>
-                <textarea
-                  value={JSON.stringify(formData.schemaData, null, 2)}
-                  onChange={(e) => {
-                    try {
-                      const parsed = JSON.parse(e.target.value);
-                      setFormData({ ...formData, schemaData: parsed });
-                    } catch (err) {}
-                  }}
-                  rows={10}
-                  className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] p-4 font-mono text-xs outline-none focus:border-primary-500"
-                />
-              </div>
+              {/* Schema Data only for English */}
+              {!isTranslation && (
+                <div>
+                  <label className="mb-1 block text-sm font-bold text-[var(--fg)]/60">
+                    Schema Data (JSON-LD)
+                  </label>
+                  <textarea
+                    value={JSON.stringify(formData.schemaData, null, 2)}
+                    onChange={(e) => {
+                      try {
+                        const parsed = JSON.parse(e.target.value);
+                        setFormData({ ...formData, schemaData: parsed });
+                      } catch (err) {}
+                    }}
+                    rows={10}
+                    className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--surface)] p-4 font-mono text-xs outline-none focus:border-primary-500"
+                  />
+                </div>
+              )}
             </div>
           )}
 
-          {activeTab === 'preview' && (
+          {activeTab === "preview" && (
             <div className="prose prose-lg dark:prose-invert max-w-none rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] p-8 animate-in fade-in slide-in-from-bottom-2">
-              <h1>{formData.title}</h1>
-              <div dangerouslySetInnerHTML={{ __html: formData.content }} />
+              <h1>{activeData.title || "Untitled"}</h1>
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: activeData.content as string,
+                }}
+              />
             </div>
           )}
         </div>
@@ -301,22 +515,31 @@ export default function BlogEditor({ blog, locale }: BlogEditorProps) {
             <h3 className="mb-4 font-bold">Post Settings</h3>
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-xs font-bold uppercase text-[var(--fg)]/40">URL Slug</label>
+                <label className="mb-1 block text-xs font-bold uppercase text-[var(--fg)]/40">
+                  URL Slug (shared across languages)
+                </label>
                 <div className="flex items-center rounded-xl border border-[var(--border-color)] bg-[var(--bg)] px-3">
                   <span className="text-sm text-[var(--fg)]/30">/blogs/</span>
                   <input
                     type="text"
                     value={formData.slug}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, slug: e.target.value })
+                    }
                     className="flex-1 bg-transparent py-2 text-sm outline-none"
                   />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold uppercase text-[var(--fg)]/40">Short Excerpt</label>
+                <label className="mb-1 block text-xs font-bold uppercase text-[var(--fg)]/40">
+                  Short Excerpt{" "}
+                  {isTranslation && `(${LOCALE_LABELS[activeLang]})`}
+                </label>
                 <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  value={activeData.description}
+                  onChange={(e) =>
+                    updateActiveData("description", e.target.value)
+                  }
                   rows={4}
                   className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg)] p-3 text-sm outline-none"
                   placeholder="Sum it up in 2-3 sentences..."
@@ -328,18 +551,53 @@ export default function BlogEditor({ blog, locale }: BlogEditorProps) {
           <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] p-6">
             <h3 className="mb-4 font-bold flex items-center gap-2">
               <Globe className="h-4 w-4" />
-              SEO Preview
+              SEO Preview ({LOCALE_LABELS[activeLang]})
             </h3>
             <div className="space-y-1 overflow-hidden">
-              <p className="truncate text-xs text-blue-800 dark:text-blue-400">lingdb.com › blogs › {formData.slug}</p>
+              <p className="truncate text-xs text-blue-800 dark:text-blue-400">
+                lingdb.com › {activeLang} › blogs › {formData.slug}
+              </p>
               <h4 className="line-clamp-2 text-lg font-medium text-blue-600 dark:text-blue-400 group-hover:underline">
-                {formData.seoTitle || formData.title || 'Untitled Blog Post'}
+                {activeData.seoTitle ||
+                  activeData.title ||
+                  "Untitled Blog Post"}
               </h4>
               <p className="line-clamp-3 text-sm text-[var(--fg)]/60">
-                {formData.seoDescription || formData.description || 'No description provided...'}
+                {activeData.seoDescription ||
+                  activeData.description ||
+                  "No description provided..."}
               </p>
             </div>
           </div>
+
+          {/* Translation Status */}
+          {blog && (
+            <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] p-6">
+              <h3 className="mb-4 font-bold flex items-center gap-2">
+                <Languages className="h-4 w-4" />
+                Translation Status
+              </h3>
+              <div className="space-y-2">
+                {LOCALES.map((loc) => (
+                  <div
+                    key={loc}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span>{LOCALE_LABELS[loc]}</span>
+                    {hasTranslation(loc) ? (
+                      <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-bold text-green-600 dark:text-green-400">
+                        Ready
+                      </span>
+                    ) : (
+                      <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-bold text-amber-600 dark:text-amber-400">
+                        Missing
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -347,5 +605,5 @@ export default function BlogEditor({ blog, locale }: BlogEditorProps) {
 }
 
 function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
