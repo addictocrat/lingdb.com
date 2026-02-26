@@ -412,9 +412,9 @@
   "nav": {
     "dashboard": "Sözlüklerim",
     "library": "Kütüphane",
-    "blogs": "Blog",
+    "blogs": "Haberler",
     "profile": "Profil",
-    "leaderboards": "Liderlik"
+    "leaderboards": "Liderlik Tahtası"
   },
   "leaderboards": {
     "title": "Liderlik Tablosu",
