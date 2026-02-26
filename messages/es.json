@@ -19,7 +19,7 @@
     "confirm": "Confirmar",
     "or": "o",
     "free": "Gratis",
-    "premium": "Premium",
+    "premium": "Plus",
     "settings": "Ajustes",
     "create": "Crear",
     "months_short": "Ene,Feb,Mar,Abr,May,Jun,Jul,Ago,Sep,Oct,Nov,Dic",
@@ -77,7 +77,7 @@
     "feature_no_ads": "Sin anuncios",
     "feature_early_access": "Acceso anticipado a funciones",
     "free_title": "Gratis",
-    "premium_title": "Premium"
+    "premium_title": "Plus"
   },
   "dashboard": {
     "title": "Mis diccionarios",
@@ -191,7 +191,7 @@
     "total_quizzes": "Cuestionarios realizados",
     "streak": "Racha de días",
     "day_streak": "Racha de días",
-    "premium_member": "Miembro Premium",
+    "premium_member": "Miembro Plus",
     "member_since": "Miembro desde {date}",
     "activity": "Actividad",
     "your_progress": "Tu progreso",
@@ -319,7 +319,7 @@
     "generating": "Generando...",
     "credits_left": "{count} créditos de IA restantes",
     "no_credits": "Sin créditos de IA",
-    "upgrade_prompt": "Mejora a Premium para 100 créditos de IA mensuales",
+    "upgrade_prompt": "Mejora a Plus para 100 créditos de IA mensuales",
     "add_manual": "Añadir manualmente"
   },
   "tiers": {
@@ -327,7 +327,7 @@
     "page_title": "Potencia tu aprendizaje",
     "page_subtitle": "Elige el plan que mejor se adapte a tus objetivos. Empieza gratis y mejora cuando necesites más potencia y cero distracciones.",
     "free_title": "Gratis",
-    "premium_title": "Premium",
+    "premium_title": "Plus",
     "monthly": "/mes",
     "free_desc": "Perfecto para empezar y crear tus primeros diccionarios.",
     "feature_unlimited_dict": "Diccionarios ilimitados",
@@ -442,7 +442,7 @@
     "library_desc": "Todos tus diccionarios personales aparecerán aquí para un fácil acceso.",
     "profile_title": "Tu Perfil",
     "profile_desc": "Realiza un seguimiento de tus rachas de aprendizaje, estadísticas y administra la configuración de tu cuenta aquí.",
-    "premium_title": "Funciones Premium",
+    "premium_title": "Funciones Plus",
     "premium_desc": "Actualiza para obtener créditos de IA ilimitados, aprendizaje sin anuncios y estadísticas avanzadas.",
     "create_title": "Crea Tu Primer Diccionario",
     "create_desc": "Haz clic aquí para comenzar a construir tu lista de vocabulario.",
@@ -467,7 +467,7 @@
     "apply_button": "Aplicar",
     "applying": "Aplicando...",
     "success_title": "¡Premium concedido! 🎉",
-    "success_message": "¡Felicidades! Has canjeado con éxito tu cupón. Tu cuenta ahora es Premium por 1 mes.",
+    "success_message": "¡Felicidades! Has canjeado con éxito tu cupón. Tu cuenta ahora es Plus por 1 mes.",
     "perks_title": "Tus nuevas ventajas:",
     "unlimited_dictionaries": "Diccionarios ilimitados",
     "ai_credits": "100 Créditos IA",

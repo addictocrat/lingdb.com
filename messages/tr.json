@@ -19,7 +19,7 @@
     "confirm": "Onayla",
     "or": "veya",
     "free": "Ücretsiz",
-    "premium": "Premium",
+    "premium": "Plus",
     "settings": "Ayarlar",
     "create": "Oluştur",
     "months_short": "Oca,Şub,Mar,Nis,May,Haz,Tem,Ağu,Eyl,Eki,Kas,Ara",
@@ -77,7 +77,7 @@
     "feature_no_ads": "Reklamsız deneyim",
     "feature_early_access": "Özelliklere erken erişim",
     "free_title": "Ücretsiz",
-    "premium_title": "Premium"
+    "premium_title": "Plus"
   },
   "dashboard": {
     "title": "Sözlüklerim",
@@ -191,7 +191,7 @@
     "total_quizzes": "Çözülen Quizler",
     "streak": "Günlük Seri",
     "day_streak": "Günlük Seri",
-    "premium_member": "Premium üye",
+    "premium_member": "Plus üye",
     "member_since": "{date} tarihinden beri üye",
     "activity": "Aktivite",
     "your_progress": "İlerlemeniz",
@@ -319,7 +319,7 @@
     "generating": "Oluşturuluyor...",
     "credits_left": "{count} Yapay Zeka kredisi kaldı",
     "no_credits": "Yapay Zeka kredisi kalmadı",
-    "upgrade_prompt": "Aylık 100 Yapay Zeka kredisi için Premium'a geçin",
+    "upgrade_prompt": "Aylık 100 Yapay Zeka kredisi için Plus'a geçin",
     "add_manual": "Manuel ekle"
   },
   "tiers": {
@@ -327,7 +327,7 @@
     "page_title": "Öğrenme sürecinizi hızlandırın",
     "page_subtitle": "Hedeflerinize uygun planı seçin. Ücretsiz başlayın ve daha fazla güç ile kesintisiz bir deneyim istediğinizde yükseltin.",
     "free_title": "Ücretsiz",
-    "premium_title": "Premium",
+    "premium_title": "Plus",
     "monthly": "/ay",
     "free_desc": "Başlamak ve ilk sözlüklerinizi oluşturmak için mükemmel.",
     "feature_unlimited_dict": "Sınırsız Sözlük",
@@ -414,10 +414,10 @@
     "library": "Kütüphane",
     "blogs": "Blog",
     "profile": "Profil",
-    "leaderboards": "Liderlik Tabloları"
+    "leaderboards": "Liderlik"
   },
   "leaderboards": {
-    "title": "Liderlik Tabloları",
+    "title": "Liderlik Tablosu",
     "subtitle": "Topluluğumuzdaki en aktif öğrencileri keşfedin.",
     "top_performers": "En İyiler",
     "most_words": "En Çok Kelime",
@@ -442,7 +442,7 @@
     "library_desc": "Tüm kişisel sözlükleriniz kolay erişim için burada görünecek.",
     "profile_title": "Profiliniz",
     "profile_desc": "Öğrenme serilerinizi, istatistiklerinizi buradan takip edin ve hesap ayarlarınızı yönetin.",
-    "premium_title": "Premium Özellikler",
+    "premium_title": "Plus Özellikler",
     "premium_desc": "Sınırsız yapay zeka kredisi, reklamsız öğrenme ve gelişmiş istatistikler için yükseltin.",
     "create_title": "İlk Sözlüğünüzü Oluşturun",
     "create_desc": "Kelime listenizi oluşturmaya başlamak için buraya tıklayın.",
