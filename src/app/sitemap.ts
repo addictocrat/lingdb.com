@@ -33,6 +33,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const sitemapEntries: MetadataRoute.Sitemap = [];
 
+  // Use the most recent blog update as lastModified for the blog list page
+  const latestBlogDate = publishedBlogs.length
+    ? publishedBlogs.reduce((latest, b) => {
+        const d = b.updatedAt || new Date(0);
+        return d > latest ? d : latest;
+      }, new Date(0))
+    : new Date();
+
   for (const locale of locales) {
     // Basic routes — all locales
     for (const route of routes) {
@@ -47,7 +55,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Blog list page — all locales
     sitemapEntries.push({
       url: `${baseUrl}/${locale}/blogs`,
-      lastModified: new Date(),
+      lastModified: latestBlogDate,
       changeFrequency: "daily",
       priority: 0.8,
     });
