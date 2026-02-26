@@ -1,14 +1,14 @@
-import { createClient } from '@/lib/supabase/server';
-import { db } from '@/lib/db/client';
-import { dictionaries, words, users, dictionaryEditors } from '@/lib/db/schema';
-import { eq, sql, or, and } from 'drizzle-orm';
-import { redirect } from 'next/navigation';
-import DashboardClient from '@/components/dictionary/DashboardClient';
-import OnboardingTour from '@/components/tutorial/OnboardingTour';
-import { getTranslations } from 'next-intl/server';
+import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db/client";
+import { dictionaries, words, users, dictionaryEditors } from "@/lib/db/schema";
+import { eq, sql, or, and } from "drizzle-orm";
+import { redirect } from "next/navigation";
+import DashboardClient from "@/components/dictionary/DashboardClient";
+import OnboardingTour from "@/components/tutorial/OnboardingTour";
+import { getTranslations } from "next-intl/server";
 
 export const metadata = {
-  title: 'Dashboard',
+  title: "Dashboard",
 };
 
 export default async function DashboardPage({
@@ -17,7 +17,7 @@ export default async function DashboardPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations('dashboard');
+  const t = await getTranslations("dashboard");
   const supabase = await createClient();
   const {
     data: { user },
@@ -27,11 +27,18 @@ export default async function DashboardPage({
     redirect(`/${locale}/login`);
   }
 
-  // Get DB user
-  const { getDbUser } = await import('@/lib/db/auth-helper');
-  const dbUser = await getDbUser(user.id);
+  // Get DB user - auto-create if missing to fix sync issues
+  const { getOrCreateDbUser } = await import("@/lib/db/auth-helper");
+
+  let dbUser;
+  try {
+    dbUser = await getOrCreateDbUser(user);
+  } catch (error) {
+    console.error("Error getting/creating DB user:", error);
+  }
 
   if (!dbUser) {
+    console.error("!!! REDIRECTING to db_sync_failed !!!");
     redirect(`/${locale}/login?error=db_sync_failed`);
   }
 
@@ -48,33 +55,42 @@ export default async function DashboardPage({
       updatedAt: dictionaries.updatedAt,
       activeMagicWords: dictionaries.activeMagicWords,
       wordCount: sql<number>`count(distinct ${words.id})::int`,
-      isShared: sql<boolean>`EXISTS(SELECT 1 FROM dictionary_editors de WHERE de.dictionary_id = ${dictionaries.id} AND de.status = 'ACCEPTED')`.mapWith(Boolean),
+      isShared:
+        sql<boolean>`EXISTS(SELECT 1 FROM dictionary_editors de WHERE de.dictionary_id = ${dictionaries.id} AND de.status = 'ACCEPTED')`.mapWith(
+          Boolean,
+        ),
     })
     .from(dictionaries)
     .leftJoin(words, eq(words.dictionaryId, dictionaries.id))
-    .leftJoin(dictionaryEditors, eq(dictionaryEditors.dictionaryId, dictionaries.id))
+    .leftJoin(
+      dictionaryEditors,
+      eq(dictionaryEditors.dictionaryId, dictionaries.id),
+    )
     .where(
       or(
         eq(dictionaries.userId, dbUser.id),
         and(
           eq(dictionaryEditors.userId, dbUser.id),
-          eq(dictionaryEditors.status, 'ACCEPTED')
-        )
-      )
+          eq(dictionaryEditors.status, "ACCEPTED"),
+        ),
+      ),
     )
     .groupBy(dictionaries.id, dictionaries.userId)
     .orderBy(dictionaries.updatedAt);
-    
+
   // Ensure unique dictionary instances based on DB groupBy
   const userDictionaries = rawDictionaries as any;
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-      <OnboardingTour hasCompletedTour={dbUser.hasCompletedTour} userId={dbUser.id} />
+      <OnboardingTour
+        hasCompletedTour={dbUser.hasCompletedTour}
+        userId={dbUser.id}
+      />
       <div className="mb-10">
-        <h1 className="text-4xl font-extrabold sm:text-5xl">{t('title')}</h1>
+        <h1 className="text-4xl font-extrabold sm:text-5xl">{t("title")}</h1>
         <p className="mt-3 text-xl text-[var(--fg)]/50">
-          {userDictionaries.length} {t('dictionaries_count')}
+          {userDictionaries.length} {t("dictionaries_count")}
         </p>
       </div>
 

@@ -55,6 +55,7 @@ export const users = pgTable('users', {
   lastActiveDate: timestamp('last_active_date', { withTimezone: true }),
   lastReminderSentAt: timestamp('last_reminder_sent_at', { withTimezone: true }),
   hasCompletedTour: boolean('has_completed_tour').notNull().default(false),
+  hasCompletedDictTour: boolean('has_completed_dict_tour').notNull().default(false),
   isDeleted: boolean('is_deleted').notNull().default(false),
   emailOptOut: boolean('email_opt_out').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true })

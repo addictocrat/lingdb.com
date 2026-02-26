@@ -1,0 +1,109 @@
+﻿[dotenv@17.3.1] injecting env (22) from .env.local -- tip: ÔÜÖ´©Å  load multiple .env files with { path: ['.env.local', '.env'] }
+Listing all columns in "users" table...
+Columns: [
+  {
+    "table_schema": "public",
+    "column_name": "id",
+    "data_type": "uuid"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "supabase_id",
+    "data_type": "text"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "email",
+    "data_type": "text"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "username",
+    "data_type": "text"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "locale",
+    "data_type": "text"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "tier",
+    "data_type": "USER-DEFINED"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "ai_credits",
+    "data_type": "integer"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "credits_reset_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "total_words",
+    "data_type": "integer"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "total_flashcards",
+    "data_type": "integer"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "total_quizzes",
+    "data_type": "integer"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "streak_count",
+    "data_type": "integer"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "last_active_date",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "has_completed_tour",
+    "data_type": "boolean"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "is_deleted",
+    "data_type": "boolean"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "email_opt_out",
+    "data_type": "boolean"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "role",
+    "data_type": "USER-DEFINED"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "last_reminder_sent_at",
+    "data_type": "timestamp with time zone"
+  },
+  {
+    "table_schema": "public",
+    "column_name": "has_completed_dict_tour",
+    "data_type": "boolean"
+  }
+]

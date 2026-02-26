@@ -450,6 +450,17 @@
     "prev_btn": "Précédent",
     "done_btn": "Terminé"
   },
+  "dictionary_tutorial": {
+    "step1_title": "Ajouter de nouveaux mots",
+    "step1_desc": "Commencez par ajouter des mots et leurs traductions ici. Vous pourrez également générer des exemples plus tard.",
+    "step2_title": "Mots Magiques ✨",
+    "step2_desc": "Une fois que vous aurez enregistré au moins 2 mots, des suggestions de mots magiques apparaîtront ici pour vous aider à enrichir votre dictionnaire plus rapidement !",
+    "step3_title": "Pratiquer & Apprendre",
+    "step3_desc": "Utilisez les boutons Cartes Mémoire et Quiz pour pratiquer et maîtriser vos mots enregistrés.",
+    "next_btn": "Suivant",
+    "prev_btn": "Précédent",
+    "done_btn": "Compris !"
+  },
   "payment": {
     "coupon_section": "Avez-vous un code promo ?",
     "coupon_placeholder": "Entrez le code...",

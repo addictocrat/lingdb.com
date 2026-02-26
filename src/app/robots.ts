@@ -1,5 +1,5 @@
-import { MetadataRoute } from 'next';
-import { APP_URL } from '@/lib/utils/constants';
+import { MetadataRoute } from "next";
+import { APP_URL } from "@/lib/utils/constants";
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = APP_URL;
@@ -7,27 +7,19 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: '*',
-        allow: [
-          '/',
-          '/en', '/fr', '/de', '/es', '/tr',
-          '/en/library',
-          '/en/library/*',
-          '/*/tiers',
-          '/*/privacy',
-          '/*/terms',
-          '/*/cookies',
-        ],
+        userAgent: "*",
         disallow: [
-          '/*/dashboard',
-          '/*/profile',
-          '/*/dictionary', // Authenticated edit view
-          '/*/payment',
-          '/api/*',
-          '/fr/library/*',
-          '/de/library/*',
-          '/es/library/*',
-          '/tr/library/*',
+          "/api/",
+          "/*/dashboard",
+          "/*/profile",
+          "/*/dictionary",
+          "/*/payment",
+
+          // Non-English library pages block
+          "/fr/library/",
+          "/de/library/",
+          "/es/library/",
+          "/tr/library/",
         ],
       },
     ],

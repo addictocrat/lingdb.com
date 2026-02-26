@@ -1,9 +1,10 @@
-'use server';
+"use server";
 
-import { db } from '@/lib/db/client';
-import { users } from '@/lib/db/schema';
-import { desc, eq, sql } from 'drizzle-orm';
-import { createClient } from '@/lib/supabase/server';
+import { db } from "@/lib/db/client";
+import { users } from "@/lib/db/schema";
+import { desc, eq, sql } from "drizzle-orm";
+import { createClient } from "@/lib/supabase/server";
+import { getOrCreateDbUser } from "@/lib/db/auth-helper";
 
 export type LeaderboardUser = {
   id: string;
@@ -17,13 +18,17 @@ export type LeaderboardUser = {
 
 export async function getLeaderboardData() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   let dbUser = null;
   if (user) {
-    dbUser = await db.query.users.findFirst({
-      where: eq(users.supabaseId, user.id),
-    });
+    try {
+      dbUser = await getOrCreateDbUser(user);
+    } catch (error) {
+      console.error("Error getting/creating DB user in leaderboard:", error);
+    }
   }
 
   // 1. Top user for Most Words
@@ -54,12 +59,12 @@ export async function getLeaderboardData() {
   let userRankInfo = null;
   if (dbUser) {
     // Check if user is already in top 10
-    const isInTop10 = top10Users.some(u => u.id === dbUser!.id);
-    
+    const isInTop10 = top10Users.some((u) => u.id === dbUser!.id);
+
     // Always get the rank to be sure
     const [{ rank }] = await db
-      .select({ 
-        rank: sql<number>`count(*) + 1` 
+      .select({
+        rank: sql<number>`count(*) + 1`,
       })
       .from(users)
       .where(sql`${users.totalWords} > ${dbUser.totalWords}`);
@@ -73,7 +78,7 @@ export async function getLeaderboardData() {
         streakCount: dbUser.streakCount,
       },
       rank: Number(rank),
-      isInTop10
+      isInTop10,
     };
   }
 

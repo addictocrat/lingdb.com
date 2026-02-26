@@ -449,5 +449,16 @@
     "next_btn": "İleri",
     "prev_btn": "Geri",
     "done_btn": "Bitti"
+  },
+  "dictionary_tutorial": {
+    "step1_title": "Yeni Kelimeler Ekle",
+    "step1_desc": "Buradan kelimeler ve çevirilerini ekleyerek başlayın. Daha sonra örnek cümleler de oluşturabilirsiniz.",
+    "step2_title": "Sihirli Kelimeler ✨",
+    "step2_desc": "En az 2 kelime kaydettiğinizde, sözlüğünüzü daha hızlı büyütmenize yardımcı olacak sihirli kelime önerileri burada görünecektir!",
+    "step3_title": "Pratik Yap ve Öğren",
+    "step3_desc": "Kaydettiğiniz kelimelerle pratik yapmak ve ustalaşmak için Kelime Kartları ve Test butonlarını kullanın.",
+    "next_btn": "İleri",
+    "prev_btn": "Geri",
+    "done_btn": "Anladım!"
   }
 }

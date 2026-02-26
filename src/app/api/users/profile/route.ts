@@ -14,6 +14,7 @@ const settingsSchema = z.object({
     .optional(),
   locale: z.enum(['en', 'fr', 'de', 'es', 'tr']).optional(),
   hasCompletedTour: z.boolean().optional(),
+  hasCompletedDictTour: z.boolean().optional(),
 });
 
 // Used for fetching current profile or checking username availability
@@ -80,7 +81,7 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const { username, locale, hasCompletedTour } = result.data;
+    const { username, locale, hasCompletedTour, hasCompletedDictTour } = result.data;
 
     // Double check username availability if it's being changed
     if (username) {
@@ -101,6 +102,7 @@ export async function PATCH(request: Request) {
     if (username) updateData.username = username;
     if (locale) updateData.locale = locale;
     if (typeof hasCompletedTour === 'boolean') updateData.hasCompletedTour = hasCompletedTour;
+    if (typeof hasCompletedDictTour === 'boolean') updateData.hasCompletedDictTour = hasCompletedDictTour;
 
     const [updatedUser] = await db
       .update(users)

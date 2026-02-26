@@ -7,6 +7,7 @@ import AddWordForm from '@/components/dictionary/AddWordForm';
 import MagicWords from '@/components/dictionary/MagicWords';
 import WordList from '@/components/dictionary/WordList';
 import DictionarySettings from '@/components/dictionary/DictionarySettings';
+import DictionaryTour from '@/components/dictionary/DictionaryTour';
 import ExamplePhrasePopup from '@/components/dictionary/ExamplePhrasePopup';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
@@ -35,6 +36,7 @@ interface DictionaryDetailClientProps {
   isOwner: boolean;
   currentUserId?: string;
   userCredits: number;
+  showTour?: boolean;
 }
 
 export default function DictionaryDetailClient({
@@ -42,6 +44,7 @@ export default function DictionaryDetailClient({
   isOwner,
   currentUserId,
   userCredits,
+  showTour = false,
 }: DictionaryDetailClientProps) {
   const locale = useLocale();
   const router = useRouter();
@@ -180,8 +183,10 @@ export default function DictionaryDetailClient({
         )}
       </div>
 
+      {showTour && <DictionaryTour hasCompletedTour={false} userId={currentUserId || ''} />}
+
       {/* Tabs */}
-      <div className="mb-6 flex gap-1 rounded-xl border border-[var(--border-color)] bg-[var(--surface)] p-1">
+      <div id="dictionary-tabs" className="mb-6 flex gap-1 rounded-xl border border-[var(--border-color)] bg-[var(--surface)] p-1">
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -215,23 +220,27 @@ export default function DictionaryDetailClient({
         <div className="space-y-4">
           {canEdit && (
             <>
-              <AddWordForm
-                dictionaryId={dictionary.id}
-                dictionaryLanguage={dictionary.language}
-                onWordAdded={refreshDictionary}
-                wordCount={dictionary.words.length}
-              />
-              <MagicWords
-                dictionaryId={dictionary.id}
-                title={dictionary.title}
-                description={dictionary.description}
-                language={dictionary.language}
-                sourceLanguage={locale}
-                existingWords={existingWords}
-                initialSuggestions={dictionary.activeMagicWords}
-                onWordAdded={refreshDictionary}
-                userCredits={userCredits}
-              />
+              <div id="add-word-section">
+                <AddWordForm
+                  dictionaryId={dictionary.id}
+                  dictionaryLanguage={dictionary.language}
+                  onWordAdded={refreshDictionary}
+                  wordCount={dictionary.words.length}
+                />
+              </div>
+              <div id="magic-words-section">
+                <MagicWords
+                  dictionaryId={dictionary.id}
+                  title={dictionary.title}
+                  description={dictionary.description}
+                  language={dictionary.language}
+                  sourceLanguage={locale}
+                  existingWords={existingWords}
+                  initialSuggestions={dictionary.activeMagicWords}
+                  onWordAdded={refreshDictionary}
+                  userCredits={userCredits}
+                />
+              </div>
             </>
           )}
           <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--surface)]">

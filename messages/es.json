@@ -450,6 +450,17 @@
     "prev_btn": "Anterior",
     "done_btn": "Hecho"
   },
+  "dictionary_tutorial": {
+    "step1_title": "Añadir nuevas palabras",
+    "step1_desc": "Comienza añadiendo palabras y sus traducciones aquí. También puedes generar ejemplos más adelante.",
+    "step2_title": "Palabras Mágicas ✨",
+    "step2_desc": "Una vez que guardes al menos 2 palabras, aparecerán sugerencias de palabras mágicas aquí para ayudarte a ampliar tu diccionario más rápido.",
+    "step3_title": "Practicar y Aprender",
+    "step3_desc": "Usa los botones de Tarjetas y Cuestionario para practicar y dominar tus palabras guardadas.",
+    "next_btn": "Siguiente",
+    "prev_btn": "Anterior",
+    "done_btn": "¡Entendido!"
+  },
   "payment": {
     "coupon_section": "¿Tienes un código de cupón?",
     "coupon_placeholder": "Introduce el código...",

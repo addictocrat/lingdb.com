@@ -1,0 +1,37 @@
+﻿# â”€â”€â”€ Database â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+DATABASE_URL=postgresql://postgres:KbydbEiqzrsWp7Lv8XogRYRQPtdPVcr5@46.225.93.34:5433/postgres
+DIRECT_URL=postgresql://postgres:KbydbEiqzrsWp7Lv8XogRYRQPtdPVcr5@46.225.93.34:5433/postgres
+
+# â”€â”€â”€ Supabase â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+NEXT_PUBLIC_SUPABASE_URL=https://supabasekong-lingdb.okandikkulak.xyz
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc3MTQ1OTY4MCwiZXhwIjo0OTI3MTMzMjgwLCJyb2xlIjoiYW5vbiJ9.tsZC9uy8k3ffQ6zF5fIvfXufFNQGp3S6OXi6aL1TzgI
+SUPABASE_SERVICE_ROLE_KEY=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzdXBhYmFzZSIsImlhdCI6MTc3MTQ1OTY4MCwiZXhwIjo0OTI3MTMzMjgwLCJyb2xlIjoic2VydmljZV9yb2xlIn0.ZsO7JZUZIU9uGVXywOhpueCLva7_zJgp1ZLvfQ73SDI
+
+# â”€â”€â”€ Google OAuth â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+GOOGLE_OAUTH2_CLIENT_ID=234249608493-1vg0qt70j4r0bh4al2jlpo9qv1fdl1ga.apps.googleusercontent.com
+GOOGLE_OAUTH2_CLIENT_SECRET=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
+
+# â”€â”€â”€ OpenAI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+OPENAI_API_KEY=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
+OPENAI_MODEL=gpt-5-nano
+
+# â”€â”€â”€ SMTP (Spacemail) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+SMTP_HOST=mail.spacemail.com
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=team@lingdb.com
+SMTP_PASS=32pe<aW2
+SMTP_FROM="Lingdb <team@lingdb.com>"
+ADMIN_ALERTS_EMAIL=okandikkulak@gmail.com
+
+# â”€â”€â”€ Iyzico (Payment â€“ to be implemented later) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+IYZICO_API_KEY=<placeholder>
+IYZICO_SECRET_KEY=<placeholder>
+IYZICO_BASE_URL=https://sandbox-api.iyzipay.com
+
+# â”€â”€â”€ Google Adsense â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+NEXT_PUBLIC_ADSENSE_CLIENT_ID=ca-pub-4652276005943804
+
+# â”€â”€â”€ App â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+NEXT_PUBLIC_APP_URL=localhost:3000
+NEXT_PUBLIC_DEFAULT_LOCALE=en

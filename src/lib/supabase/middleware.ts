@@ -1,10 +1,15 @@
-import { createServerClient } from '@supabase/ssr';
-import { NextResponse, type NextRequest } from 'next/server';
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
-export async function updateSession(request: NextRequest, response?: NextResponse) {
-  let supabaseResponse = response || NextResponse.next({
-    request,
-  });
+export async function updateSession(
+  request: NextRequest,
+  response?: NextResponse,
+) {
+  let supabaseResponse =
+    response ||
+    NextResponse.next({
+      request,
+    });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,16 +21,16 @@ export async function updateSession(request: NextRequest, response?: NextRespons
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value)
+            request.cookies.set(name, value),
           );
           // If we have a response, we should use it, but if we need a fresh next() to update request...
           // Actually, modifying the existing supabaseResponse is better.
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options),
           );
         },
       },
-    }
+    },
   );
 
   // Refresh the auth session — important for Server Components
@@ -37,30 +42,38 @@ export async function updateSession(request: NextRequest, response?: NextRespons
   const { pathname } = request.nextUrl;
 
   // Extract locale from path (e.g., /en/dashboard → en)
-  const pathSegments = pathname.split('/').filter(Boolean);
-  const locale = pathSegments[0] || 'en';
+  const pathSegments = pathname.split("/").filter(Boolean);
+  const locale = pathSegments[0] || "en";
 
   // Check if the route is in a protected group (main)
   const isProtectedRoute =
-    pathname.includes('/dashboard') ||
-    (pathname.includes('/dictionary') && pathSegments.length <= 2) ||
-    pathname.includes('/profile') ||
-    pathname.includes('/payment') ||
-    pathname.includes('/tiers');
+    pathname.includes("/dashboard") ||
+    (pathname.includes("/dictionary") && pathSegments.length <= 2) ||
+    pathname.includes("/profile") ||
+    pathname.includes("/payment") ||
+    pathname.includes("/tiers");
 
   if (!user && isProtectedRoute) {
     const loginUrl = new URL(`/${locale}/login`, request.url);
-    loginUrl.searchParams.set('redirect', pathname);
+    loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
   // If user is logged in and trying to access auth pages, redirect to dashboard
   // BUT: don't redirect if there's an error param (e.g. db_sync_failed) to avoid infinite loop
   const isAuthRoute =
-    pathname.includes('/login') || pathname.includes('/signup');
+    pathname.includes("/login") || pathname.includes("/signup");
 
-  if (user && isAuthRoute && !request.nextUrl.searchParams.has('error')) {
+  if (user && isAuthRoute && !request.nextUrl.searchParams.has("error")) {
     return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
+  }
+
+  // Debug log for sync issues
+  if (pathname.includes("/dashboard") || pathname.includes("/profile")) {
+    const timestamp = new Date().toISOString();
+    console.log(
+      `[${timestamp}] MIDDLEWARE: ${pathname} | user: ${user ? user.id : "NONE"}`,
+    );
   }
 
   return supabaseResponse;

@@ -15,6 +15,13 @@
       "when": 1771787800189,
       "tag": "0001_grey_cyclops",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771958967010,
+      "tag": "0002_nosy_vengeance",
+      "breakpoints": true
     }
   ]
 }

@@ -450,6 +450,17 @@
     "prev_btn": "Zurück",
     "done_btn": "Fertig"
   },
+  "dictionary_tutorial": {
+    "step1_title": "Neue Wörter hinzufügen",
+    "step1_desc": "Beginnen Sie hier mit dem Hinzufügen von Wörtern und deren Übersetzungen. Später können Sie auch Beispielsätze generieren.",
+    "step2_title": "Magische Wörter ✨",
+    "step2_desc": "Sobald Sie mindestens 2 Wörter gespeichert haben, erscheinen hier magische Wortvorschläge, die Ihnen helfen, Ihr Wörterbuch schneller zu erweitern!",
+    "step3_title": "Üben & Lernen",
+    "step3_desc": "Verwenden Sie die Schaltflächen Flashcards und Quiz, um Ihre gespeicherten Wörter zu üben und zu meistern.",
+    "next_btn": "Weiter",
+    "prev_btn": "Zurück",
+    "done_btn": "Verstanden!"
+  },
   "payment": {
     "coupon_section": "Hast du einen Gutscheincode?",
     "coupon_placeholder": "Code eingeben...",

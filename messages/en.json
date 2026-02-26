@@ -446,9 +446,19 @@
     "premium_desc": "Upgrade for unlimited AI credits, ad-free learning, and advanced stats.",
     "create_title": "Create Your First Dictionary",
     "create_desc": "Click here to start building your vocabulary list.",
-    "next_btn": "Next",
     "prev_btn": "Previous",
     "done_btn": "Done"
+  },
+  "dictionary_tutorial": {
+    "step1_title": "Add New Words",
+    "step1_desc": "Start by adding words and their translations here. You can also generate examples later.",
+    "step2_title": "Magic Words ✨",
+    "step2_desc": "Once you save at least 2 words, magic word suggestions will appear here to help you expand your dictionary faster!",
+    "step3_title": "Practice & Learn",
+    "step3_desc": "Use Flashcards and Quiz buttons to practice and master your saved words.",
+    "next_btn": "Next",
+    "prev_btn": "Previous",
+    "done_btn": "Got it!"
   },
   "payment": {
     "coupon_section": "Have a coupon code?",
