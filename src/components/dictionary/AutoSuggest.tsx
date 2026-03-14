@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useDebounce } from '@/lib/hooks/useDebounce';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 
 interface AutoSuggestProps {
   language: string;
@@ -21,9 +21,9 @@ export default function AutoSuggest({
   sourceWord,
   value,
   onChange,
-  placeholder = 'Enter a word...',
+  placeholder = "Enter a word...",
   className,
-  apiEndpoint = '/api/words/suggest',
+  apiEndpoint = "/api/words/suggest",
   rightElement,
 }: AutoSuggestProps) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -35,42 +35,48 @@ export default function AutoSuggest({
   const debouncedValue = useDebounce(value, 200);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const lastFetchedSource = useRef('');
-  const lastFetchedLang = useRef('');
+  const lastFetchedSource = useRef("");
+  const lastFetchedLang = useRef("");
 
-  const isTranslationMode = apiEndpoint === '/api/words/translate-suggest';
+  const isTranslationMode = apiEndpoint === "/api/words/translate-suggest";
 
-  const fetchTranslations = useCallback(async (wordToTranslate: string) => {
-    if (!wordToTranslate || wordToTranslate.length < 2) return;
-    
-    // If we've already fetched for this word and this target language, just open the dropdown
-    if (wordToTranslate === lastFetchedSource.current && targetLang === lastFetchedLang.current) {
-      if (allTranslations.length > 0) setIsOpen(true);
-      return;
-    }
+  const fetchTranslations = useCallback(
+    async (wordToTranslate: string) => {
+      if (!wordToTranslate || wordToTranslate.length < 2) return;
 
-    setIsLoading(true);
-    try {
-      const url = new URL(apiEndpoint, window.location.origin);
-      url.searchParams.set('word', wordToTranslate);
-      url.searchParams.set('lang', language);
-      if (targetLang) url.searchParams.set('targetLang', targetLang);
-
-      const res = await fetch(url.toString());
-      if (res.ok) {
-        const data = await res.json();
-        const results = data.suggestions || [];
-        setAllTranslations(results);
-        lastFetchedSource.current = wordToTranslate;
-        lastFetchedLang.current = targetLang || '';
-        setIsOpen(results.length > 0);
+      // If we've already fetched for this word and this target language, just open the dropdown
+      if (
+        wordToTranslate === lastFetchedSource.current &&
+        targetLang === lastFetchedLang.current
+      ) {
+        if (allTranslations.length > 0) setIsOpen(true);
+        return;
       }
-    } catch {
-      // Silently fail
-    } finally {
-      setIsLoading(false);
-    }
-  }, [apiEndpoint, language, targetLang, allTranslations.length]);
+
+      setIsLoading(true);
+      try {
+        const url = new URL(apiEndpoint, window.location.origin);
+        url.searchParams.set("word", wordToTranslate);
+        url.searchParams.set("lang", language);
+        if (targetLang) url.searchParams.set("targetLang", targetLang);
+
+        const res = await fetch(url.toString());
+        if (res.ok) {
+          const data = await res.json();
+          const results = data.suggestions || [];
+          setAllTranslations(results);
+          lastFetchedSource.current = wordToTranslate;
+          lastFetchedLang.current = targetLang || "";
+          setIsOpen(results.length > 0);
+        }
+      } catch {
+        // Silently fail
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [apiEndpoint, language, targetLang, allTranslations.length],
+  );
 
   // Standard suggestion fetching (e.g., from dictionary/word list)
   useEffect(() => {
@@ -85,9 +91,9 @@ export default function AutoSuggest({
     const fetchSuggestions = async () => {
       try {
         const url = new URL(apiEndpoint, window.location.origin);
-        url.searchParams.set('q', debouncedValue);
-        url.searchParams.set('lang', language);
-        
+        url.searchParams.set("q", debouncedValue);
+        url.searchParams.set("lang", language);
+
         const res = await fetch(url.toString());
         if (res.ok) {
           const data = await res.json();
@@ -108,23 +114,16 @@ export default function AutoSuggest({
     if (!isTranslationMode || allTranslations.length === 0) return;
 
     const query = value.toLowerCase();
-    const filtered = query 
-      ? allTranslations.filter(t => t.toLowerCase().includes(query))
+    const filtered = query
+      ? allTranslations.filter((t) => t.toLowerCase().includes(query))
       : allTranslations;
-    
+
     setSuggestions(filtered);
     // Only auto-open if we have matches and the input is currently focused
     if (document.activeElement === inputRef.current) {
       setIsOpen(filtered.length > 0);
     }
   }, [value, allTranslations, isTranslationMode]);
-
-  // Retrigger fetch if targetLang changes (but not when sourceWord changes while typing)
-  useEffect(() => {
-    if (isTranslationMode && sourceWord) {
-      fetchTranslations(sourceWord);
-    }
-  }, [targetLang, isTranslationMode, sourceWord, fetchTranslations]);
 
   // Close on outside click
   useEffect(() => {
@@ -136,8 +135,8 @@ export default function AutoSuggest({
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
   const selectSuggestion = useCallback(
@@ -146,39 +145,39 @@ export default function AutoSuggest({
       setIsOpen(false);
       setSuggestions([]);
     },
-    [onChange]
+    [onChange],
   );
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!isOpen || suggestions.length === 0) return;
 
     switch (e.key) {
-      case 'ArrowDown':
+      case "ArrowDown":
         e.preventDefault();
         setActiveIndex((prev) =>
-          prev < suggestions.length - 1 ? prev + 1 : 0
+          prev < suggestions.length - 1 ? prev + 1 : 0,
         );
         break;
-      case 'ArrowUp':
+      case "ArrowUp":
         e.preventDefault();
         setActiveIndex((prev) =>
-          prev > 0 ? prev - 1 : suggestions.length - 1
+          prev > 0 ? prev - 1 : suggestions.length - 1,
         );
         break;
-      case 'Enter':
+      case "Enter":
         e.preventDefault();
         if (activeIndex >= 0) {
           selectSuggestion(suggestions[activeIndex]);
         }
         break;
-      case 'Escape':
+      case "Escape":
         setIsOpen(false);
         break;
     }
   };
 
   return (
-    <div ref={wrapperRef} className={`relative ${className || ''}`}>
+    <div ref={wrapperRef} className={`relative ${className || ""}`}>
       <input
         ref={inputRef}
         value={value}
@@ -193,7 +192,7 @@ export default function AutoSuggest({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className={`w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg)] py-2 text-lg transition-colors focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500/20 ${
-          rightElement ? 'pl-3 pr-10' : 'px-3'
+          rightElement ? "pl-3 pr-10" : "px-3"
         }`}
         autoComplete="off"
       />
@@ -213,8 +212,8 @@ export default function AutoSuggest({
               onClick={() => selectSuggestion(suggestion)}
               className={`w-full px-3 py-2 text-left text-lg transition-colors ${
                 i === activeIndex
-                  ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400'
-                  : 'hover:bg-[var(--surface)]'
+                  ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400"
+                  : "hover:bg-[var(--surface)]"
               }`}
             >
               {suggestion}

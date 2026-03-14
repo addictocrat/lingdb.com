@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
 const suggestSchema = z.object({
   word: z.string().min(1).max(50),
@@ -12,10 +12,16 @@ const translationCache = new Map<string, string[]>();
 
 export async function GET(request: NextRequest) {
   try {
+    const openRouterKey = process.env.OPENROUTER_API_KEY;
+    if (!openRouterKey) {
+      console.error("Missing OPENROUTER_API_KEY for translation suggestions");
+      return NextResponse.json({ suggestions: [] });
+    }
+
     const { searchParams } = new URL(request.url);
-    const word = searchParams.get('word');
-    const lang = searchParams.get('lang') || 'en';
-    const targetLang = searchParams.get('targetLang') || 'en';
+    const word = searchParams.get("word");
+    const lang = searchParams.get("lang") || "en";
+    const targetLang = searchParams.get("targetLang") || "en";
 
     if (!word || word.length < 2) {
       return NextResponse.json({ suggestions: [] });
@@ -26,36 +32,43 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ suggestions: translationCache.get(cacheKey) });
     }
 
-    // Call OpenAI
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    // Call OpenRouter for translation suggestions only
+    const response = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${openRouterKey}`,
+          "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL
+            ? `https://${process.env.NEXT_PUBLIC_APP_URL}`
+            : "http://localhost:3000",
+          "X-Title": "Lingdb",
+        },
+        body: JSON.stringify({
+          model: "mistralai/mistral-small-creative",
+          messages: [
+            {
+              role: "system",
+              content: `You are a professional dictionary translator. Provide up to 3 single-word or short-phrase translations for the given word. The word is in the language '${lang}' and you must translate it to '${targetLang}'. Return ONLY a JSON array of strings, e.g., ["translation1", "translation2"]. No markdown formatting, no explanations.`,
+            },
+            {
+              role: "user",
+              content: `Translate: ${word}`,
+            },
+          ],
+        }),
       },
-      body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || 'gpt-5-nano',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a professional dictionary translator. Provide up to 3 single-word or short-phrase translations for the given word. The word is in the language '${lang}' and you must translate it to '${targetLang}'. Return ONLY a JSON array of strings, e.g., ["translation1", "translation2"]. No markdown formatting, no explanations.`
-          },
-          {
-            role: 'user',
-            content: `Translate: ${word}`
-          }
-        ],
-      }),
-    });
+    );
 
     if (!response.ok) {
-      console.error('OpenAI API error:', await response.text());
+      console.error("OpenRouter API error:", await response.text());
       return NextResponse.json({ suggestions: [] });
     }
 
     const data = await response.json();
-    const content = data.choices[0]?.message?.content?.trim() || '[]';
-    
+    const content = data.choices[0]?.message?.content?.trim() || "[]";
+
     let suggestions: string[] = [];
     try {
       suggestions = JSON.parse(content);
@@ -71,7 +84,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ suggestions });
   } catch (error) {
-    console.error('Error suggesting translation:', error);
+    console.error("Error suggesting translation:", error);
     return NextResponse.json({ suggestions: [] });
   }
 }
