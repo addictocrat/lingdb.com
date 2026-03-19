@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { db } from "@/lib/db/client";
 import { users, dictionaries } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { checkRateLimit, logActivity } from "@/lib/rate-limit";
 
 const suggestSchema = z.object({
   dictionaryId: z.string().uuid(),
@@ -78,15 +79,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Credit check for refresh
-    if (isRefresh) {
-      if (dbUser.aiCredits <= 0) {
-        return NextResponse.json(
-          { error: "No AI credits remaining" },
-          { status: 403 },
-        );
-      }
+    // Rate limiting: 5 requests per minute
+    const isAllowed = await checkRateLimit(dbUser.id, "suggest_words", { limit: 5 });
+
+    if (!isAllowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a minute." },
+        { status: 429 },
+      );
     }
+
+    // Log the request
+    await logActivity(dbUser.id, "suggest_words", { dictionaryId });
 
     const wordListString = existingWords
       .map((w) => `${w.title} (${w.translation})`)
@@ -165,23 +169,15 @@ No markdown, no explanations.`,
     }
 
     if (suggestions.length > 0) {
-      // Use transaction or separate updates
       await db
         .update(dictionaries)
         .set({ activeMagicWords: suggestions })
         .where(eq(dictionaries.id, dictionaryId));
-
-      if (isRefresh) {
-        await db
-          .update(users)
-          .set({ aiCredits: dbUser.aiCredits - 1 })
-          .where(eq(users.id, dbUser.id));
-      }
     }
 
     return NextResponse.json({
       suggestions,
-      creditsRemaining: isRefresh ? dbUser.aiCredits - 1 : dbUser.aiCredits,
+      creditsRemaining: dbUser.aiCredits,
     });
   } catch (error) {
     console.error("Magic words API error:", error);

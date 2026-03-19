@@ -35,7 +35,6 @@ interface DictionaryDetailClientProps {
   };
   isOwner: boolean;
   currentUserId?: string;
-  userCredits: number;
   showTour?: boolean;
 }
 
@@ -43,7 +42,6 @@ export default function DictionaryDetailClient({
   dictionary: initialDict,
   isOwner,
   currentUserId,
-  userCredits,
   showTour = false,
 }: DictionaryDetailClientProps) {
   const locale = useLocale();
@@ -238,7 +236,6 @@ export default function DictionaryDetailClient({
                   existingWords={existingWords}
                   initialSuggestions={dictionary.activeMagicWords}
                   onWordAdded={refreshDictionary}
-                  userCredits={userCredits}
                 />
               </div>
             </>

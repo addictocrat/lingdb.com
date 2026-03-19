@@ -78,7 +78,6 @@ export default async function DictionaryPage({
         dictionary={dict as any}
         isOwner={isOwner}
         currentUserId={dbUser?.id}
-        userCredits={dbUser?.aiCredits ?? 0}
         showTour={showTour}
       />
     </main>

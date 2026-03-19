@@ -20,7 +20,6 @@ interface MagicWordsProps {
   existingWords: { title: string; translation: string }[];
   initialSuggestions?: MagicWord[] | null;
   onWordAdded: () => void;
-  userCredits: number;
 }
 
 export default function MagicWords({
@@ -32,7 +31,6 @@ export default function MagicWords({
   existingWords,
   initialSuggestions,
   onWordAdded,
-  userCredits,
 }: MagicWordsProps) {
   const { toast } = useToast();
   const [suggestions, setSuggestions] = useState<MagicWord[]>(initialSuggestions || []);
@@ -41,11 +39,6 @@ export default function MagicWords({
   const hasFetchedOnce = useRef(!!initialSuggestions?.length);
 
   const fetchSuggestions = useCallback(async (isRefresh = false) => {
-    if (isRefresh && userCredits <= 0) {
-      toast('No AI credits remaining. Upgrade to Premium for more.', 'warning');
-      return;
-    }
-
     setIsLoading(true);
     try {
       const res = await fetch('/api/ai/suggest-words', {
@@ -68,7 +61,7 @@ export default function MagicWords({
         setSuggestions(data.suggestions || []);
         hasFetchedOnce.current = true;
         if (isRefresh) {
-          toast('Magic words refreshed! (-1 credit)', 'success');
+          toast('Magic words refreshed!', 'success');
         }
       } else {
         const data = await res.json();
@@ -79,7 +72,7 @@ export default function MagicWords({
     } finally {
       setIsLoading(false);
     }
-  }, [dictionaryId, title, description, language, sourceLanguage, existingWords, userCredits, toast]);
+  }, [dictionaryId, title, description, language, sourceLanguage, existingWords, toast]);
 
   // Fetch suggestions once when threshold (2 words) is reached
   useEffect(() => {
@@ -179,7 +172,7 @@ export default function MagicWords({
           <button
             onClick={() => fetchSuggestions(true)}
             disabled={isLoading}
-            title={`Refresh magic words (Costs 1 AI Credit. You have ${userCredits})`}
+            title="Refresh magic words"
             className="cursor-pointer flex h-7 w-7 items-center justify-center rounded-full text-[var(--fg)]/30 transition-colors hover:bg-[var(--surface)] hover:text-primary-500 disabled:opacity-50"
           >
             <RefreshCw className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
