@@ -43,6 +43,13 @@
       "when": 1772300000000,
       "tag": "0005_wordle_note_to_solver",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1772400000000,
+      "tag": "0006_wordle_language",
+      "breakpoints": true
     }
   ]
 }

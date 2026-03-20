@@ -3,6 +3,10 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import {
+  SUPPORTED_LOCALES,
+  type SupportedLocale,
+} from "@/lib/utils/constants";
 
 type CreateResponse = {
   gameId: string;
@@ -16,6 +20,14 @@ function onlyLetters(value: string) {
 
 export default function WordleCreator({ locale }: { locale: string }) {
   const t = useTranslations("wordle");
+  const tCommon = useTranslations("common");
+  const tLanguages = useTranslations("settings.languages");
+  const [language, setLanguage] = useState<SupportedLocale>(() => {
+    const normalizedLocale = locale.toLowerCase();
+    return SUPPORTED_LOCALES.includes(normalizedLocale as SupportedLocale)
+      ? (normalizedLocale as SupportedLocale)
+      : "en";
+  });
   const [maxTries, setMaxTries] = useState(6);
   const [word, setWord] = useState("");
   const [noteToSolver, setNoteToSolver] = useState("");
@@ -52,6 +64,7 @@ export default function WordleCreator({ locale }: { locale: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           locale,
+          language,
           word: normalizedWord,
           noteToSolver,
           maxTries,
@@ -92,6 +105,23 @@ export default function WordleCreator({ locale }: { locale: string }) {
         </p>
 
         <form onSubmit={handleCreateGame} className="mt-10 space-y-8">
+          <div>
+            <label className="mb-3 block text-2xl font-bold sm:text-3xl">
+              {tCommon("language")}
+            </label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as SupportedLocale)}
+              className="w-full border border-[var(--border-color)] bg-[var(--bg)] px-5 py-4 text-2xl font-bold outline-none focus:border-primary-500 sm:text-3xl"
+            >
+              {SUPPORTED_LOCALES.map((languageCode) => (
+                <option key={languageCode} value={languageCode}>
+                  {tLanguages(languageCode)}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label className="mb-3 block text-2xl font-bold sm:text-3xl">
               {t("fields.word")}

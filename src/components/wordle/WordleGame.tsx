@@ -5,6 +5,10 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import Modal from "@/components/ui/Modal";
 import { Link2 } from "lucide-react";
+import {
+  SUPPORTED_LOCALES,
+  type SupportedLocale,
+} from "@/lib/utils/constants";
 
 type CellState = "correct" | "present" | "absent";
 
@@ -15,6 +19,7 @@ type GuessResult = {
 
 type GamePayload = {
   id: string;
+  language: SupportedLocale;
   wordLength: number;
   maxTries: number;
 };
@@ -38,6 +43,8 @@ export default function WordleGame({
   gameId: string;
 }) {
   const t = useTranslations("wordle");
+  const tCommon = useTranslations("common");
+  const tLanguages = useTranslations("settings.languages");
   const [game, setGame] = useState<GamePayload | null>(null);
   const [attempts, setAttempts] = useState<GuessResult[]>([]);
   const [guess, setGuess] = useState("");
@@ -193,6 +200,19 @@ export default function WordleGame({
     t("game.share_message", { url: getShareUrl() }),
   )}`;
 
+  const gameLanguageName = useMemo(() => {
+    if (!game?.language) {
+      return null;
+    }
+
+    const normalizedLanguage = game.language.toLowerCase();
+    if (!SUPPORTED_LOCALES.includes(normalizedLanguage as SupportedLocale)) {
+      return normalizedLanguage.toUpperCase();
+    }
+
+    return tLanguages(normalizedLanguage as SupportedLocale);
+  }, [game?.language, tLanguages]);
+
   return (
     <main className="mx-auto w-full px-2 py-6 sm:max-w-5xl sm:px-6 sm:py-14">
       <div>
@@ -235,6 +255,11 @@ export default function WordleGame({
                 tries: game.maxTries,
               })}
             </p>
+            {gameLanguageName && (
+              <p className="mt-2 text-xl font-semibold text-[var(--fg)]/65 sm:text-2xl">
+                {tCommon("language")}: {gameLanguageName}
+              </p>
+            )}
 
             <div className="mt-8 space-y-3">
               {rows.map((row, rowIndex) => {

@@ -188,6 +188,7 @@ export default function AddWordDemoCard({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           locale,
+          language,
           word: normalizedWord,
           maxTries: 6,
           noteToSolver: "Good job!",

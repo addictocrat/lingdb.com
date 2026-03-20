@@ -21,6 +21,7 @@ export async function GET(
     const game = await db.query.wordleGames.findFirst({
       columns: {
         id: true,
+        language: true,
         wordLength: true,
         maxTries: true,
         createdAt: true,

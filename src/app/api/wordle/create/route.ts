@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { wordleGames } from "@/lib/db/schema";
-import { APP_URL } from "@/lib/utils/constants";
+import { APP_URL, SUPPORTED_LOCALES } from "@/lib/utils/constants";
 import { isAlphabeticWord, normalizeWord } from "@/lib/utils/wordle";
 
 const createWordleSchema = z.object({
@@ -10,6 +10,10 @@ const createWordleSchema = z.object({
   noteToSolver: z.string().max(500).optional(),
   maxTries: z.number().int().min(1).max(10).default(6),
   locale: z.string().min(2).max(10).optional().default("en"),
+  language: z
+    .enum(SUPPORTED_LOCALES)
+    .optional()
+    .default("en"),
 });
 
 type RateLimitEntry = {
@@ -90,6 +94,7 @@ export async function POST(request: NextRequest) {
       .insert(wordleGames)
       .values({
         solution: normalizedWord,
+        language: parsed.data.language,
         noteToSolver,
         wordLength: normalizedWord.length,
         maxTries: parsed.data.maxTries,

@@ -318,6 +318,7 @@ export const wordleGames = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     solution: text("solution").notNull(),
+    language: text("language").notNull().default("en"),
     noteToSolver: text("note_to_solver"),
     wordLength: integer("word_length").notNull(),
     maxTries: integer("max_tries").notNull().default(6),
