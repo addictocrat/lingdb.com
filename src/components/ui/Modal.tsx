@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils/cn';
 import { X } from 'lucide-react';
 
@@ -27,8 +27,6 @@ export default function Modal({
   className,
   size = 'md',
 }: ModalProps) {
-  const overlayRef = useRef<HTMLDivElement>(null);
-
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -51,17 +49,15 @@ export default function Modal({
 
   return (
     <div
-      ref={overlayRef}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      onClick={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
+      onClick={onClose}
     >
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" />
 
       {/* Content */}
       <div
+        onClick={(e) => e.stopPropagation()}
         className={cn(
           'relative w-full rounded-2xl border border-[var(--border-color)] bg-[var(--bg)] p-6 shadow-2xl animate-in zoom-in-95 fade-in duration-200',
           sizeStyles[size],
