@@ -6,11 +6,13 @@ import postgres from "postgres";
 config({ path: ".env.local" });
 config();
 
-const connectionString = process.env.DATABASE_URL;
-
-if (!connectionString) {
-  console.error("❌ DATABASE_URL is missing. Set it in .env.local or .env.");
-  process.exit(1);
+function getConnectionString(): string {
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) {
+    console.error("❌ DATABASE_URL is missing. Set it in .env.local or .env.");
+    process.exit(1);
+  }
+  return connectionString;
 }
 
 const BASELINE_MILLIS = 1772092800000; // 0003_blog_translations
@@ -62,6 +64,7 @@ async function ensureBaselineForExistingDb(client: postgres.Sql) {
 async function runMigrations() {
   console.log("🔄 Running migrations...");
 
+  const connectionString = getConnectionString();
   const client = postgres(connectionString, { max: 1 });
   const db = drizzle(client);
 
