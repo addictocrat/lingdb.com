@@ -32,7 +32,7 @@
   },
   "landing": {
     "badge_text": "La façon la plus intelligente d'apprendre des langues",
-    "hero_title": "Maîtrisez n'importe quelle langue",
+    "hero_title": "Créez des dictionnaires intelligents",
     "hero_title_highlight": "en toute simplicité",
     "hero_subtitle": "Créez des flashcards, passez des quiz et apprenez avec des outils alimentés par l'IA.",
     "cta_button": "Commencer gratuitement",
@@ -95,6 +95,7 @@
     "translation_placeholder": "Entrez la traduction...",
     "word": "Mot",
     "translation": "Traduction",
+    "save_word_cta": "Enregistrer le mot",
     "add": "Ajouter",
     "words_tab": "Mots",
     "flashcards_tab": "Flashcards",

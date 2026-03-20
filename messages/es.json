@@ -32,7 +32,7 @@
   },
   "landing": {
     "badge_text": "La forma más inteligente de aprender idiomas",
-    "hero_title": "Domina cualquier idioma",
+    "hero_title": "Crea diccionarios inteligentes",
     "hero_title_highlight": "con facilidad",
     "hero_subtitle": "Crea tarjetas, haz cuestionarios y aprende con herramientas impulsadas por IA.",
     "cta_button": "Empieza gratis",
@@ -95,6 +95,7 @@
     "translation_placeholder": "Introduce la traducción...",
     "word": "Palabra",
     "translation": "Traducción",
+    "save_word_cta": "Guardar la palabra",
     "add": "Añadir",
     "words_tab": "Palabras",
     "flashcards_tab": "Tarjetas",

@@ -13,6 +13,8 @@ interface AutoSuggestProps {
   className?: string;
   apiEndpoint?: string;
   rightElement?: React.ReactNode;
+  autoFocus?: boolean;
+  focusTrigger?: number;
 }
 
 export default function AutoSuggest({
@@ -25,6 +27,8 @@ export default function AutoSuggest({
   className,
   apiEndpoint = "/api/words/suggest",
   rightElement,
+  autoFocus = false,
+  focusTrigger = 0,
 }: AutoSuggestProps) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [allTranslations, setAllTranslations] = useState<string[]>([]); // Cache for translations of sourceWord
@@ -138,6 +142,18 @@ export default function AutoSuggest({
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  useEffect(() => {
+    if (!autoFocus) return;
+
+    const timeoutId = window.setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [autoFocus, focusTrigger]);
 
   const selectSuggestion = useCallback(
     (suggestion: string) => {

@@ -32,7 +32,7 @@
   },
   "landing": {
     "badge_text": "Die smartere Art, Sprachen zu lernen",
-    "hero_title": "Jede Sprache meistern",
+    "hero_title": "Erstellen Sie intelligente Wörterbücher",
     "hero_title_highlight": "mit Leichtigkeit",
     "hero_subtitle": "Erstellen Sie Karteikarten, machen Sie Quiz und lernen Sie mit KI-gestützten Tools.",
     "cta_button": "Kostenlos starten",
@@ -95,6 +95,7 @@
     "translation_placeholder": "Übersetzung eingeben...",
     "word": "Wort",
     "translation": "Übersetzung",
+    "save_word_cta": "Wort speichern",
     "add": "Hinzufügen",
     "words_tab": "Wörter",
     "flashcards_tab": "Lernkarten",

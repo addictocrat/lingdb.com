@@ -32,7 +32,7 @@
   },
   "landing": {
     "badge_text": "Dil öğrenmenin daha akıllı yolu",
-    "hero_title": "Akıllı Sözlüklerle Dil Öğrenin.",
+    "hero_title": "Akıllı Sözlük Oluşturun",
     "hero_title_highlight": "Hem De Birlikte.",
     "hero_subtitle": "Kelime kartları oluşturun, quiz çözün ve yapay zeka ile çalışın.",
     "cta_button": "Ücretsiz Başlayın",
@@ -95,6 +95,7 @@
     "translation_placeholder": "Çeviri girin...",
     "word": "Kelime",
     "translation": "Çeviri",
+    "save_word_cta": "Kelimeyi Kaydedin",
     "add": "Ekle",
     "words_tab": "Kelimeler",
     "flashcards_tab": "Kelime Kartları",

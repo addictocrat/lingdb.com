@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ArrowRight, Sparkles } from "lucide-react";
 import gsap from "gsap";
+import AddWordDemoCard from "@/components/landing/AddWordDemoCard";
 
 export default function Hero({ locale = "en" }: { locale?: string }) {
   const t = useTranslations("landing");
@@ -73,7 +74,7 @@ export default function Hero({ locale = "en" }: { locale?: string }) {
         <h1 className="hero-title text-5xl font-extrabold leading-tight tracking-tight sm:text-6xl md:text-7xl lg:text-7xl">
           {t("hero_title")}{" "}
           <span className="bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">
-            {t("hero_title_highlight")}
+            {/* {t("hero_title_highlight")} */}
           </span>
         </h1>
 
@@ -82,8 +83,12 @@ export default function Hero({ locale = "en" }: { locale?: string }) {
           {t("hero_subtitle")}
         </p>
 
+        <div className="hero-cards relative z-20 mx-auto my-8 max-w-3xl">
+          <AddWordDemoCard locale={locale} />
+        </div>
+
         {/* CTA */}
-        <div className="hero-cta mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+        <div className="hero-cta relative z-10 mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Link
             href={`/${locale}/signup`}
             className="group flex items-center gap-2 rounded-2xl bg-primary-500 px-8 py-4 text-base font-bold text-white shadow-lg shadow-primary-500/25 transition-all duration-300 hover:bg-primary-600 hover:shadow-xl hover:shadow-primary-500/30 active:scale-[0.97]"
@@ -100,31 +105,7 @@ export default function Hero({ locale = "en" }: { locale?: string }) {
         </div>
       </div>
 
-      {/* Floating flashcard mockup */}
-      <div className="hero-cards mx-auto mt-16 max-w-3xl">
-        <div className="relative mx-auto w-full max-w-lg">
-          {/* Main card */}
-          <div className="relative z-10 rounded-2xl border border-[var(--border-color)] bg-[var(--bg)] p-8 shadow-2xl shadow-black/10">
-            <div className="mb-4 flex items-center justify-between">
-              <span className="rounded-lg bg-primary-100 px-3 py-1 text-sm font-bold text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
-                French
-              </span>
-              <span className="text-sm text-[var(--fg)]/40">1 / 10</span>
-            </div>
-            <p className="text-4xl font-bold">bonjour</p>
-            <p className="mt-2 text-xl text-[var(--fg)]/50">hello</p>
-            <div className="mt-6 flex gap-3">
-              <div className="h-2 flex-1 rounded-full bg-primary-500" />
-              <div className="h-2 flex-1 rounded-full bg-primary-200 dark:bg-primary-800" />
-              <div className="h-2 flex-1 rounded-full bg-primary-200 dark:bg-primary-800" />
-            </div>
-          </div>
-
-          {/* Background cards for depth */}
-          <div className="absolute -right-4 top-4 -z-0 h-full w-full rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] opacity-60" />
-          <div className="absolute -right-8 top-8 -z-10 h-full w-full rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] opacity-30" />
-        </div>
-      </div>
+      {/* Interactive add-word demo card */}
     </section>
   );
 }
