@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import Modal from "@/components/ui/Modal";
@@ -50,6 +50,7 @@ export default function WordleGame({
   const [shareFeedback, setShareFeedback] = useState<
     "copied" | "failed" | null
   >(null);
+  const guessInputRef = useRef<HTMLInputElement | null>(null);
 
   const isGameOver =
     hasWon || (game ? attempts.length >= game.maxTries : false);
@@ -166,6 +167,12 @@ export default function WordleGame({
     setIsShareModalOpen(false);
   }
 
+  function focusGuessInput() {
+    if (!isGameOver) {
+      guessInputRef.current?.focus();
+    }
+  }
+
   function getShareUrl() {
     if (typeof window === "undefined") {
       return "";
@@ -187,18 +194,24 @@ export default function WordleGame({
   )}`;
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
-      <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] p-6 sm:p-10">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <main className="mx-auto w-full px-2 py-6 sm:max-w-5xl sm:px-6 sm:py-14">
+      <div>
+        <div className="flex items-start justify-between gap-3 sm:gap-4">
           <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
             {t("game.title")}
           </h1>
           <button
             type="button"
             onClick={openShareModal}
-            className="cursor-pointer bg-yellow-400 px-6 py-4 text-center text-xl font-black text-black transition-colors hover:bg-yellow-300 sm:text-2xl"
+            className="inline-flex cursor-pointer items-center justify-center bg-yellow-400 p-3 text-black transition-colors hover:bg-yellow-300 sm:px-6 sm:py-4"
           >
-            {t("game.share")}
+            <span className="sm:hidden">
+              <Link2 className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <span className="hidden text-center text-xl font-black sm:inline sm:text-2xl">
+              {t("game.share")}
+            </span>
+            <span className="sr-only sm:hidden">{t("game.share")}</span>
           </button>
         </div>
 
@@ -244,7 +257,8 @@ export default function WordleGame({
                         return (
                           <div
                             key={cellIndex}
-                            className={`flex h-14 w-14 items-center justify-center border text-2xl font-black sm:h-20 sm:w-20 sm:text-4xl ${toCellClass(state)}`}
+                            onClick={focusGuessInput}
+                            className={`flex h-14 w-14 cursor-text items-center justify-center border text-2xl font-black sm:h-20 sm:w-20 sm:text-4xl ${toCellClass(state)}`}
                           >
                             {letter}
                           </div>
@@ -259,6 +273,7 @@ export default function WordleGame({
             {!isGameOver && (
               <form onSubmit={handleSubmitGuess} className="mt-8 space-y-4">
                 <input
+                  ref={guessInputRef}
                   value={guess}
                   maxLength={game.wordLength}
                   onChange={(e) =>
