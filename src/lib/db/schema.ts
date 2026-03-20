@@ -311,6 +311,27 @@ export const coupons = pgTable("coupons", {
     .defaultNow(),
 });
 
+// ─── Wordle Games ──────────────────────────────────────────
+
+export const wordleGames = pgTable(
+  "wordle_games",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    solution: text("solution").notNull(),
+    noteToSolver: text("note_to_solver"),
+    wordLength: integer("word_length").notNull(),
+    maxTries: integer("max_tries").notNull().default(6),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("wordle_games_created_at_idx").on(table.createdAt),
+    index("wordle_games_expires_at_idx").on(table.expiresAt),
+  ],
+);
+
 // ─── Blogs ──────────────────────────────────────────────────
 
 export const blogs = pgTable(

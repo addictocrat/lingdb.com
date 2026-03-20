@@ -415,7 +415,51 @@
     "library": "Bibliothek",
     "blogs": "Blogs",
     "profile": "Profil",
-    "leaderboards": "Bestenlisten"
+    "leaderboards": "Bestenlisten",
+    "wordle": "Wordle"
+  },
+  "wordle": {
+    "title": "Wordle-Ersteller",
+    "subtitle": "Erstelle ein eigenes Wordle und teile es sofort.",
+    "fields": {
+      "word": "Geheimes Wort",
+      "word_placeholder": "WORT EINGEBEN",
+      "word_hint": "Nur Buchstaben verwenden. Das Wort muss 3 bis 12 Buchstaben haben.",
+      "length": "Wortlange",
+      "max_tries": "Schrittzahl (Max. Versuche)",
+      "max_tries_hint": "Standard ist 6 Versuche.",
+      "note_to_solver": "Notiz fur den Loser (optional)",
+      "note_placeholder": "Fuge eine geheime Nachricht fur den Spieler hinzu...",
+      "note_hint": "Diese Nachricht wird erst nach dem Losen angezeigt."
+    },
+    "create_button": "Teilbares Wordle Erstellen",
+    "creating": "Wird erstellt...",
+    "share": {
+      "title": "Dein Freigabelink",
+      "copy": "Link Kopieren",
+      "open": "Spiel Offnen"
+    },
+    "errors": {
+      "word_length_mismatch": "Das Wort muss genau {length} Buchstaben haben.",
+      "word_length_range": "Das Wort muss zwischen 3 und 12 Buchstaben lang sein.",
+      "word_letters_only": "Nur Buchstaben sind erlaubt.",
+      "create_failed": "Spiel konnte nicht erstellt werden. Bitte erneut versuchen."
+    },
+    "game": {
+      "title": "Wordle",
+      "loading": "Spiel wird geladen...",
+      "load_failed": "Dieses Spiel konnte nicht geladen werden.",
+      "guess_failed": "Dein Versuch konnte nicht gesendet werden.",
+      "meta": "{length} Buchstaben, {tries} Versuche",
+      "guess_placeholder": "DEIN VERSUCH",
+      "submit": "Versuch Absenden",
+      "share": "Teilen",
+      "submitting": "Wird gesendet...",
+      "win": "Geloest!",
+      "secret_note_title": "Geheime Notiz",
+      "lose": "Keine Versuche mehr. Erstelle ein neues Spiel!",
+      "create_new": "Neues Wordle Erstellen"
+    }
   },
   "leaderboards": {
     "title": "Bestenlisten",

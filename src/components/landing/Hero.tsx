@@ -71,7 +71,7 @@ export default function Hero({ locale = "en" }: { locale?: string }) {
         </div>
 
         {/* Title */}
-        <h1 className="hero-title text-5xl font-extrabold leading-tight tracking-tight sm:text-6xl md:text-7xl lg:text-7xl">
+        <h1 className="hero-title text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl md:text-7xl lg:text-7xl">
           {t("hero_title")}{" "}
           <span className="bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">
             {/* {t("hero_title_highlight")} */}

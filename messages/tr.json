@@ -415,7 +415,51 @@
     "library": "Kütüphane",
     "blogs": "Haberler",
     "profile": "Profil",
-    "leaderboards": "Liderlik Tahtası"
+    "leaderboards": "Liderlik Tahtası",
+    "wordle": "Wordle"
+  },
+  "wordle": {
+    "title": "Wordle Oluşturucu",
+    "subtitle": "Kendi Wordle oyununuzu oluşturun ve anında paylaşın.",
+    "fields": {
+      "word": "Gizli Kelime",
+      "word_placeholder": "KELIME GIR",
+      "word_hint": "Sadece harf kullanın. Kelime 3 ile 12 harf arasında olmalı.",
+      "length": "Kelime Uzunluğu",
+      "max_tries": "Adım Sayısı (Maks Deneme)",
+      "max_tries_hint": "Varsayılan 6 denemedir.",
+      "note_to_solver": "Çözücüye Not (isteğe bağlı)",
+      "note_placeholder": "Oyuncu için gizli bir mesaj ekleyin...",
+      "note_hint": "Bu not sadece bulmaca çözüldüğünde gösterilir."
+    },
+    "create_button": "Paylaşılabilir Wordle Oluştur",
+    "creating": "Oluşturuluyor...",
+    "share": {
+      "title": "Paylaşım Linkiniz",
+      "copy": "Linki Kopyala",
+      "open": "Oyunu Aç"
+    },
+    "errors": {
+      "word_length_mismatch": "Kelime tam {length} harf olmalı.",
+      "word_length_range": "Kelime 3 ile 12 harf arasında olmalı.",
+      "word_letters_only": "Sadece harfe izin verilir.",
+      "create_failed": "Oyun oluşturulamadı. Tekrar deneyin."
+    },
+    "game": {
+      "title": "Wordle",
+      "loading": "Oyun yükleniyor...",
+      "load_failed": "Bu oyun yüklenemedi.",
+      "guess_failed": "Tahmin gönderilemedi.",
+      "meta": "{length} harf, {tries} deneme",
+      "guess_placeholder": "TAHMININIZ",
+      "submit": "Tahmini Gönder",
+      "share": "Paylaş",
+      "submitting": "Gönderiliyor...",
+      "win": "Çözdünüz!",
+      "secret_note_title": "Gizli Not",
+      "lose": "Deneme kalmadı. Yeni oyun oluşturun!",
+      "create_new": "Yeni Wordle Oluştur"
+    }
   },
   "leaderboards": {
     "title": "Liderlik Tablosu",

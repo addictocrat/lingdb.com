@@ -415,7 +415,51 @@
     "library": "Biblioteca",
     "blogs": "Blogs",
     "profile": "Perfil",
-    "leaderboards": "Clasificación"
+    "leaderboards": "Clasificación",
+    "wordle": "Wordle"
+  },
+  "wordle": {
+    "title": "Creador de Wordle",
+    "subtitle": "Crea un Wordle personalizado y compartelo al instante.",
+    "fields": {
+      "word": "Palabra Secreta",
+      "word_placeholder": "ESCRIBE PALABRA",
+      "word_hint": "Usa solo letras. La palabra debe tener entre 3 y 12 letras.",
+      "length": "Longitud de la Palabra",
+      "max_tries": "Cantidad de Pasos (Intentos Max)",
+      "max_tries_hint": "El valor por defecto es 6 intentos.",
+      "note_to_solver": "Nota para el jugador (opcional)",
+      "note_placeholder": "Agrega un mensaje secreto para el jugador...",
+      "note_hint": "Este mensaje solo se mostrara despues de resolver el juego."
+    },
+    "create_button": "Crear Wordle Compartible",
+    "creating": "Creando...",
+    "share": {
+      "title": "Tu Enlace para Compartir",
+      "copy": "Copiar Enlace",
+      "open": "Abrir Juego"
+    },
+    "errors": {
+      "word_length_mismatch": "La palabra debe tener exactamente {length} letras.",
+      "word_length_range": "La palabra debe tener entre 3 y 12 letras.",
+      "word_letters_only": "Solo se permiten letras.",
+      "create_failed": "No se pudo crear el juego. Intentalo de nuevo."
+    },
+    "game": {
+      "title": "Wordle",
+      "loading": "Cargando juego...",
+      "load_failed": "No se pudo cargar este juego.",
+      "guess_failed": "No se pudo enviar tu intento.",
+      "meta": "{length} letras, {tries} intentos",
+      "guess_placeholder": "TU INTENTO",
+      "submit": "Enviar Intento",
+      "share": "Compartir",
+      "submitting": "Enviando...",
+      "win": "Lo resolviste!",
+      "secret_note_title": "Nota Secreta",
+      "lose": "No quedan intentos. Crea un juego nuevo!",
+      "create_new": "Crear Nuevo Wordle"
+    }
   },
   "leaderboards": {
     "title": "Tablas de clasificación",

@@ -1,16 +1,24 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils/cn';
-import { Menu, X, LayoutDashboard, Library, User as UserIcon, Settings, LogOut, Coins, ShieldCheck, FileText } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import gsap from 'gsap';
-import ThemeToggle from '@/components/common/ThemeToggle';
-import LocaleSwitcher from '@/components/common/LocaleSwitcher';
-import type { User } from '@supabase/supabase-js';
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils/cn";
+import {
+  Menu,
+  X,
+  User as UserIcon,
+  Settings,
+  LogOut,
+  Coins,
+  ShieldCheck,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import gsap from "gsap";
+import ThemeToggle from "@/components/common/ThemeToggle";
+import LocaleSwitcher from "@/components/common/LocaleSwitcher";
+import type { User } from "@supabase/supabase-js";
 
 interface NavLink {
   href: string;
@@ -22,7 +30,13 @@ interface MobileNavProps {
   locale: string;
   isLoggedIn: boolean;
   navLinks: NavLink[];
-  profile: any;
+  profile: {
+    tier?: string;
+    username?: string;
+    email?: string;
+    aiCredits?: number;
+    role?: string;
+  } | null;
   user: User | null;
   signOut: () => Promise<void>;
 }
@@ -36,42 +50,44 @@ export default function MobileNav({
   signOut,
 }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const t = useTranslations('common');
-  const tNav = useTranslations('nav');
+  const t = useTranslations("common");
+  const tNav = useTranslations("nav");
   const pathname = usePathname();
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
       // GSAP Animation for opening
       gsap.fromTo(
         menuRef.current,
-        { y: '-100%', opacity: 0 },
-        { y: '0%', opacity: 1, duration: 0.5, ease: 'power4.out' }
+        { y: "-100%", opacity: 0 },
+        { y: "0%", opacity: 1, duration: 0.5, ease: "power4.out" },
       );
       gsap.fromTo(
         contentRef.current?.children || [],
         { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.4, stagger: 0.1, delay: 0.2, ease: 'back.out(1.7)' }
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.4,
+          stagger: 0.1,
+          delay: 0.2,
+          ease: "back.out(1.7)",
+        },
       );
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
   }, [isOpen]);
 
   const closeMenu = () => {
     gsap.to(menuRef.current, {
-      y: '-100%',
+      y: "-100%",
       opacity: 0,
       duration: 0.4,
-      ease: 'power4.in',
+      ease: "power4.in",
       onComplete: () => setIsOpen(false),
     });
   };
@@ -90,7 +106,7 @@ export default function MobileNav({
           onClick={closeMenu}
           className="text-2xl font-bold tracking-tight"
         >
-          {profile?.tier === 'PREMIUM' ? t('premium') : t('appName')}
+          {profile?.tier === "PREMIUM" ? t("premium") : t("appName")}
         </Link>
         <button
           onClick={closeMenu}
@@ -111,67 +127,69 @@ export default function MobileNav({
               href={link.href}
               onClick={closeMenu}
               className={cn(
-                'flex items-center gap-4 rounded-2xl p-4 text-xl font-medium transition-all active:scale-[0.98]',
-                isActive(link.href.split('/').pop()!)
-                  ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
-                  : 'bg-[var(--surface)] text-[var(--fg)] hover:bg-[var(--surface)]/80'
+                "flex items-center gap-4 p-4 text-xl font-medium transition-all active:scale-[0.98]",
+                link.href.includes("/wordle")
+                  ? "rounded-none bg-yellow-400 font-extrabold text-black hover:bg-yellow-300"
+                  : isActive(link.href.split("/").pop()!)
+                    ? "rounded-2xl bg-primary-500 text-white shadow-lg shadow-primary-500/20"
+                    : "rounded-2xl bg-[var(--surface)] text-[var(--fg)] hover:bg-[var(--surface)]/80",
               )}
             >
               <link.icon className="h-6 w-6" />
               {link.label}
             </Link>
           ))}
-          
+
           {isLoggedIn && (
             <>
               <Link
                 href={`/${locale}/profile`}
                 onClick={closeMenu}
                 className={cn(
-                  'flex items-center gap-4 rounded-2xl p-4 text-xl font-medium transition-all active:scale-[0.98]',
-                  isActive('profile') && !pathname.includes('settings')
-                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
-                    : 'bg-[var(--surface)] text-[var(--fg)] hover:bg-[var(--surface)]/80'
+                  "flex items-center gap-4 rounded-2xl p-4 text-xl font-medium transition-all active:scale-[0.98]",
+                  isActive("profile") && !pathname.includes("settings")
+                    ? "bg-primary-500 text-white shadow-lg shadow-primary-500/20"
+                    : "bg-[var(--surface)] text-[var(--fg)] hover:bg-[var(--surface)]/80",
                 )}
               >
                 <UserIcon className="h-6 w-6" />
-                {tNav('profile')}
+                {tNav("profile")}
               </Link>
               <Link
                 href={`/${locale}/payment`}
                 onClick={closeMenu}
                 className={cn(
-                  'flex items-center gap-4 rounded-2xl p-4 text-xl font-bold transition-all active:scale-[0.98]',
-                  isActive('payment')
-                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
-                    : 'bg-primary-500/10 text-primary-600 dark:text-primary-400 hover:bg-primary-500/20'
+                  "flex items-center gap-4 rounded-2xl p-4 text-xl font-bold transition-all active:scale-[0.98]",
+                  isActive("payment")
+                    ? "bg-primary-500 text-white shadow-lg shadow-primary-500/20"
+                    : "bg-primary-500/10 text-primary-600 dark:text-primary-400 hover:bg-primary-500/20",
                 )}
               >
                 <ShieldCheck className="h-6 w-6" />
-                {t('upgrade_cta') || 'Upgrade'}
+                {t("upgrade_cta") || "Upgrade"}
               </Link>
               <Link
                 href={`/${locale}/profile/settings`}
                 onClick={closeMenu}
                 className={cn(
-                  'flex items-center gap-4 rounded-2xl p-4 text-xl font-medium transition-all active:scale-[0.98]',
-                  isActive('settings')
-                    ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/20'
-                    : 'bg-[var(--surface)] text-[var(--fg)] hover:bg-[var(--surface)]/80'
+                  "flex items-center gap-4 rounded-2xl p-4 text-xl font-medium transition-all active:scale-[0.98]",
+                  isActive("settings")
+                    ? "bg-primary-500 text-white shadow-lg shadow-primary-500/20"
+                    : "bg-[var(--surface)] text-[var(--fg)] hover:bg-[var(--surface)]/80",
                 )}
               >
                 <Settings className="h-6 w-6" />
-                {t('settings')}
+                {t("settings")}
               </Link>
-              {profile?.role === 'ADMIN' && (
+              {profile?.role === "ADMIN" && (
                 <Link
                   href={`/${locale}/admin/overview`}
                   onClick={closeMenu}
                   className={cn(
-                    'flex items-center gap-4 rounded-2xl p-4 text-xl font-medium transition-all active:scale-[0.98]',
-                    isActive('admin')
-                      ? 'bg-amber-500 text-white shadow-lg shadow-amber-500/20'
-                      : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20'
+                    "flex items-center gap-4 rounded-2xl p-4 text-xl font-medium transition-all active:scale-[0.98]",
+                    isActive("admin")
+                      ? "bg-amber-500 text-white shadow-lg shadow-amber-500/20"
+                      : "bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20",
                   )}
                 >
                   <ShieldCheck className="h-6 w-6" />
@@ -194,7 +212,7 @@ export default function MobileNav({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  profile.username?.[0]?.toUpperCase() || 'U'
+                  profile.username?.[0]?.toUpperCase() || "U"
                 )}
               </div>
               <div>
@@ -205,7 +223,7 @@ export default function MobileNav({
             <div className="flex items-center justify-between p-3 rounded-2xl bg-white/50 dark:bg-black/20">
               <div className="flex items-center gap-2">
                 <Coins className="h-5 w-5 text-amber-500" />
-                <span className="font-medium">{t('credits')}</span>
+                <span className="font-medium">{t("credits")}</span>
               </div>
               <span className="font-bold text-lg text-primary-600 dark:text-primary-400">
                 {profile.aiCredits}
@@ -217,11 +235,11 @@ export default function MobileNav({
         {/* Controls */}
         <div className="flex flex-col gap-4 p-4 rounded-2xl bg-[var(--surface)]/50">
           <div className="flex items-center justify-between">
-            <span className="font-medium">{t('theme')}</span>
+            <span className="font-medium">{t("theme")}</span>
             <ThemeToggle />
           </div>
           <div className="flex items-center justify-between">
-            <span className="font-medium">{t('language')}</span>
+            <span className="font-medium">{t("language")}</span>
             <LocaleSwitcher />
           </div>
         </div>
@@ -238,7 +256,7 @@ export default function MobileNav({
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-red-500/10 p-4 text-xl font-bold text-red-500 transition-all hover:bg-red-500/20 active:scale-[0.98]"
             >
               <LogOut className="h-6 w-6" />
-              {t('logout')}
+              {t("logout")}
             </button>
           ) : (
             <div className="grid grid-cols-2 gap-4">
@@ -247,14 +265,14 @@ export default function MobileNav({
                 onClick={closeMenu}
                 className="flex items-center justify-center rounded-2xl bg-[var(--surface)] p-4 text-xl font-bold transition-all hover:bg-[var(--surface)]/80 active:scale-[0.98]"
               >
-                {t('login')}
+                {t("login")}
               </Link>
               <Link
                 href={`/${locale}/signup`}
                 onClick={closeMenu}
                 className="flex items-center justify-center rounded-2xl bg-primary-500 p-4 text-xl font-bold text-white shadow-lg shadow-primary-500/20 transition-all hover:bg-primary-600 active:scale-[0.98]"
               >
-                {t('signup')}
+                {t("signup")}
               </Link>
             </div>
           )}
@@ -273,7 +291,7 @@ export default function MobileNav({
         <Menu className="h-6 w-6" />
       </button>
 
-      {mounted && createPortal(menuContent, document.body)}
+      {isOpen && createPortal(menuContent, document.body)}
     </div>
   );
 }

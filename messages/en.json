@@ -415,7 +415,51 @@
     "library": "Library",
     "blogs": "Blogs",
     "profile": "Profile",
-    "leaderboards": "Leaderboards"
+    "leaderboards": "Leaderboards",
+    "wordle": "Wordle"
+  },
+  "wordle": {
+    "title": "Wordle Creator",
+    "subtitle": "Build a custom Wordle and share it instantly.",
+    "fields": {
+      "word": "Secret Word",
+      "word_placeholder": "ENTER WORD",
+      "word_hint": "Use only letters. Word must be 3 to 12 letters.",
+      "length": "Word Length",
+      "max_tries": "Steps Count (Max Tries)",
+      "max_tries_hint": "Default is 6 tries.",
+      "note_to_solver": "Note to the Solver (optional)",
+      "note_placeholder": "Add a secret message for the player...",
+      "note_hint": "This will only be shown after the puzzle is solved."
+    },
+    "create_button": "Create Shareable Wordle",
+    "creating": "Creating...",
+    "share": {
+      "title": "Your Share Link",
+      "copy": "Copy Link",
+      "open": "Open Game"
+    },
+    "errors": {
+      "word_length_mismatch": "Word must be exactly {length} letters.",
+      "word_length_range": "Word must be between 3 and 12 letters.",
+      "word_letters_only": "Only letters are allowed.",
+      "create_failed": "Could not create game. Please try again."
+    },
+    "game": {
+      "title": "Wordle",
+      "loading": "Loading game...",
+      "load_failed": "Could not load this game.",
+      "guess_failed": "Could not submit your guess.",
+      "meta": "{length}-letter word, {tries} tries",
+      "guess_placeholder": "YOUR GUESS",
+      "submit": "Submit Guess",
+      "share": "Share",
+      "submitting": "Submitting...",
+      "win": "You solved it!",
+      "secret_note_title": "Secret Note",
+      "lose": "No tries left. Create a new game!",
+      "create_new": "Create New Wordle"
+    }
   },
   "leaderboards": {
     "title": "Leaderboards",

@@ -23,6 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const routes = [
     "",
     "/library",
+    "/wordle",
     "/tiers",
     "/login",
     "/signup",

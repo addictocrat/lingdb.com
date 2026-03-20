@@ -29,6 +29,20 @@
       "when": 1772092800000,
       "tag": "0003_blog_translations",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1772200000000,
+      "tag": "0004_wordle_games",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1772300000000,
+      "tag": "0005_wordle_note_to_solver",
+      "breakpoints": true
     }
   ]
 }

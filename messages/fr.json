@@ -415,7 +415,51 @@
     "library": "Bibliothèque",
     "blogs": "Blogs",
     "profile": "Profil",
-    "leaderboards": "Classements"
+    "leaderboards": "Classements",
+    "wordle": "Wordle"
+  },
+  "wordle": {
+    "title": "Createur Wordle",
+    "subtitle": "Creez un Wordle personnalise et partagez-le instantanement.",
+    "fields": {
+      "word": "Mot Secret",
+      "word_placeholder": "ENTREZ LE MOT",
+      "word_hint": "Utilisez uniquement des lettres. Le mot doit avoir entre 3 et 12 lettres.",
+      "length": "Longueur du Mot",
+      "max_tries": "Nombre d'Etapes (Essais Max)",
+      "max_tries_hint": "La valeur par defaut est 6 essais.",
+      "note_to_solver": "Note au joueur (optionnel)",
+      "note_placeholder": "Ajoutez un message secret pour le joueur...",
+      "note_hint": "Ce message apparaitra seulement apres la resolution."
+    },
+    "create_button": "Creer un Wordle Partageable",
+    "creating": "Creation...",
+    "share": {
+      "title": "Votre Lien de Partage",
+      "copy": "Copier le Lien",
+      "open": "Ouvrir le Jeu"
+    },
+    "errors": {
+      "word_length_mismatch": "Le mot doit contenir exactement {length} lettres.",
+      "word_length_range": "Le mot doit contenir entre 3 et 12 lettres.",
+      "word_letters_only": "Seules les lettres sont autorisees.",
+      "create_failed": "Impossible de creer la partie. Reessayez."
+    },
+    "game": {
+      "title": "Wordle",
+      "loading": "Chargement du jeu...",
+      "load_failed": "Impossible de charger ce jeu.",
+      "guess_failed": "Impossible d'envoyer votre essai.",
+      "meta": "{length} lettres, {tries} essais",
+      "guess_placeholder": "VOTRE ESSAI",
+      "submit": "Valider",
+      "share": "Partager",
+      "submitting": "Envoi...",
+      "win": "Trouve!",
+      "secret_note_title": "Note Secrete",
+      "lose": "Plus d'essais. Creez une nouvelle partie!",
+      "create_new": "Creer un Nouveau Wordle"
+    }
   },
   "leaderboards": {
     "title": "Classements",

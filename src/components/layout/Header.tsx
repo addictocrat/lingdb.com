@@ -19,6 +19,7 @@ import {
   Trophy,
   ShieldCheck,
   FileText,
+  Puzzle,
 } from "lucide-react";
 
 export default function Header({ locale = "en" }: { locale?: string }) {
@@ -42,6 +43,7 @@ export default function Header({ locale = "en" }: { locale?: string }) {
       icon: Trophy,
     },
     { href: `/${locale}/blogs`, label: tNav("blogs"), icon: FileText },
+    { href: `/${locale}/wordle`, label: tNav("wordle"), icon: Puzzle },
   ];
 
   return (
@@ -68,7 +70,8 @@ export default function Header({ locale = "en" }: { locale?: string }) {
                   user ||
                   link.href.includes("/library") ||
                   link.href.includes("/leaderboards") ||
-                  link.href.includes("/blogs"),
+                  link.href.includes("/blogs") ||
+                  link.href.includes("/wordle"),
               )
               .map((link) => (
                 <Link
@@ -84,10 +87,12 @@ export default function Header({ locale = "en" }: { locale?: string }) {
                           : undefined
                   }
                   className={cn(
-                    "flex items-center gap-2 rounded-lg px-3 py-2 text-lg font-medium transition-colors",
-                    isActive(link.href.split("/").pop()!)
-                      ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400"
-                      : "text-[var(--fg)]/60 hover:bg-[var(--surface)] hover:text-[var(--fg)]",
+                    "flex items-center gap-2 px-3 py-2 text-lg font-medium transition-colors",
+                    link.href.includes("/wordle")
+                      ? "rounded-none bg-yellow-400 font-extrabold text-black hover:bg-yellow-300"
+                      : isActive(link.href.split("/").pop()!)
+                        ? "rounded-lg bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400"
+                        : "rounded-lg text-[var(--fg)]/60 hover:bg-[var(--surface)] hover:text-[var(--fg)]",
                   )}
                 >
                   <link.icon className="h-4 w-4" />

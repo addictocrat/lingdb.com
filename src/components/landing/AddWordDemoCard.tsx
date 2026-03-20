@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import AutoSuggest from "@/components/dictionary/AutoSuggest";
-import { Plus, Sparkles, WandSparkles } from "lucide-react";
+import { Plus, Puzzle, Sparkles, WandSparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type MagicSuggestion = {
   word: string;
@@ -131,6 +132,8 @@ export default function AddWordDemoCard({
   locale?: string;
 }) {
   const tDictionary = useTranslations("dictionary");
+  const tWordle = useTranslations("wordle");
+  const router = useRouter();
 
   const [language, setLanguage] =
     useState<(typeof LANGUAGE_OPTIONS)[number]["code"]>("fr");
@@ -146,6 +149,8 @@ export default function AddWordDemoCard({
   const [isLoadingMagic, setIsLoadingMagic] = useState(false);
   const [isLoadingPhrase, setIsLoadingPhrase] = useState(false);
   const [showSaveButton, setShowSaveButton] = useState(false);
+  const [isCreatingWordle, setIsCreatingWordle] = useState(false);
+  const [wordleError, setWordleError] = useState<string | null>(null);
   const [burstSeed, setBurstSeed] = useState(0);
   const [translatedWord, setTranslatedWord] = useState("");
   const [translationUpdateTick, setTranslationUpdateTick] = useState(0);
@@ -156,6 +161,53 @@ export default function AddWordDemoCard({
   const debouncedWord = useDebounce(word.trim(), 2000);
   const sourceLanguage = useMemo(() => toSafeLocale(locale), [locale]);
   const showTranslationField = translation.length > 0;
+
+  async function handleCreateWordle() {
+    if (isCreatingWordle) {
+      return;
+    }
+
+    const normalizedWord = word.trim().toUpperCase();
+
+    if (normalizedWord.length < 3 || normalizedWord.length > 12) {
+      setWordleError(tWordle("errors.word_length_range"));
+      return;
+    }
+
+    if (!/^[A-Z]+$/.test(normalizedWord)) {
+      setWordleError(tWordle("errors.word_letters_only"));
+      return;
+    }
+
+    setWordleError(null);
+    setIsCreatingWordle(true);
+
+    try {
+      const res = await fetch("/api/wordle/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          locale,
+          word: normalizedWord,
+          maxTries: 6,
+          noteToSolver: "Good job!",
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || typeof data?.sharePath !== "string") {
+        setWordleError(data?.error || tWordle("errors.create_failed"));
+        return;
+      }
+
+      router.push(data.sharePath);
+    } catch {
+      setWordleError(tWordle("errors.create_failed"));
+    } finally {
+      setIsCreatingWordle(false);
+    }
+  }
 
   const handleLanguageChange = (
     nextLanguage: (typeof LANGUAGE_OPTIONS)[number]["code"],
@@ -543,16 +595,34 @@ export default function AddWordDemoCard({
       </div>
 
       {showSaveButton && examplePhrase && (
-        <Link
-          href={`/${locale}/signup`}
+        <div
           style={{
             animation: "demo-explode 760ms cubic-bezier(0.2, 1.2, 0.2, 1) both",
           }}
-          className="group mt-5 inline-flex items-center gap-2 rounded-2xl bg-primary-500 px-8 py-4 text-base font-bold text-white shadow-lg shadow-primary-500/25 transition-all duration-300 hover:bg-primary-600 hover:shadow-xl hover:shadow-primary-500/30 active:scale-[0.97]"
+          className="mt-5 flex w-full flex-wrap items-center justify-center gap-3"
         >
-          <Plus className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-          {tDictionary("save_word_cta")}
-        </Link>
+          <Link
+            href={`/${locale}/signup`}
+            className="group inline-flex items-center gap-2 rounded-2xl bg-primary-500 px-8 py-4 text-base font-bold text-white shadow-lg shadow-primary-500/25 transition-all duration-300 hover:bg-primary-600 hover:shadow-xl hover:shadow-primary-500/30 active:scale-[0.97]"
+          >
+            <Plus className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+            {tDictionary("save_word_cta")}
+          </Link>
+
+          <button
+            type="button"
+            onClick={handleCreateWordle}
+            disabled={isCreatingWordle}
+            className="flex cursor-pointer items-center gap-2 rounded-none bg-yellow-400 px-5 py-3 text-xl font-extrabold text-black transition-colors hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-60 sm:text-xl"
+          >
+            <Puzzle className="h-4 w-4 sm:h-5 sm:w-5" />
+            Wordle
+          </button>
+        </div>
+      )}
+
+      {wordleError && (
+        <p className="mt-3 text-sm font-semibold text-red-600">{wordleError}</p>
       )}
 
       <style jsx>{`
