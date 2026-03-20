@@ -5,6 +5,7 @@ import { db } from "@/lib/db/client";
 import { users, dictionaries } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { checkRateLimit, logActivity } from "@/lib/rate-limit";
+import { fetchOpenRouterChatCompletion } from "@/lib/openrouter/chat";
 
 const suggestSchema = z.object({
   dictionaryId: z.string().uuid(),
@@ -80,7 +81,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limiting: 5 requests per minute
-    const isAllowed = await checkRateLimit(dbUser.id, "suggest_words", { limit: 5 });
+    const isAllowed = await checkRateLimit(dbUser.id, "suggest_words", {
+      limit: 5,
+    });
 
     if (!isAllowed) {
       return NextResponse.json(
@@ -96,24 +99,12 @@ export async function POST(request: NextRequest) {
       .map((w) => `${w.title} (${w.translation})`)
       .join(", ");
 
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${openRouterKey}`,
-          "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL
-            ? `https://${process.env.NEXT_PUBLIC_APP_URL}`
-            : "http://localhost:3000",
-          "X-Title": "Lingdb",
-        },
-        body: JSON.stringify({
-          model: "mistralai/mistral-small-creative",
-          messages: [
-            {
-              role: "system",
-              content: `You are a helpful language learning assistant. Your task is to suggest 3 new vocabulary words that fit the SEMANTIC THEME of the user's dictionary.
+    const response = await fetchOpenRouterChatCompletion({
+      apiKey: openRouterKey,
+      messages: [
+        {
+          role: "system",
+          content: `You are a helpful language learning assistant. Your task is to suggest 3 new vocabulary words that fit the SEMANTIC THEME of the user's dictionary.
 
 Target Language: '${language}'
 Source Language: '${sourceLanguage}'
@@ -132,15 +123,13 @@ CRITICAL INSTRUCTIONS:
 5. LANGUAGE: "word" must be in ${language}, "translation" must be in ${sourceLanguage}. Keep translations concise (1-2 words).
 
 No markdown, no explanations.`,
-            },
-            {
-              role: "user",
-              content: `Analyze the theme of these words: ${wordListString}. Suggest 3 more related words for this dictionary in ${language}.`,
-            },
-          ],
-        }),
-      },
-    );
+        },
+        {
+          role: "user",
+          content: `Analyze the theme of these words: ${wordListString}. Suggest 3 more related words for this dictionary in ${language}.`,
+        },
+      ],
+    });
 
     if (!response.ok) {
       const errorText = await response.text();

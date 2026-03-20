@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { fetchOpenRouterChatCompletion } from "@/lib/openrouter/chat";
 
 const suggestSchema = z.object({
   word: z.string().min(1).max(50),
@@ -33,33 +34,19 @@ export async function GET(request: NextRequest) {
     }
 
     // Call OpenRouter for translation suggestions only
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${openRouterKey}`,
-          "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL
-            ? `https://${process.env.NEXT_PUBLIC_APP_URL}`
-            : "http://localhost:3000",
-          "X-Title": "Lingdb",
+    const response = await fetchOpenRouterChatCompletion({
+      apiKey: openRouterKey,
+      messages: [
+        {
+          role: "system",
+          content: `You are a professional dictionary translator. Provide up to 3 single-word or short-phrase translations for the given word. The word is in the language '${lang}' and you must translate it to '${targetLang}'. Return ONLY a JSON array of strings, e.g., ["translation1", "translation2"]. No markdown formatting, no explanations.`,
         },
-        body: JSON.stringify({
-          model: "mistralai/mistral-small-creative",
-          messages: [
-            {
-              role: "system",
-              content: `You are a professional dictionary translator. Provide up to 3 single-word or short-phrase translations for the given word. The word is in the language '${lang}' and you must translate it to '${targetLang}'. Return ONLY a JSON array of strings, e.g., ["translation1", "translation2"]. No markdown formatting, no explanations.`,
-            },
-            {
-              role: "user",
-              content: `Translate: ${word}`,
-            },
-          ],
-        }),
-      },
-    );
+        {
+          role: "user",
+          content: `Translate: ${word}`,
+        },
+      ],
+    });
 
     if (!response.ok) {
       console.error("OpenRouter API error:", await response.text());

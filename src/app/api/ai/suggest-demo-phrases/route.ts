@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { fetchOpenRouterChatCompletion } from "@/lib/openrouter/chat";
 
 const demoPhraseSchema = z.object({
   word: z.string().min(2).max(80),
@@ -77,33 +78,19 @@ export async function POST(request: NextRequest) {
       ? `Related vocabulary to optionally include: ${magicWords.join(", ")}.`
       : "";
 
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${openRouterKey}`,
-          "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL
-            ? `https://${process.env.NEXT_PUBLIC_APP_URL}`
-            : "http://localhost:3000",
-          "X-Title": "Lingdb",
+    const response = await fetchOpenRouterChatCompletion({
+      apiKey: openRouterKey,
+      messages: [
+        {
+          role: "system",
+          content: `You generate one beginner-friendly example sentence for language learners. Return ONLY JSON object format: {"phrase":"...","translation":"..."}. "phrase" must be in ${language}. "translation" must be in ${sourceLanguage}. Keep phrase natural and concise (5-14 words).`,
         },
-        body: JSON.stringify({
-          model: "mistralai/mistral-small-creative",
-          messages: [
-            {
-              role: "system",
-              content: `You generate one beginner-friendly example sentence for language learners. Return ONLY JSON object format: {"phrase":"...","translation":"..."}. "phrase" must be in ${language}. "translation" must be in ${sourceLanguage}. Keep phrase natural and concise (5-14 words).`,
-            },
-            {
-              role: "user",
-              content: `Primary word: ${word}. Meaning: ${translation}. ${hintWords}`,
-            },
-          ],
-        }),
-      },
-    );
+        {
+          role: "user",
+          content: `Primary word: ${word}. Meaning: ${translation}. ${hintWords}`,
+        },
+      ],
+    });
 
     if (!response.ok) {
       const errorText = await response.text();

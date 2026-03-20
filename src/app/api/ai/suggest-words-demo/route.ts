@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { fetchOpenRouterChatCompletion } from "@/lib/openrouter/chat";
 
 const demoSuggestSchema = z.object({
   word: z.string().min(2).max(80),
@@ -71,24 +72,12 @@ export async function POST(request: NextRequest) {
 
     const { word, translation, language, sourceLanguage } = parsed.data;
 
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${openRouterKey}`,
-          "HTTP-Referer": process.env.NEXT_PUBLIC_APP_URL
-            ? `https://${process.env.NEXT_PUBLIC_APP_URL}`
-            : "http://localhost:3000",
-          "X-Title": "Lingdb",
-        },
-        body: JSON.stringify({
-          model: "mistralai/mistral-small-creative",
-          messages: [
-            {
-              role: "system",
-              content: `You suggest vocabulary for language learners. Return ONLY a JSON array of exactly 3 objects in this exact format: [{"word":"...","translation":"..."}].
+    const response = await fetchOpenRouterChatCompletion({
+      apiKey: openRouterKey,
+      messages: [
+        {
+          role: "system",
+          content: `You suggest vocabulary for language learners. Return ONLY a JSON array of exactly 3 objects in this exact format: [{"word":"...","translation":"..."}].
 
 STRICT RULES:
 - "word" must be in ${language}.
@@ -98,15 +87,13 @@ STRICT RULES:
 - Do not include the seed word itself.
 - No duplicates.
 - No extra text, no markdown, no commentary.`,
-            },
-            {
-              role: "user",
-              content: `Seed word: ${word}. Seed translation: ${translation}. Return 3 one-word synonyms only.`,
-            },
-          ],
-        }),
-      },
-    );
+        },
+        {
+          role: "user",
+          content: `Seed word: ${word}. Seed translation: ${translation}. Return 3 one-word synonyms only.`,
+        },
+      ],
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
