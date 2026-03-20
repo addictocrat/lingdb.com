@@ -30,7 +30,7 @@ const LANGUAGE_PLACEHOLDERS: Record<
   string
 > = {
   en: "school",
-  fr: "amour",
+  fr: "fleur",
   de: "küchenchef",
   es: "hermano",
   tr: "harika",
@@ -471,8 +471,8 @@ export default function AddWordDemoCard({
               <input
                 value={translation}
                 readOnly
-                disabled
-                className="w-full rounded-lg border border-pink-500/35 bg-pink-500/10 px-3 py-2 text-lg font-semibold text-pink-800 disabled:opacity-100 dark:text-pink-200"
+                aria-disabled="true"
+                className="translationPreviewInput w-full rounded-lg border border-pink-500/35 bg-pink-500/10 px-3 py-2 text-lg font-semibold text-pink-800 dark:text-pink-200"
               />
             </div>
           </div>
@@ -556,6 +556,15 @@ export default function AddWordDemoCard({
       )}
 
       <style jsx>{`
+        .translationPreviewInput {
+          opacity: 1;
+          -webkit-text-fill-color: rgb(157 23 77);
+        }
+
+        :global(.dark) .translationPreviewInput {
+          -webkit-text-fill-color: rgb(251 207 232);
+        }
+
         @keyframes demo-explode {
           0% {
             opacity: 0;
