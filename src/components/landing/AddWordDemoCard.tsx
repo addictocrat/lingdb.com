@@ -25,6 +25,17 @@ const LANGUAGE_OPTIONS = [
   { code: "tr", name: "Turkish" },
 ] as const;
 
+const LANGUAGE_PLACEHOLDERS: Record<
+  (typeof LANGUAGE_OPTIONS)[number]["code"],
+  string
+> = {
+  en: "school",
+  fr: "amour",
+  de: "küchenchef",
+  es: "hermano",
+  tr: "harika",
+};
+
 function FlagIcon({
   code,
 }: {
@@ -415,7 +426,12 @@ export default function AddWordDemoCard({
                 type="button"
                 onClick={() => handleLanguageChange(option.code)}
                 aria-label={option.name}
-                className="cursor-pointer rounded-md border border-transparent p-0.5 transition-transform duration-200 hover:scale-105"
+                aria-pressed={language === option.code}
+                className={`cursor-pointer rounded-md border p-0.5 transition-transform duration-200 hover:scale-105 ${
+                  language === option.code
+                    ? "border-primary-500 shadow-sm shadow-primary-500/40"
+                    : "border-transparent"
+                }`}
               >
                 <FlagIcon code={option.code} />
               </button>
@@ -435,7 +451,7 @@ export default function AddWordDemoCard({
             language={language}
             value={word}
             onChange={setWord}
-            placeholder={tDictionary("word_placeholder")}
+            placeholder={LANGUAGE_PLACEHOLDERS[language]}
             autoFocus
             focusTrigger={focusTrigger}
           />
