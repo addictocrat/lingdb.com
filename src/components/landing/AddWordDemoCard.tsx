@@ -545,7 +545,7 @@ export default function AddWordDemoCard({
                 <div
                   key={`${burstSeed}-${item.word}-${item.translation}`}
                   style={style}
-                  className="demoMagicWord inline-flex items-center gap-2 rounded-2xl border border-pink-500/45 bg-pink-500/15 px-5 py-3 text-lg font-bold text-pink-700 dark:text-pink-300"
+                  className="magicWordDemo inline-flex items-center gap-2 rounded-2xl border border-pink-500/45 bg-pink-500/15 px-5 py-3 text-lg font-bold text-pink-700 dark:text-pink-300"
                 >
                   <Sparkles className="h-4 w-4 shrink-0 text-pink-500/80" />
                   {item.word} - {item.translation}
@@ -576,10 +576,10 @@ export default function AddWordDemoCard({
                   }}
                   className="mx-auto max-w-xl rounded-2xl border border-pink-500/45 bg-pink-500/15 px-5 py-3"
                 >
-                  <p className="demoPhraseText text-base font-bold text-pink-800 dark:text-pink-200">
+                  <p className="phraseDemoMain text-base font-bold text-pink-800 dark:text-pink-200">
                     {examplePhrase.phrase}
                   </p>
-                  <p className="demoPhraseTranslation mt-1 text-sm font-medium text-pink-700/85 dark:text-pink-300/90">
+                  <p className="phraseDemoSub mt-1 text-sm font-medium text-pink-700/85 dark:text-pink-300/90">
                     {examplePhrase.translation}
                   </p>
                 </div>
@@ -628,31 +628,29 @@ export default function AddWordDemoCard({
 
       <style jsx>{`
         .translationPreviewInput,
-        .demoPhraseText {
+        .phraseDemoMain {
           opacity: 1;
           -webkit-text-fill-color: rgb(157 23 77);
         }
 
-        .demoMagicWord {
-          opacity: 1;
+        .magicWordDemo {
           -webkit-text-fill-color: rgb(190 24 93);
         }
 
-        .demoPhraseTranslation {
-          opacity: 1;
+        .phraseDemoSub {
           -webkit-text-fill-color: rgba(190, 24, 93, 0.85);
         }
 
         :global(.dark) .translationPreviewInput,
-        :global(.dark) .demoPhraseText {
+        :global(.dark) .phraseDemoMain {
           -webkit-text-fill-color: rgb(251 207 232);
         }
 
-        :global(.dark) .demoMagicWord {
+        :global(.dark) .magicWordDemo {
           -webkit-text-fill-color: rgb(249 168 212);
         }
 
-        :global(.dark) .demoPhraseTranslation {
+        :global(.dark) .phraseDemoSub {
           -webkit-text-fill-color: rgba(249, 168, 212, 0.9);
         }
 
