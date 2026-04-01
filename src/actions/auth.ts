@@ -12,8 +12,19 @@ import { sendAdminNewUserNotification } from '@/lib/email/notify-admin';
  * Creates the user (unconfirmed) via admin API, generates a verification link,
  * and sends a custom email via SMTP.
  */
-export async function signUp(email: string, password: string) {
+export async function signUp(email: string, password: string, captchaDuration?: number, honeypot?: string) {
   try {
+    // Honeypot check
+    if (honeypot && honeypot.length > 0) {
+      // Ssssh, don't tell the bot we caught them, just return as if it's a generic error 
+      // or even success to waste their time, but here we return a generic error.
+      return { success: false, error: 'Registration failed. Please try again.' };
+    }
+
+    // Basic server-side CAPTCHA validation
+    if (!captchaDuration || captchaDuration < 200) {
+      return { success: false, error: 'CAPTCHA verification failed. Please try again.' };
+    }
     const admin = createAdminClient();
 
     // Create user with email_confirm: false

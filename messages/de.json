@@ -264,6 +264,8 @@
     "updating": "Aktualisierung läuft...",
     "return_to_login": "Zurück zum Login",
     "or": "oder",
+    "slide_to_verify": "Zum Verifizieren schieben",
+    "verified": "Verifiziert",
     "check_email_title": "Prüfen Sie Ihre E-Mails",
     "check_email_body": "Wir haben einen Bestätigungslink an {email} gesendet. Bitte bestätigen Sie Ihr Konto, bevor Sie sich anmelden.",
     "email_not_confirmed": "Bitte bestätigen Sie Ihre E-Mail-Adresse, um fortzufahren.",
@@ -289,7 +291,8 @@
       "password_number": "Passwort muss mindestens eine Zahl enthalten",
       "passwords_mismatch": "Passwörter stimmen nicht überein",
       "password_hint": "Muss 8+ Zeichen, 1 Großbuchstaben und 1 Zahl enthalten.",
-      "invalid_email": "Ungültige E-Mail-Adresse"
+      "invalid_email": "Ungültige E-Mail-Adresse",
+      "captcha_failed": "CAPTCHA-Verifizierung fehlgeschlagen. Bitte versuchen Sie es erneut."
     }
   },
   "library": {

@@ -264,6 +264,8 @@
     "updating": "Güncelleniyor...",
     "return_to_login": "Girişe dön",
     "or": "ya da",
+    "slide_to_verify": "Onaylamak için kaydırın",
+    "verified": "Onaylandı",
     "check_email_title": "E-postanızı kontrol edin",
     "check_email_body": "{email} adresine bir doğrulama bağlantısı gönderdik. Lütfen giriş yapmadan önce hesabınızı doğrulayın.",
     "email_not_confirmed": "Devam etmek için lütfen e-posta adresinizi doğrulayın.",
@@ -289,7 +291,8 @@
       "password_number": "Şifre en az 1 rakam içermelidir",
       "passwords_mismatch": "Şifreler eşleşmiyor",
       "password_hint": "En az 8 karakter, 1 büyük harf ve 1 rakam içermelidir.",
-      "invalid_email": "Geçersiz e-posta adresi"
+      "invalid_email": "Geçersiz e-posta adresi",
+      "captcha_failed": "CAPTCHA doğrulaması başarısız oldu. Lütfen tekrar deneyin."
     }
   },
   "library": {

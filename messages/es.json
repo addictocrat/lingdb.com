@@ -264,6 +264,8 @@
     "updating": "Actualizando...",
     "return_to_login": "Volver al inicio de sesión",
     "or": "o",
+    "slide_to_verify": "Desliza para verificar",
+    "verified": "Verificado",
     "check_email_title": "Consulta tu correo",
     "check_email_body": "Hemos enviado un enlace de verificación a {email}. Por favor, verifica tu cuenta antes de iniciar sesión.",
     "email_not_confirmed": "Por favor, verifica tu correo electrónico para continuar.",
@@ -289,7 +291,8 @@
       "password_number": "La contraseña debe contener al menos un número",
       "passwords_mismatch": "Las contraseñas no coinciden",
       "password_hint": "Debe contener más de 8 caracteres, 1 mayúscula y 1 número.",
-      "invalid_email": "Dirección de correo no válida"
+      "invalid_email": "Dirección de correo no válida",
+      "captcha_failed": "La verificación CAPTCHA falló. Inténtelo de nuevo."
     }
   },
   "library": {

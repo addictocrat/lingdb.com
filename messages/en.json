@@ -264,6 +264,8 @@
     "updating": "Updating...",
     "return_to_login": "Return to login",
     "or": "or",
+    "slide_to_verify": "Slide to verify",
+    "verified": "Verified",
     "check_email_title": "Check your email",
     "check_email_body": "We've sent a verification link to {email}. Please verify your account before logging in.",
     "email_not_confirmed": "Please verify your email address to continue.",
@@ -289,7 +291,8 @@
       "password_number": "Password must contain at least 1 number",
       "passwords_mismatch": "Passwords don't match",
       "password_hint": "Must contain 8+ characters, 1 uppercase letter, and 1 number.",
-      "invalid_email": "Invalid email address"
+      "invalid_email": "Invalid email address",
+      "captcha_failed": "CAPTCHA verification failed. Please try again."
     }
   },
   "library": {

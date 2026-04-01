@@ -264,6 +264,8 @@
     "updating": "Mise à jour en cours...",
     "return_to_login": "Retour à la connexion",
     "or": "ou",
+    "slide_to_verify": "Faire glisser pour vérifier",
+    "verified": "Vérifié",
     "check_email_title": "Vérifiez votre e-mail",
     "check_email_body": "Nous avons envoyé un lien de vérification à {email}. Veuillez vérifier votre compte avant de vous connecter.",
     "email_not_confirmed": "Veuillez vérifier votre adresse e-mail pour continuer.",
@@ -289,7 +291,8 @@
       "password_number": "Le mot de passe doit contenir au moins un chiffre",
       "passwords_mismatch": "Les mots de passe ne correspondent pas",
       "password_hint": "Doit contenir 8+ caractères, 1 majuscule et 1 chiffre.",
-      "invalid_email": "Adresse e-mail invalide"
+      "invalid_email": "Adresse e-mail invalide",
+      "captcha_failed": "La vérification CAPTCHA a échoué. Veuillez réessayer."
     }
   },
   "library": {

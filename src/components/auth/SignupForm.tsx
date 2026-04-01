@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils/cn';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import SlideCaptcha from '@/components/ui/SlideCaptcha';
 
 export default function SignupForm({ locale = 'en' }: { locale?: string }) {
   const supabase = createClient();
@@ -20,6 +21,9 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const [captchaDuration, setCaptchaDuration] = useState<number>(0);
+  const [honeypot, setHoneypot] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,9 +31,24 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
     setIsLoading(true);
 
     // Validate with Zod
-    const result = signupSchema.safeParse({ email, password });
+    const result = signupSchema.safeParse({ email, password, captchaDuration, honeypot });
     if (!result.success) {
       const issue = result.error.issues[0];
+      
+      // Specifically handle honeypot - if filled (bot detected), we silent fail or return generic error
+      if (issue.path.includes('honeypot')) {
+        setError('Registration failed. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Specifically handle captchaDuration error first
+      if (issue.path.includes('captchaDuration')) {
+        setError(t('errors.captcha_failed'));
+        setIsLoading(false);
+        return;
+      }
+
       // Safely check properties for narrowing
       if ('validation' in issue && issue.validation === 'email') {
         setError(t('errors.invalid_email'));
@@ -54,7 +73,7 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
 
     try {
       const { signUp } = await import('@/actions/auth');
-      const registerResult = await signUp(email, password);
+      const registerResult = await signUp(email, password, captchaDuration, honeypot);
 
       if (!registerResult.success) {
         setError(registerResult.error || t('errors.signup_failed'));
@@ -118,6 +137,18 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
           </div>
         )}
 
+        {/* Honeypot field (hidden from humans) - Using common name to attract bots */}
+        <div style={{ display: 'none' }} aria-hidden="true">
+          <input
+            type="text"
+            name="website"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+          />
+        </div>
+
         <div className="space-y-1.5">
           <label htmlFor="email" className="text-lg font-medium">
             {t('email_label')}
@@ -164,12 +195,23 @@ export default function SignupForm({ locale = 'en' }: { locale?: string }) {
           </p>
         </div>
 
+        <div className="pt-2">
+          <SlideCaptcha 
+            onVerify={({ verified, duration }) => {
+              setIsVerified(verified);
+              setCaptchaDuration(duration);
+            }} 
+            text={t('slide_to_verify')}
+            successText={t('verified')}
+          />
+        </div>
+
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || !isVerified}
           className={cn(
             'flex w-full items-center justify-center gap-2 rounded-xl bg-primary-500 py-3 text-lg font-semibold text-white transition-all duration-200 hover:bg-primary-600 hover:shadow-lg active:scale-[0.98]',
-            isLoading && 'cursor-not-allowed opacity-70'
+            (isLoading || !isVerified) && 'cursor-not-allowed opacity-70'
           )}
         >
           {isLoading ? (
