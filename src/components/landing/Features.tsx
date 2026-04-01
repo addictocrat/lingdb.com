@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { BookOpen, Sparkles, Brain, Users } from 'lucide-react';
+import { Gamepad2, Sparkles, Brain, Users } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -11,21 +11,15 @@ import { useTranslations } from 'next-intl';
 
 const features = [
   {
-    icon: BookOpen,
+ icon: Sparkles,
     titleKey: 'feature_dictionaries',
     descKey: 'feature_dictionaries_desc',
-    color: 'text-primary-500',
-    bg: 'bg-primary-50 dark:bg-primary-900/20',
-    glow: 'rgba(59, 130, 246, 0.5)',
-  },
-  {
-    icon: Sparkles,
-    titleKey: 'feature_ai',
-    descKey: 'feature_ai_desc',
     color: 'text-yellow-500',
     bg: 'bg-yellow-50 dark:bg-yellow-900/20',
     glow: 'rgba(234, 179, 8, 0.5)',
   },
+ 
+ 
   {
     icon: Brain,
     titleKey: 'feature_study',
@@ -34,13 +28,21 @@ const features = [
     bg: 'bg-green-50 dark:bg-green-900/20',
     glow: 'rgba(34, 197, 94, 0.5)',
   },
+   {
+    icon: Gamepad2,
+    titleKey: 'feature_minigames',
+    descKey: 'feature_minigames_desc',
+    color: 'text-[#a855f7]',
+    bg: 'bg-[#a855f7]/10 dark:bg-[#a855f7]/20',
+    glow: 'rgba(168, 85, 247, 0.5)',
+  },
   {
     icon: Users,
     titleKey: 'feature_community',
     descKey: 'feature_community_desc',
     color: 'text-accent-500',
     bg: 'bg-accent-50 dark:bg-accent-900/20',
-    glow: 'rgba(168, 85, 247, 0.5)',
+    glow: 'rgba(247, 123, 85, 0.5)',
   },
 ];
 
