@@ -1,11 +1,18 @@
 export type WordleCellState = "correct" | "present" | "absent";
 
-export function normalizeWord(value: string) {
+export function normalizeWord(value: string, locale?: string) {
+  if (locale) {
+    try {
+      return value.trim().toLocaleUpperCase(locale);
+    } catch {
+      return value.trim().toUpperCase();
+    }
+  }
   return value.trim().toUpperCase();
 }
 
 export function isAlphabeticWord(value: string) {
-  return /^[A-Z]+$/.test(value);
+  return /^\p{L}+$/u.test(value);
 }
 
 export function evaluateWordleGuess(

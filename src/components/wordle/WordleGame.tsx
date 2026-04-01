@@ -32,7 +32,7 @@ function toCellClass(state?: CellState) {
 }
 
 function onlyLetters(value: string) {
-  return value.replace(/[^a-zA-Z]/g, "");
+  return value.replace(/[^\p{L}]/gu, "");
 }
 
 export default function WordleGame({
@@ -121,13 +121,13 @@ export default function WordleGame({
     e.preventDefault();
     if (!game || isGameOver || isSubmitting) return;
 
-    const nextGuess = guess.trim().toUpperCase();
+    const nextGuess = guess.trim().toLocaleUpperCase(game.language);
     if (nextGuess.length !== game.wordLength) {
       setError(t("errors.word_length_mismatch", { length: game.wordLength }));
       return;
     }
 
-    if (!/^[A-Z]+$/.test(nextGuess)) {
+    if (!/^\p{L}+$/u.test(nextGuess)) {
       setError(t("errors.word_letters_only"));
       return;
     }
@@ -302,7 +302,7 @@ export default function WordleGame({
                   value={guess}
                   maxLength={game.wordLength}
                   onChange={(e) =>
-                    setGuess(onlyLetters(e.target.value).toUpperCase())
+                    setGuess(onlyLetters(e.target.value).toLocaleUpperCase(game?.language || locale))
                   }
                   className="w-full border border-[var(--border-color)] bg-[var(--bg)] px-5 py-4 text-3xl font-black tracking-[0.2em] uppercase outline-none focus:border-primary-500 sm:text-5xl"
                   placeholder={t("game.guess_placeholder")}

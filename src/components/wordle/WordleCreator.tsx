@@ -15,7 +15,7 @@ type CreateResponse = {
 };
 
 function onlyLetters(value: string) {
-  return value.replace(/[^a-zA-Z]/g, "");
+  return value.replace(/[^\p{L}]/gu, "");
 }
 
 export default function WordleCreator({ locale }: { locale: string }) {
@@ -36,7 +36,14 @@ export default function WordleCreator({ locale }: { locale: string }) {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [sharePath, setSharePath] = useState<string | null>(null);
 
-  const normalizedWord = useMemo(() => word.trim().toUpperCase(), [word]);
+  const normalizedWord = useMemo(() => {
+    try {
+      return word.trim().toLocaleUpperCase(language);
+    } catch {
+      return word.trim().toUpperCase();
+    }
+  }, [word, language]);
+
   const isLengthInvalid =
     normalizedWord.length > 0 &&
     (normalizedWord.length < 3 || normalizedWord.length > 12);
@@ -52,7 +59,7 @@ export default function WordleCreator({ locale }: { locale: string }) {
       return;
     }
 
-    if (!/^[A-Z]+$/.test(normalizedWord)) {
+    if (!/^\p{L}+$/u.test(normalizedWord)) {
       setError(t("errors.word_letters_only"));
       return;
     }
@@ -129,7 +136,7 @@ export default function WordleCreator({ locale }: { locale: string }) {
             <input
               value={word}
               onChange={(e) =>
-                setWord(onlyLetters(e.target.value).toUpperCase())
+                setWord(onlyLetters(e.target.value).toLocaleUpperCase(language))
               }
               className="w-full border border-[var(--border-color)] bg-[var(--bg)] px-5 py-4 text-3xl font-black tracking-[0.2em] uppercase outline-none focus:border-primary-500 sm:text-5xl"
               placeholder={t("fields.word_placeholder")}

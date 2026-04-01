@@ -17,6 +17,9 @@
 /.next/
 /out/
 
+# test artifacts
+/test-results
+
 # production
 /build
 
@@ -43,5 +46,6 @@ next-env.d.ts
 
 # agent tasks
 /implementations
+
 
 

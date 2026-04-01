@@ -70,11 +70,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const normalizedWord = normalizeWord(parsed.data.word);
+    const normalizedWord = normalizeWord(parsed.data.word, parsed.data.language);
 
     if (!isAlphabeticWord(normalizedWord)) {
       return NextResponse.json(
-        { error: "Word must contain only letters A-Z." },
+        { error: "Word must contain only letters." },
         { status: 400 },
       );
     }

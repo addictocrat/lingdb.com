@@ -167,14 +167,14 @@ export default function AddWordDemoCard({
       return;
     }
 
-    const normalizedWord = word.trim().toUpperCase();
+    const normalizedWord = word.trim().toLocaleUpperCase(language);
 
     if (normalizedWord.length < 3 || normalizedWord.length > 12) {
       setWordleError(tWordle("errors.word_length_range"));
       return;
     }
 
-    if (!/^[A-Z]+$/.test(normalizedWord)) {
+    if (!/^\p{L}+$/u.test(normalizedWord)) {
       setWordleError(tWordle("errors.word_letters_only"));
       return;
     }

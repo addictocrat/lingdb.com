@@ -75,6 +75,7 @@ export async function POST(request: NextRequest) {
         noteToSolver: true,
         wordLength: true,
         maxTries: true,
+        language: true,
         expiresAt: true,
       },
       where: and(
@@ -90,11 +91,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
 
-    const normalizedGuess = normalizeWord(parsed.data.guess);
+    const normalizedGuess = normalizeWord(parsed.data.guess, game.language);
 
     if (!isAlphabeticWord(normalizedGuess)) {
       return NextResponse.json(
-        { error: "Guess must contain only letters A-Z." },
+        { error: "Guess must contain only letters." },
         { status: 400 },
       );
     }
