@@ -286,11 +286,11 @@
       "signup_failed": "Hesap oluşturulamadı.",
       "reset_failed": "Sıfırlama e-postası gönderilemedi.",
       "update_failed": "Şifre güncellenemedi.",
-      "password_min": "Şifre en az 8 karakter olmalıdır",
+      "password_min": "Şifre en az 6 karakter olmalıdır",
       "password_uppercase": "Şifre en az 1 büyük harf içermelidir",
       "password_number": "Şifre en az 1 rakam içermelidir",
       "passwords_mismatch": "Şifreler eşleşmiyor",
-      "password_hint": "En az 8 karakter, 1 büyük harf ve 1 rakam içermelidir.",
+      "password_hint": "En az 6 karakter içermelidir.",
       "invalid_email": "Geçersiz e-posta adresi",
       "captcha_failed": "CAPTCHA doğrulaması başarısız oldu. Lütfen tekrar deneyin."
     }

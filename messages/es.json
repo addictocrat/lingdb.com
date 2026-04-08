@@ -286,11 +286,11 @@
       "signup_failed": "Error al crear la cuenta.",
       "reset_failed": "Error al enviar el correo de restablecimiento.",
       "update_failed": "Error al actualizar la contraseña.",
-      "password_min": "La contraseña debe tener al menos 8 caracteres",
-      "password_uppercase": "La contraseña debe contener al menos una letra mayúscula",
-      "password_number": "La contraseña debe contener al menos un número",
+      "password_min": "La contraseña debe tener al menos 6 caracteres",
+      "password_uppercase": "La contraseña debe tener al menos 1 mayúscula",
+      "password_number": "La contraseña debe tener al menos 1 número",
       "passwords_mismatch": "Las contraseñas no coinciden",
-      "password_hint": "Debe contener más de 8 caracteres, 1 mayúscula y 1 número.",
+      "password_hint": "Debe tener al menos 6 caracteres.",
       "invalid_email": "Dirección de correo no válida",
       "captcha_failed": "La verificación CAPTCHA falló. Inténtelo de nuevo."
     }
