@@ -1,27 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useRef } from 'react';
-import Button from '@/components/ui/Button';
-import { useToast } from '@/components/ui/Toast';
-import { Plus } from 'lucide-react';
-import { z } from 'zod';
-import { useLocale, useTranslations } from 'next-intl';
-import AutoSuggest from './AutoSuggest';
+import { useState, useRef } from "react";
+import Button from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
+import { Plus } from "lucide-react";
+import { z } from "zod";
+import { useLocale, useTranslations } from "next-intl";
+import AutoSuggest from "./AutoSuggest";
+import { SUPPORTED_LANGUAGES } from "@/lib/utils/constants";
 
-import Dropdown, { DropdownItem } from '@/components/ui/Dropdown';
+import Dropdown, { DropdownItem } from "@/components/ui/Dropdown";
 
 const addWordSchema = z.object({
-  title: z.string().min(1, 'Word is required').max(100),
-  translation: z.string().min(1, 'Translation is required').max(200),
+  title: z.string().min(1, "Word is required").max(100),
+  translation: z.string().min(1, "Translation is required").max(200),
 });
-
-const languages = [
-  { code: 'en', flagClass: 'fi fi-gb' },
-  { code: 'fr', flagClass: 'fi fi-fr' },
-  { code: 'de', flagClass: 'fi fi-de' },
-  { code: 'es', flagClass: 'fi fi-es' },
-  { code: 'tr', flagClass: 'fi fi-tr' },
-];
 
 interface AddWordFormProps {
   dictionaryId: string;
@@ -38,9 +31,9 @@ export default function AddWordForm({
 }: AddWordFormProps) {
   const { toast } = useToast();
   const locale = useLocale();
-  const t = useTranslations('dictionary');
-  const [title, setTitle] = useState('');
-  const [translation, setTranslation] = useState('');
+  const t = useTranslations("dictionary");
+  const [title, setTitle] = useState("");
+  const [translation, setTranslation] = useState("");
   const [targetLang, setTargetLang] = useState(locale);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -61,30 +54,30 @@ export default function AddWordForm({
     }
 
     if (wordCount >= 500) {
-      toast(t('word_limit', { max: 500 }), 'warning');
+      toast(t("word_limit", { max: 500 }), "warning");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/words', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/words", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...result.data, dictionaryId }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        toast(data.error || t('settings.error_saved'), 'error');
+        toast(data.error || t("settings.error_saved"), "error");
         return;
       }
 
-      setTitle('');
-      setTranslation('');
+      setTitle("");
+      setTranslation("");
       titleRef.current?.focus(); // Actually AutoSuggest input ref might not be exposed, but that's fine
       onWordAdded();
     } catch {
-      toast(t('settings.error_saved'), 'error');
+      toast(t("settings.error_saved"), "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -96,13 +89,15 @@ export default function AddWordForm({
       className="flex flex-col gap-3 rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] p-4 sm:flex-row sm:items-end"
     >
       <div className="flex-1 space-y-1">
-        <label className="text-sm font-medium text-[var(--fg)]/60">{t('word')}</label>
+        <label className="text-sm font-medium text-[var(--fg)]/60">
+          {t("word")}
+        </label>
         <AutoSuggest
           language={dictionaryLanguage}
           value={title}
           onChange={setTitle}
-          placeholder={t('word_placeholder')}
-          className={errors.title ? 'border-accent-400' : ''}
+          placeholder={t("word_placeholder")}
+          className={errors.title ? "border-accent-400" : ""}
         />
         {errors.title && (
           <p className="text-sm text-accent-500">{errors.title}</p>
@@ -111,7 +106,7 @@ export default function AddWordForm({
 
       <div className="flex-1 space-y-1">
         <label className="text-sm font-medium text-[var(--fg)]/60">
-          {t('translation')}
+          {t("translation")}
         </label>
         <AutoSuggest
           language={dictionaryLanguage}
@@ -120,8 +115,8 @@ export default function AddWordForm({
           apiEndpoint="/api/words/translate-suggest"
           value={translation}
           onChange={setTranslation}
-          placeholder={t('translation_placeholder')}
-          className={errors.translation ? 'border-accent-400' : ''}
+          placeholder={t("translation_placeholder")}
+          className={errors.translation ? "border-accent-400" : ""}
           rightElement={
             <Dropdown
               key={targetLang}
@@ -133,21 +128,24 @@ export default function AddWordForm({
                 >
                   <span
                     className={`text-lg rounded-sm overflow-hidden ${
-                      languages.find((l) => l.code === targetLang)?.flagClass || 'fi fi-gb'
+                      SUPPORTED_LANGUAGES.find((l) => l.code === targetLang)
+                        ?.flagClass || "fi fi-gb"
                     }`}
                   ></span>
                 </button>
               }
             >
               <div className="py-1">
-                {languages.map((lang) => (
+                {SUPPORTED_LANGUAGES.map((lang) => (
                   <DropdownItem
                     key={lang.code}
                     onClick={() => setTargetLang(lang.code)}
                     className="gap-3"
                     type="button"
                   >
-                    <span className={`text-xl rounded-sm overflow-hidden ${lang.flagClass}`}></span>
+                    <span
+                      className={`text-xl rounded-sm overflow-hidden ${lang.flagClass}`}
+                    ></span>
                     <span className="text-base uppercase">{lang.code}</span>
                   </DropdownItem>
                 ))}
@@ -160,9 +158,14 @@ export default function AddWordForm({
         )}
       </div>
 
-      <Button type="submit" className="cursor-pointer" isLoading={isSubmitting} size="md">
+      <Button
+        type="submit"
+        className="cursor-pointer"
+        isLoading={isSubmitting}
+        size="md"
+      >
         <Plus className="h-4 w-4" />
-        {t('add')}
+        {t("add")}
       </Button>
     </form>
   );

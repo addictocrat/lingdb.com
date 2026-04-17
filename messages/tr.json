@@ -39,13 +39,13 @@
     "browse_library": "Kütüphaneye Göz At",
     "features_title": "Neden Lingdb?",
     "feature_dictionaries": "Akıllı Sözlükler",
-    "feature_dictionaries_desc": "YZ sözlükler bağlama uygun yeni kelimeler önerir ve örnek cümleler kurar.",
+    "feature_dictionaries_desc": "YZ yeni kelimeler önerir ve örnek cümleler kurar.",
     "feature_minigames": "Mini oyunlar",
-    "feature_minigames_desc": "Wordle, Taboo oyna ve arkadaşlarına meydan oku!",
+    "feature_minigames_desc": "Wordle hazırla ve arkadaşlarına meydan oku.",
     "feature_study": "Quiz ve Kelime Kartları",
     "feature_study_desc": "Kelime kartları ve quizlerle etkili şekilde çalışın.",
     "feature_community": "Birlikte Öğrenin",
-    "feature_community_desc": "Arkadaşlarınızla sözlük oluşturun. Diğer sözlükleri keşfedin ve kopyalayın.",
+    "feature_community_desc": "Arkadaşlarınızla ortak sözlük oluşturun.",
     "how_it_works": "Nasıl Çalışır",
     "step1": "Kayıt Olun",
     "step1_desc": "Saniyeler içinde ücretsiz hesabınızı oluşturun.",
@@ -419,7 +419,9 @@
     "blogs": "Haberler",
     "profile": "Profil",
     "leaderboards": "Liderlik Tahtası",
-    "wordle": "Wordle"
+    "wordle": "Wordle",
+    "legal": "Yasal",
+    "contact": "İletişim"
   },
   "wordle": {
     "title": "Wordle Oluşturucu",

@@ -9,17 +9,13 @@ import MobileNav from "./MobileNav";
 import Dropdown, { DropdownItem } from "@/components/ui/Dropdown";
 import { cn } from "@/lib/utils/cn";
 import { useTranslations } from "next-intl";
+import { MAIN_NAV_LINKS } from "@/lib/constants/navigation";
 import {
-  LayoutDashboard,
-  Library,
   User as UserIcon,
-  LogOut,
-  Settings,
-  Coins,
-  Trophy,
   ShieldCheck,
-  FileText,
-  Puzzle,
+  Settings,
+  LogOut,
+  Coins,
 } from "lucide-react";
 
 export default function Header({ locale = "en" }: { locale?: string }) {
@@ -29,22 +25,6 @@ export default function Header({ locale = "en" }: { locale?: string }) {
   const tNav = useTranslations("nav");
 
   const isActive = (path: string) => pathname.includes(path);
-
-  const navLinks = [
-    {
-      href: `/${locale}/dashboard`,
-      label: tNav("dashboard"),
-      icon: LayoutDashboard,
-    },
-    { href: `/${locale}/library`, label: tNav("library"), icon: Library },
-    {
-      href: `/${locale}/leaderboards`,
-      label: tNav("leaderboards"),
-      icon: Trophy,
-    },
-    { href: `/${locale}/blogs`, label: tNav("blogs"), icon: FileText },
-    { href: `/${locale}/wordle`, label: tNav("wordle"), icon: Puzzle },
-  ];
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-[var(--border-color)] bg-[var(--bg)]/80 backdrop-blur-xl">
@@ -64,41 +44,37 @@ export default function Header({ locale = "en" }: { locale?: string }) {
           </Link>
           {/* Desktop Nav */}
           <nav className="hidden items-center gap-1 md:flex">
-            {navLinks
-              .filter(
-                (link) =>
-                  user ||
-                  link.href.includes("/library") ||
-                  link.href.includes("/leaderboards") ||
-                  link.href.includes("/blogs") ||
-                  link.href.includes("/wordle"),
-              )
-              .map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  id={
-                    link.href.includes("profile")
-                      ? "profile-nav-link"
-                      : link.href.includes("library")
-                        ? "library-nav-link"
-                        : link.href.includes("tiers")
-                          ? "tiers-nav-link"
-                          : undefined
-                  }
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-2 text-lg font-medium transition-colors",
-                    link.href.includes("/wordle")
-                      ? "rounded-none bg-yellow-400 font-extrabold text-black hover:bg-yellow-300"
-                      : isActive(link.href.split("/").pop()!)
-                        ? "rounded-lg bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400"
-                        : "rounded-lg text-[var(--fg)]/60 hover:bg-[var(--surface)] hover:text-[var(--fg)]",
-                  )}
-                >
-                  <link.icon className="h-4 w-4" />
-                  {link.label}
-                </Link>
-              ))}
+            {MAIN_NAV_LINKS.filter((link) => user || !link.authRequired).map(
+              (link) => {
+                const hrefWithLocale = `/${locale}${link.href}`;
+                return (
+                  <Link
+                    key={link.href}
+                    href={hrefWithLocale}
+                    id={
+                      link.href.includes("profile")
+                        ? "profile-nav-link"
+                        : link.href.includes("library")
+                          ? "library-nav-link"
+                          : link.href.includes("tiers")
+                            ? "tiers-nav-link"
+                            : undefined
+                    }
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-2 text-lg font-medium transition-colors",
+                      link.variant === "special"
+                        ? "rounded-none bg-yellow-400 font-extrabold text-black hover:bg-yellow-300"
+                        : isActive(link.href.split("/").pop()!)
+                          ? "rounded-lg bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400"
+                          : "rounded-lg text-[var(--fg)]/60 hover:bg-[var(--surface)] hover:text-[var(--fg)]",
+                    )}
+                  >
+                    <link.icon className="h-4 w-4" />
+                    {tNav(link.labelKey)}
+                  </Link>
+                );
+              },
+            )}
           </nav>
         </div>
 
@@ -203,11 +179,15 @@ export default function Header({ locale = "en" }: { locale?: string }) {
           <MobileNav
             locale={locale}
             isLoggedIn={!!user}
-            navLinks={navLinks.filter(
+            navLinks={MAIN_NAV_LINKS.filter(
               (link) =>
                 !link.href.includes("/blogs") &&
                 !link.href.includes("/leaderboards"),
-            )}
+            ).map((link) => ({
+              href: `/${locale}${link.href}`,
+              label: tNav(link.labelKey),
+              icon: link.icon,
+            }))}
             profile={profile}
             user={user}
             signOut={signOut}

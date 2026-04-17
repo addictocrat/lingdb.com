@@ -31,7 +31,7 @@
     "upgrade_cta": "Améliorer"
   },
   "landing": {
-    "badge_text": "La façon la plus intelligente d'apprendre des langues",
+    "badge_text": "La façon intelligente d'apprendre des langues",
     "hero_title": "Créez des dictionnaires intelligents",
     "hero_title_highlight": "en toute simplicité",
     "hero_subtitle": "Créez des flashcards, passez des quiz et apprenez avec des outils alimentés par l'IA.",
@@ -419,7 +419,9 @@
     "blogs": "Blogs",
     "profile": "Profil",
     "leaderboards": "Classements",
-    "wordle": "Wordle"
+    "wordle": "Wordle",
+    "legal": "Mentions Légales",
+    "contact": "Contact"
   },
   "wordle": {
     "title": "Createur Wordle",

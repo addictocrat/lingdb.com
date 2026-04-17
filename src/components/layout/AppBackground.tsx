@@ -20,11 +20,11 @@ export default function AppBackground() {
     <div className="fixed inset-0 z-[-1] pointer-events-none">
       <DotGrid
         dotSize={4}
-        gap={64}
-        baseColor={isDark ? "#1b1956" : "#dbdee4"}
-        activeColor={isDark ? "#5a57a9" : "#585b8a"}
-        proximity={120}
-        shockRadius={250}
+        gap={25}
+        baseColor={isDark ? "#0000d886" : "rgba(0, 0, 216, 0.2)"}
+        activeColor="#0001D8"
+        proximity={110}
+        shockRadius={200}
         shockStrength={5}
         resistance={750}
         returnDuration={1.5}

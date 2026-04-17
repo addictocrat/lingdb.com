@@ -1,0 +1,83 @@
+import {
+  LayoutDashboard,
+  Library,
+  Trophy,
+  FileText,
+  Puzzle,
+  Settings,
+  Users,
+  ShieldCheck,
+  BarChart,
+  BarChart3,
+  MessageSquare,
+  Ticket,
+  BookOpen,
+} from "lucide-react";
+
+export const MAIN_NAV_LINKS = [
+  {
+    href: "/dashboard",
+    labelKey: "dashboard",
+    icon: LayoutDashboard,
+    authRequired: true,
+  },
+  {
+    href: "/library",
+    labelKey: "library",
+    icon: Library,
+    authRequired: false,
+  },
+  {
+    href: "/leaderboards",
+    labelKey: "leaderboards",
+    icon: Trophy,
+    authRequired: false,
+  },
+  {
+    href: "/blogs",
+    labelKey: "blogs",
+    icon: FileText,
+    authRequired: false,
+  },
+  {
+    href: "/wordle",
+    labelKey: "wordle",
+    icon: Puzzle,
+    authRequired: false,
+    variant: "special",
+  },
+];
+
+export const LEGAL_LINKS = [
+  { href: "/privacy", labelKey: "privacy.title" },
+  { href: "/terms", labelKey: "terms.title" },
+  { href: "/cookies", labelKey: "cookies.title" },
+];
+
+export const ADMIN_NAV_LINKS = [
+  {
+    href: "/admin/overview",
+    label: "Overview",
+    icon: BarChart3,
+  },
+  {
+    href: "/admin/users",
+    label: "Users",
+    icon: Users,
+  },
+  {
+    href: "/admin/dictionaries",
+    label: "Dictionaries",
+    icon: BookOpen,
+  },
+  {
+    href: "/admin/blogs",
+    label: "Blogs",
+    icon: FileText,
+  },
+  {
+    href: "/admin/coupons",
+    label: "Coupons",
+    icon: Ticket,
+  },
+];

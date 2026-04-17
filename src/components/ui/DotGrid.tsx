@@ -40,16 +40,6 @@ export interface DotGridProps {
   style?: React.CSSProperties;
 }
 
-function hexToRgb(hex: string) {
-  const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
-  if (!m) return { r: 0, g: 0, b: 0 };
-  return {
-    r: parseInt(m[1], 16),
-    g: parseInt(m[2], 16),
-    b: parseInt(m[3], 16),
-  };
-}
-
 const DotGrid: React.FC<DotGridProps> = ({
   dotSize = 16,
   gap = 46,
@@ -78,9 +68,6 @@ const DotGrid: React.FC<DotGridProps> = ({
     lastX: 0,
     lastY: 0,
   });
-
-  const baseRgb = useMemo(() => hexToRgb(baseColor), [baseColor]);
-  const activeRgb = useMemo(() => hexToRgb(activeColor), [activeColor]);
 
   const circlePath = useMemo(() => {
     if (typeof window === "undefined" || !window.Path2D) return null;
@@ -151,19 +138,9 @@ const DotGrid: React.FC<DotGridProps> = ({
         const dy = dot.cy - py;
         const dsq = dx * dx + dy * dy;
 
-        let style = baseColor;
-        if (dsq <= proxSq) {
-          const dist = Math.sqrt(dsq);
-          const t = 1 - dist / proximity;
-          const r = Math.round(baseRgb.r + (activeRgb.r - baseRgb.r) * t);
-          const g = Math.round(baseRgb.g + (activeRgb.g - baseRgb.g) * t);
-          const b = Math.round(baseRgb.b + (activeRgb.b - baseRgb.b) * t);
-          style = `rgb(${r},${g},${b})`;
-        }
-
         ctx.save();
         ctx.translate(ox, oy);
-        ctx.fillStyle = style;
+        ctx.fillStyle = dsq <= proxSq ? activeColor : baseColor;
         ctx.fill(circlePath);
         ctx.restore();
       }
@@ -173,7 +150,7 @@ const DotGrid: React.FC<DotGridProps> = ({
 
     draw();
     return () => cancelAnimationFrame(rafId);
-  }, [proximity, baseColor, activeRgb, baseRgb, circlePath]);
+  }, [proximity, baseColor, activeColor, circlePath]);
 
   useEffect(() => {
     buildGrid();

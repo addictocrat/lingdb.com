@@ -419,7 +419,9 @@
     "blogs": "Blogs",
     "profile": "Profil",
     "leaderboards": "Bestenlisten",
-    "wordle": "Wordle"
+    "wordle": "Wordle",
+    "legal": "Rechtliches",
+    "contact": "Kontakt"
   },
   "wordle": {
     "title": "Wordle-Ersteller",

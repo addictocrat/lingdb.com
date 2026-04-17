@@ -55,7 +55,7 @@ export default function Hero({ locale = "en" }: { locale?: string }) {
   return (
     <section
       ref={containerRef}
-      className="relative overflow-hidden px-4 pb-20 pt-16 sm:px-6 md:pb-28 md:pt-24"
+      className="relative overflow-hidden px-4 py-20 sm:px-6 md:py-22 md:pt-24"
     >
       {/* Background gradient */}
       {/* <div className="pointer-events-none absolute inset-0 -z-10">
@@ -79,7 +79,7 @@ export default function Hero({ locale = "en" }: { locale?: string }) {
         </h1>
 
         {/* Subtitle */}
-        <p className="hero-subtitle mx-auto mt-6 max-w-2xl text-xl text-[var(--fg)]/60 sm:text-2xl">
+        <p className="hero-subtitle mx-auto mt-6 max-w-2xl text-xl text-[var(--fg)] sm:text-2xl">
           {t("hero_subtitle")}
         </p>
 
@@ -98,7 +98,7 @@ export default function Hero({ locale = "en" }: { locale?: string }) {
           </Link>
           <Link
             href={`/${locale}/library`}
-            className="flex items-center gap-2 rounded-2xl border border-[var(--border-color)] px-8 py-4 text-base font-semibold transition-all duration-200 hover:bg-[var(--surface)] hover:shadow-md"
+            className="bg-gray-50 text-primary-300 flex items-center gap-2 rounded-2xl border border-[var(--border-color)] px-8 py-4 text-base font-semibold transition-all duration-200 hover:shadow-md"
           >
             {t("browse_library")}
           </Link>

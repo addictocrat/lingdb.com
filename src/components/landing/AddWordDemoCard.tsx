@@ -7,6 +7,11 @@ import { Plus, Puzzle, Sparkles, WandSparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  DEMO_LANGUAGE_OPTIONS,
+  DEMO_LANGUAGE_PLACEHOLDERS,
+  type DemoLanguageCode,
+} from "@/lib/constants/landing";
 
 type MagicSuggestion = {
   word: string;
@@ -18,109 +23,20 @@ type ExamplePhrase = {
   translation: string;
 };
 
-const LANGUAGE_OPTIONS = [
-  { code: "en", name: "English" },
-  { code: "fr", name: "French" },
-  { code: "de", name: "German" },
-  { code: "es", name: "Spanish" },
-  { code: "tr", name: "Turkish" },
-] as const;
-
-const LANGUAGE_PLACEHOLDERS: Record<
-  (typeof LANGUAGE_OPTIONS)[number]["code"],
-  string
-> = {
-  en: "school",
-  fr: "fleur",
-  de: "küchenchef",
-  es: "hermano",
-  tr: "harika",
-};
-
-function FlagIcon({
-  code,
-}: {
-  code: (typeof LANGUAGE_OPTIONS)[number]["code"];
-}) {
-  if (code === "en") {
-    return (
-      <svg
-        viewBox="0 0 60 40"
-        className="h-5 w-7 overflow-hidden rounded-sm"
-        aria-hidden="true"
-      >
-        <rect width="60" height="40" fill="#012169" />
-        <path d="M0 0 L60 40 M60 0 L0 40" stroke="#fff" strokeWidth="8" />
-        <path d="M0 0 L60 40 M60 0 L0 40" stroke="#C8102E" strokeWidth="4" />
-        <rect x="24" width="12" height="40" fill="#fff" />
-        <rect y="14" width="60" height="12" fill="#fff" />
-        <rect x="26" width="8" height="40" fill="#C8102E" />
-        <rect y="16" width="60" height="8" fill="#C8102E" />
-      </svg>
-    );
-  }
-
-  if (code === "fr") {
-    return (
-      <svg
-        viewBox="0 0 60 40"
-        className="h-5 w-7 overflow-hidden rounded-sm"
-        aria-hidden="true"
-      >
-        <rect width="20" height="40" fill="#0055A4" />
-        <rect x="20" width="20" height="40" fill="#fff" />
-        <rect x="40" width="20" height="40" fill="#EF4135" />
-      </svg>
-    );
-  }
-
-  if (code === "de") {
-    return (
-      <svg
-        viewBox="0 0 60 40"
-        className="h-5 w-7 overflow-hidden rounded-sm"
-        aria-hidden="true"
-      >
-        <rect width="60" height="13.33" fill="#000" />
-        <rect y="13.33" width="60" height="13.33" fill="#DD0000" />
-        <rect y="26.66" width="60" height="13.34" fill="#FFCE00" />
-      </svg>
-    );
-  }
-
-  if (code === "es") {
-    return (
-      <svg
-        viewBox="0 0 60 40"
-        className="h-5 w-7 overflow-hidden rounded-sm"
-        aria-hidden="true"
-      >
-        <rect width="60" height="40" fill="#AA151B" />
-        <rect y="10" width="60" height="20" fill="#F1BF00" />
-      </svg>
-    );
-  }
+function FlagIcon({ code }: { code: DemoLanguageCode }) {
+  const flagCode = code === "en" ? "gb" : code;
 
   return (
-    <svg
-      viewBox="0 0 60 40"
-      className="h-5 w-7 overflow-hidden rounded-sm"
+    <span
+      className={`fi fi-${flagCode} h-5 w-7 overflow-hidden rounded-sm`}
       aria-hidden="true"
-    >
-      <rect width="60" height="40" fill="#E30A17" />
-      <circle cx="26" cy="20" r="8" fill="#fff" />
-      <circle cx="28" cy="20" r="6.5" fill="#E30A17" />
-      <path
-        d="M37.5 20l3-1.2-1.6 2.7 3.1.3-2.7 1.5.9 3-2.7-1.6-2.6 1.6.8-3-2.6-1.5 3-.3-1.5-2.7z"
-        fill="#fff"
-      />
-    </svg>
+    />
   );
 }
 
 function toSafeLocale(locale?: string) {
   const normalized = (locale || "en").toLowerCase();
-  if (LANGUAGE_OPTIONS.some((lang) => lang.code === normalized)) {
+  if (DEMO_LANGUAGE_OPTIONS.some((lang) => lang.code === normalized)) {
     return normalized;
   }
   return "en";
@@ -135,8 +51,7 @@ export default function AddWordDemoCard({
   const tWordle = useTranslations("wordle");
   const router = useRouter();
 
-  const [language, setLanguage] =
-    useState<(typeof LANGUAGE_OPTIONS)[number]["code"]>("fr");
+  const [language, setLanguage] = useState<DemoLanguageCode>("fr");
   const [word, setWord] = useState("");
   const [translation, setTranslation] = useState("");
   const [magicSuggestions, setMagicSuggestions] = useState<MagicSuggestion[]>(
@@ -210,9 +125,7 @@ export default function AddWordDemoCard({
     }
   }
 
-  const handleLanguageChange = (
-    nextLanguage: (typeof LANGUAGE_OPTIONS)[number]["code"],
-  ) => {
+  const handleLanguageChange = (nextLanguage: DemoLanguageCode) => {
     setLanguage(nextLanguage);
     setWord("");
     setTranslation("");
@@ -473,14 +386,14 @@ export default function AddWordDemoCard({
             {tDictionary("add_word")}
           </p>
           <div className="ml-1 flex items-center gap-0.5">
-            {LANGUAGE_OPTIONS.map((option) => (
+            {DEMO_LANGUAGE_OPTIONS.map((option) => (
               <button
                 key={option.code}
                 type="button"
                 onClick={() => handleLanguageChange(option.code)}
                 aria-label={option.name}
                 aria-pressed={language === option.code}
-                className={`cursor-pointer rounded-md border p-0.5 transition-transform duration-200 hover:scale-105 ${
+                className={`flex size-fit cursor-pointer items-center justify-center rounded-sm border transition-colors duration-200 ${
                   language === option.code
                     ? "border-primary-500 shadow-sm shadow-primary-500/40"
                     : "border-transparent"
@@ -504,7 +417,7 @@ export default function AddWordDemoCard({
             language={language}
             value={word}
             onChange={setWord}
-            placeholder={LANGUAGE_PLACEHOLDERS[language]}
+            placeholder={DEMO_LANGUAGE_PLACEHOLDERS[language]}
             autoFocus
             focusTrigger={focusTrigger}
           />
@@ -519,13 +432,13 @@ export default function AddWordDemoCard({
                 animation:
                   "demo-explode 640ms cubic-bezier(0.2, 1.2, 0.2, 1) both",
               }}
-              className="rounded-xl border border-pink-500/45 bg-pink-500/15 p-1"
+              className="rounded-xl border border-primary-500/45 bg-primary-500/15 p-1"
             >
               <input
                 value={translation}
                 readOnly
                 aria-disabled="true"
-                className="translationPreviewInput w-full rounded-lg border border-pink-500/35 bg-pink-500/10 px-3 py-2 text-lg font-semibold text-pink-800 dark:text-pink-200"
+                className="translationPreviewInput w-full rounded-lg border border-primary-500/35 bg-primary-500/10 px-3 py-2 text-lg font-semibold text-primary-800 dark:text-primary-200"
               />
             </div>
           </div>
@@ -545,9 +458,9 @@ export default function AddWordDemoCard({
                 <div
                   key={`${burstSeed}-${item.word}-${item.translation}`}
                   style={style}
-                  className="magicWordDemo inline-flex items-center gap-2 rounded-2xl border border-pink-500/45 bg-pink-500/15 px-5 py-3 text-lg font-bold text-pink-700 dark:text-pink-300"
+                  className="magicWordDemo inline-flex items-center gap-2 rounded-2xl border border-primary-500/45 bg-primary-500/15 px-5 py-3 text-lg font-bold text-primary-700 dark:text-primary-300"
                 >
-                  <Sparkles className="h-4 w-4 shrink-0 text-pink-500/80" />
+                  <Sparkles className="h-4 w-4 shrink-0 text-primary-500/80" />
                   {item.word} - {item.translation}
                 </div>
               );
@@ -555,17 +468,17 @@ export default function AddWordDemoCard({
 
             {isLoadingMagic && magicSuggestions.length === 0 && (
               <div className="flex items-center gap-1.5 py-2">
-                <Sparkles className="h-4 w-4 animate-pulse text-pink-500/80" />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-pink-500/70 [animation-delay:-0.2s]" />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-pink-500/70 [animation-delay:-0.1s]" />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-pink-500/70" />
+                <Sparkles className="h-4 w-4 animate-pulse text-primary-500/80" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-primary-500/70 [animation-delay:-0.2s]" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-primary-500/70 [animation-delay:-0.1s]" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-primary-500/70" />
               </div>
             )}
           </div>
         )}
 
         {(isLoadingPhrase || examplePhrase) && (
-          <div className="mt-4 border-t border-pink-500/20 pt-3 text-center">
+          <div className="mt-4 border-t border-primary-500/20 pt-3 text-center">
             {examplePhrase ? (
               <>
                 <div
@@ -574,21 +487,21 @@ export default function AddWordDemoCard({
                     animation:
                       "demo-explode 760ms cubic-bezier(0.2, 1.2, 0.2, 1) both",
                   }}
-                  className="mx-auto max-w-xl rounded-2xl border border-pink-500/45 bg-pink-500/15 px-5 py-3"
+                  className="mx-auto max-w-xl rounded-2xl border border-primary-500/45 bg-primary-500/15 px-5 py-3"
                 >
-                  <p className="phraseDemoMain text-base font-bold text-pink-800 dark:text-pink-200">
+                  <p className="phraseDemoMain text-base font-bold text-primary-800 dark:text-primary-200">
                     {examplePhrase.phrase}
                   </p>
-                  <p className="phraseDemoSub mt-1 text-sm font-medium text-pink-700/85 dark:text-pink-300/90">
+                  <p className="phraseDemoSub mt-1 text-sm font-medium text-primary-700/85 dark:text-primary-300/90">
                     {examplePhrase.translation}
                   </p>
                 </div>
               </>
             ) : (
               <div className="flex items-center justify-center gap-1.5 py-2">
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-pink-500/70 [animation-delay:-0.2s]" />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-pink-500/70 [animation-delay:-0.1s]" />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-pink-500/70" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary-500/70 [animation-delay:-0.2s]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary-500/70 [animation-delay:-0.1s]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary-500/70" />
               </div>
             )}
           </div>
@@ -606,7 +519,6 @@ export default function AddWordDemoCard({
             href={`/${locale}/signup`}
             className="group inline-flex items-center gap-2 rounded-2xl bg-primary-500 px-8 py-4 text-base font-bold text-white shadow-lg shadow-primary-500/25 transition-all duration-300 hover:bg-primary-600 hover:shadow-xl hover:shadow-primary-500/30 active:scale-[0.97]"
           >
-            <Plus className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             {tDictionary("save_word_cta")}
           </Link>
 
@@ -630,28 +542,28 @@ export default function AddWordDemoCard({
         .translationPreviewInput,
         .phraseDemoMain {
           opacity: 1;
-          -webkit-text-fill-color: rgb(157 23 77);
+          -webkit-text-fill-color: var(--color-primary-700);
         }
 
         .magicWordDemo {
-          -webkit-text-fill-color: rgb(190 24 93);
+          -webkit-text-fill-color: var(--color-primary-600);
         }
 
         .phraseDemoSub {
-          -webkit-text-fill-color: rgba(190, 24, 93, 0.85);
+          -webkit-text-fill-color: var(--color-primary-600);
         }
 
         :global(.dark) .translationPreviewInput,
         :global(.dark) .phraseDemoMain {
-          -webkit-text-fill-color: rgb(251 207 232);
+          -webkit-text-fill-color: var(--color-primary-200);
         }
 
-        :global(.dark) .magicWordDemo {
-          -webkit-text-fill-color: rgb(249 168 212);
+        .magicWordDemo {
+          -webkit-text-fill-color: var(--color-primary-300);
         }
 
-        :global(.dark) .phraseDemoSub {
-          -webkit-text-fill-color: rgba(249, 168, 212, 0.9);
+        .phraseDemoSub {
+          -webkit-text-fill-color: var(--color-primary-300);
         }
 
         @keyframes demo-explode {
