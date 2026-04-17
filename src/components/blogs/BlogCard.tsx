@@ -5,6 +5,7 @@ import Link from "next/link";
 import gsap from "gsap";
 import { Calendar, User, ArrowRight } from "lucide-react";
 import type { Blog } from "@/lib/db/schema";
+import { useTranslations } from "next-intl";
 
 interface BlogCardProps {
   blog: Blog & { author?: { username: string | null } };
@@ -12,6 +13,7 @@ interface BlogCardProps {
 }
 
 export default function BlogCard({ blog, locale }: BlogCardProps) {
+  const t = useTranslations("landing");
   const cardRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
@@ -113,7 +115,7 @@ export default function BlogCard({ blog, locale }: BlogCardProps) {
           href={`/${locale}/blogs/${blog.slug}`}
           className="flex items-center gap-1 font-bold text-primary-500 transition-all hover:gap-2"
         >
-          Read More
+          {t("read_more")}
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>

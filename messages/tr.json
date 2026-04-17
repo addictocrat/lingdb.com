@@ -77,7 +77,11 @@
     "feature_no_ads": "Reklamsız deneyim",
     "feature_early_access": "Özelliklere erken erişim",
     "free_title": "Ücretsiz",
-    "premium_title": "Plus"
+    "premium_title": "Plus",
+    "featured_blogs_title": "Duolingo mu, Lingdb mi?",
+    "featured_blogs_description": "Popüler dil uygulamalarla karşılaştırın ve kararınızı verin",
+    "view_all_blogs": "Tüm blog yazılarını görüntüle",
+    "read_more": "Devamını Oku"
   },
   "dashboard": {
     "title": "Sözlüklerim",

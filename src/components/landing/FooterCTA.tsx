@@ -6,8 +6,8 @@ export default function FooterCTA({ locale = "en" }: { locale?: string }) {
   const t = useTranslations("landing");
 
   return (
-    <section className="px-4 py-20 md:py-22 sm:px-6">
-      <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 p-12 text-center text-white shadow-2xl shadow-primary-500/25 sm:p-16">
+    <section className="w-full">
+      <div className="w-full overflow-hidden bg-gradient-to-br from-primary-500 via-primary-600 to-primary-700 py-20 px-4 text-center text-white shadow-2xl shadow-primary-500/25 sm:px-6 sm:py-24 md:py-28">
         <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
           {t("footer_title")}
         </h2>

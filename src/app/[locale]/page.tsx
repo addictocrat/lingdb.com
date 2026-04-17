@@ -1,7 +1,10 @@
-import Hero from "@/components/landing/Hero";
-import Features from "@/components/landing/Features";
-import PricingPreview from "@/components/landing/PricingPreview";
-import FooterCTA from "@/components/landing/FooterCTA";
+import {
+  Hero,
+  Features,
+  FeaturedBlogs,
+  FooterCTA,
+  PricingPreview,
+} from "@/components/landing";
 
 export const metadata = {
   title: "Lingdb – Master Any Language",
@@ -20,8 +23,9 @@ export default async function LandingPage({
     <main>
       <Hero locale={locale} />
       <Features />
-      <PricingPreview locale={locale} />
+      <FeaturedBlogs locale={locale} />
       <FooterCTA locale={locale} />
+      <PricingPreview locale={locale} />
     </main>
   );
 }
