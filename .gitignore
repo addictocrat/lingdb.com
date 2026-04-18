@@ -47,5 +47,11 @@ next-env.d.ts
 # agent tasks
 /implementations
 
+# static assets
+/public
+
+# scripts
+/scripts
+
 
 
