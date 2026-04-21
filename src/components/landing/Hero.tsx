@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { ArrowRight, Sparkles } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import AddWordDemoCard from "@/components/landing/AddWordDemoCard";
+import AIFeatureDemo from "@/components/landing/AIFeatureDemo";
 
 export default function Hero({ locale = "en" }: { locale?: string }) {
   const t = useTranslations("landing");
@@ -55,10 +55,10 @@ export default function Hero({ locale = "en" }: { locale?: string }) {
       className="relative overflow-hidden px-4 py-20 sm:px-6 md:py-22 md:pt-24"
     >
       {/* Background gradient */}
-      {/* <div className="pointer-events-none absolute inset-0 -z-10">
+      <div className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute left-1/2 top-0 h-[600px] w-[800px] -translate-x-1/2 rounded-full bg-primary-500/10 blur-[120px]" />
         <div className="absolute bottom-0 right-0 h-[400px] w-[600px] rounded-full bg-accent-500/8 blur-[100px]" />
-      </div> */}
+      </div>
 
       <div className="mx-auto max-w-4xl text-center">
         {/* Badge */}
@@ -68,20 +68,17 @@ export default function Hero({ locale = "en" }: { locale?: string }) {
         </div>
 
         {/* Title */}
-        <h1 className="hero-title text-4xl font-extrabold leading-tight tracking-tight sm:text-6xl md:text-7xl lg:text-7xl">
-          {t("hero_title")}{" "}
-          <span className="bg-gradient-to-r from-primary-500 to-primary-700 bg-clip-text text-transparent">
-            {/* {t("hero_title_highlight")} */}
-          </span>
+        <h1 className="hero-title text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-7xl">
+          {t("hero_title")}
         </h1>
 
         {/* Subtitle */}
-        <p className="hero-subtitle mx-auto mt-6 max-w-2xl text-xl text-[var(--fg)] sm:text-2xl">
+        <p className="hero-subtitle mx-auto mt-6 max-w-2xl text-xl text-[var(--fg)]/70 sm:text-2xl">
           {t("hero_subtitle")}
         </p>
 
-        <div className="hero-cards relative z-20 mx-auto my-8 max-w-3xl">
-          <AddWordDemoCard locale={locale} />
+        <div className="hero-cards relative z-20 mx-auto my-4 max-w-6xl">
+          <AIFeatureDemo locale={locale} />
         </div>
 
         {/* CTA */}
@@ -95,14 +92,12 @@ export default function Hero({ locale = "en" }: { locale?: string }) {
           </Link>
           <Link
             href={`/${locale}/library`}
-            className="bg-gray-50 text-primary-300 flex items-center gap-2 rounded-2xl border border-[var(--border-color)] px-8 py-4 text-base font-semibold transition-all duration-200 hover:shadow-md"
+            className="flex items-center gap-2 rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] px-8 py-4 text-base font-semibold text-[var(--fg)]/70 transition-all duration-200 hover:bg-[var(--border-color)] hover:shadow-md"
           >
             {t("browse_library")}
           </Link>
         </div>
       </div>
-
-      {/* Interactive add-word demo card */}
     </section>
   );
 }

@@ -81,7 +81,10 @@
     "featured_blogs_title": "Duolingo or Lingdb?",
     "featured_blogs_description": "Compare with popular language apps and make your decision",
     "view_all_blogs": "View all blog posts",
-    "read_more": "Read More"
+    "read_more": "Read More",
+    "demo_save_word": "Save Word",
+    "demo_magic_words": "Magic Words",
+    "demo_example_usages": "Example Usages"
   },
   "dashboard": {
     "title": "My Dictionaries",

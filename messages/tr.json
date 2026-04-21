@@ -81,7 +81,10 @@
     "featured_blogs_title": "Duolingo mu, Lingdb mi?",
     "featured_blogs_description": "Popüler dil uygulamalarla karşılaştırın ve kararınızı verin",
     "view_all_blogs": "Tüm blog yazılarını görüntüle",
-    "read_more": "Devamını Oku"
+    "read_more": "Devamını Oku",
+    "demo_save_word": "Kelimeyi Kaydet",
+    "demo_magic_words": "Sihirli Kelimeler",
+    "demo_example_usages": "Örnek Kullanımlar"
   },
   "dashboard": {
     "title": "Sözlüklerim",
