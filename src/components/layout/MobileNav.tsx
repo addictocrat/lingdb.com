@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import ThemeToggle from "@/components/common/ThemeToggle";
 import LocaleSwitcher from "@/components/common/LocaleSwitcher";
 import type { User } from "@supabase/supabase-js";
@@ -56,7 +57,7 @@ export default function MobileNav({
   const tNav = useTranslations("nav");
   const pathname = usePathname();
 
-  useEffect(() => {
+  useGSAP(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
       // GSAP Animation for opening
@@ -80,7 +81,7 @@ export default function MobileNav({
     } else {
       document.body.style.overflow = "";
     }
-  }, [isOpen]);
+  }, { dependencies: [isOpen], scope: menuRef });
 
   const closeMenu = () => {
     gsap.to(menuRef.current, {

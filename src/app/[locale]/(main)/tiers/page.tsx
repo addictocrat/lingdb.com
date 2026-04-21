@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import Button from "@/components/ui/Button";
 import { Check, X, ShieldCheck } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,31 +17,27 @@ export default function TiersPage() {
   const t = useTranslations("tiers");
   const mainRef = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Set initial state
-      gsap.set(".pricing-card", {
-        y: 60,
-        opacity: 0,
-      });
+  useGSAP(() => {
+    // Set initial state
+    gsap.set(".pricing-card", {
+      y: 60,
+      opacity: 0,
+    });
 
-      // Animate to final state
-      gsap.to(".pricing-card", {
-        y: 0,
-        opacity: 1,
-        duration: 0.8,
-        stagger: 0.2,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: mainRef.current,
-          start: "top 80%",
-          once: true,
-        },
-      });
-    }, mainRef);
-
-    return () => ctx.revert();
-  }, []);
+    // Animate to final state
+    gsap.to(".pricing-card", {
+      y: 0,
+      opacity: 1,
+      duration: 0.8,
+      stagger: 0.2,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: mainRef.current,
+        start: "top 80%",
+        once: true,
+      },
+    });
+  }, { scope: mainRef });
 
   return (
     <main

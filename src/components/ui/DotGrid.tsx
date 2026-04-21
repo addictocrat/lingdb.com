@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useEffect, useCallback, useMemo } from "react";
 import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 import { InertiaPlugin } from "gsap/InertiaPlugin";
 
 gsap.registerPlugin(InertiaPlugin);
@@ -172,7 +173,7 @@ const DotGrid: React.FC<DotGridProps> = ({
     };
   }, [buildGrid]);
 
-  useEffect(() => {
+  useGSAP(() => {
     const onMove = (e: MouseEvent) => {
       const now = performance.now();
       const pr = pointerRef.current;
@@ -258,7 +259,7 @@ const DotGrid: React.FC<DotGridProps> = ({
       window.removeEventListener("mousemove", throttledMove);
       window.removeEventListener("click", onClick);
     };
-  }, [
+  }, { dependencies: [
     maxSpeed,
     speedTrigger,
     proximity,
@@ -266,7 +267,7 @@ const DotGrid: React.FC<DotGridProps> = ({
     returnDuration,
     shockRadius,
     shockStrength,
-  ]);
+  ], scope: wrapperRef });
 
   return (
     <section

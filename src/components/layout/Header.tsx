@@ -30,18 +30,18 @@ export default function Header({ locale = "en" }: { locale?: string }) {
     <header className="sticky top-0 z-40 w-full border-b border-[var(--border-color)] bg-[var(--bg)]/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full items-center justify-between px-4 sm:px-6 ">
         <div className="flex gap-3 mt-2">
-          {/* Logo */}
-          <Link
-            href={user ? `/${locale}/dashboard` : `/${locale}`}
-            className="flex items-center gap-2 text-3xl font-bold tracking-tight transition-opacity hover:opacity-80"
-          >
-            {/* <BookOpen className="h-6 w-6 text-primary-500" /> */}
-            <span>
-              {profile?.tier === "PREMIUM"
-                ? `${t("appName")} ${t("premium")}`
-                : t("appName")}
-            </span>
-          </Link>
+          <div id="logo-wrap" className="flex items-center">
+            <Link
+              id="header-logo"
+              href={user ? `/${locale}/dashboard` : `/${locale}`}
+              className="flex items-center gap-2 text-3xl font-bold tracking-tight transition-opacity hover:opacity-80"
+            >
+              {/* <BookOpen className="h-6 w-6 text-primary-500" /> */}
+              <span>
+                {t("appName")}
+              </span>
+            </Link>
+          </div>
           {/* Desktop Nav */}
           <nav className="hidden items-center gap-1 md:flex">
             {MAIN_NAV_LINKS.filter((link) => user || !link.authRequired).map(

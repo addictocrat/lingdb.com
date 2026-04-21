@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useMemo } from 'react';
+import { useRef, useMemo } from 'react';
 import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { BookOpen, Layers, Brain, Flame } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -60,48 +61,40 @@ export default function StatsGrid({
     },
   ], [totalWords, totalFlashcards, totalQuizzes, streakCount]);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Animate the cards staggering in - only once on mount
-      gsap.fromTo('.stat-card', 
-        { y: 20, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: 'power2.out',
-        }
-      );
-    }, containerRef);
+  useGSAP(() => {
+    // Animate the cards staggering in - only once on mount
+    gsap.fromTo('.stat-card', 
+      { y: 20, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: 'power2.out',
+      }
+    );
+  }, { scope: containerRef });
 
-    return () => ctx.revert();
-  }, []); // Run only on mount
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Animate the numbers counting up
-      const numbers = document.querySelectorAll('.stat-number');
-      numbers.forEach((el, index) => {
-        const targetValue = stats[index].value;
-        const currentVal = parseInt(el.innerHTML) || 0;
-        const config = { val: currentVal };
-        
-        gsap.to(config, {
-          val: targetValue,
-          duration: 1.5,
-          ease: 'power1.out',
-          onUpdate: function () {
-            if (el) {
-              el.innerHTML = Math.floor(config.val).toString();
-            }
-          },
-        });
+  useGSAP(() => {
+    // Animate the numbers counting up
+    const numbers = document.querySelectorAll('.stat-number');
+    numbers.forEach((el, index) => {
+      const targetValue = stats[index].value;
+      const currentVal = parseInt(el.innerHTML) || 0;
+      const config = { val: currentVal };
+      
+      gsap.to(config, {
+        val: targetValue,
+        duration: 1.5,
+        ease: 'power1.out',
+        onUpdate: function () {
+          if (el) {
+            el.innerHTML = Math.floor(config.val).toString();
+          }
+        },
       });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, [stats]);
+    });
+  }, { dependencies: [stats], scope: containerRef });
 
   return (
     <div ref={containerRef} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Gamepad2, Sparkles, Brain, Users } from "lucide-react";
 import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -13,32 +14,34 @@ import { LANDING_FEATURES } from "@/lib/constants/landing";
 export default function Features() {
   const t = useTranslations("landing");
   const sectionRef = useRef<HTMLDivElement>(null);
+  const cardsContainerRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // Entrance animation
-      gsap.set(cardsRef.current, {
-        y: 60,
-        opacity: 0,
-      });
+  useGSAP(
+    () => {
+      const cards = cardsContainerRef.current?.querySelectorAll(".feature-card");
+      if (!cards || cards.length === 0) return;
 
-      gsap.to(cardsRef.current, {
-        y: 0,
-        opacity: 1,
-        duration: 0.7,
-        stagger: 0.15,
-        ease: "power3.out",
+      gsap.from(cards, {
+        opacity: 0,
+        y: 60,
+        rotation: -2,
+        scale: 0.9,
+        duration: 1.2,
+        stagger: {
+          amount: 0.5,
+          ease: "power2.out",
+        },
+        ease: "back.out(1.5)",
         scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-          once: true,
+          trigger: cardsContainerRef.current,
+          start: "top 90%",
+          toggleActions: "play none none none",
         },
       });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
+    },
+    { scope: sectionRef },
+  );
 
   const handleMouseEnter = (index: number) => {
     const card = cardsRef.current[index];
@@ -81,7 +84,7 @@ export default function Features() {
           </h2>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div ref={cardsContainerRef} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {LANDING_FEATURES.map((feature, index) => (
             <div
               key={feature.titleKey}

@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
-import { gsap } from 'gsap';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import Button from '@/components/ui/Button';
 import { RotateCcw, ArrowRight } from 'lucide-react';
 import type { Word } from '@/lib/db/schema';
@@ -29,16 +30,13 @@ export default function QuizResults({
   const router = useRouter();
   const locale = useLocale();
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        containerRef.current,
-        { opacity: 0, scale: 0.95, y: 20 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: 'back.out(1.2)' }
-      );
-    });
-    return () => ctx.revert();
-  }, []);
+  useGSAP(() => {
+    gsap.fromTo(
+      containerRef.current,
+      { opacity: 0, scale: 0.95, y: 20 },
+      { opacity: 1, scale: 1, y: 0, duration: 0.6, ease: 'back.out(1.2)' }
+    );
+  }, { scope: containerRef });
 
   let resultColor = 'text-green-500';
   let message = 'Excellent Job!';

@@ -5,6 +5,7 @@ import {
   FooterCTA,
   PricingPreview,
 } from "@/components/landing";
+import FullscreenLoader from "@/components/common/FullscreenLoader";
 
 export const metadata = {
   title: "Lingdb – Master Any Language",
@@ -21,6 +22,7 @@ export default async function LandingPage({
 
   return (
     <main>
+      <FullscreenLoader />
       <Hero locale={locale} />
       <Features />
       <FeaturedBlogs locale={locale} />

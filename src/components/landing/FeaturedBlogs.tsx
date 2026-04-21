@@ -1,7 +1,7 @@
 import { db } from "@/lib/db/client";
 import { blogs as blogsTable } from "@/lib/db/schema";
 import { inArray } from "drizzle-orm";
-import BlogCard from "@/components/blogs/BlogCard";
+import FeaturedBlogsGrid from "./FeaturedBlogsGrid";
 import { getTranslations } from "next-intl/server";
 
 interface FeaturedBlogsProps {
@@ -56,8 +56,8 @@ export default async function FeaturedBlogs({ locale }: FeaturedBlogsProps) {
   if (localizedBlogs.length === 0) return null;
 
   return (
-    <section className="py-20 md:py-22">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <section className="py-20 md:py-22 px-4 sm:px-6">
+      <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
             {t("featured_blogs_title") || "From the Blog"}
@@ -67,11 +67,7 @@ export default async function FeaturedBlogs({ locale }: FeaturedBlogsProps) {
               "Learn more about how Lingdb compares to other tools and how to improve your learning."}
           </p>
         </div>
-        <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
-          {localizedBlogs.map((blog) => (
-            <BlogCard key={blog.id} blog={blog} locale={locale} />
-          ))}
-        </div>
+        <FeaturedBlogsGrid blogs={localizedBlogs} locale={locale} />
       </div>
     </section>
   );

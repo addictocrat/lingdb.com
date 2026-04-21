@@ -5,6 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import Button from '@/components/ui/Button';
 
 export const COOKIE_CONSENT_KEY = 'lingdb_cookie_consent';
@@ -28,7 +29,7 @@ export default function CookieConsent() {
     }
   }, []);
 
-  useEffect(() => {
+  useGSAP(() => {
     if (show && bannerRef.current) {
       // Slide up animation
       gsap.fromTo(
@@ -37,7 +38,7 @@ export default function CookieConsent() {
         { y: 0, opacity: 1, duration: 0.6, ease: 'power3.out' }
       );
     }
-  }, [show]);
+  }, { dependencies: [show], scope: bannerRef });
 
   const handleConsent = (value: 'accepted' | 'rejected') => {
     if (bannerRef.current) {

@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger);
 import { Calendar, User, ArrowRight } from "lucide-react";
 import type { Blog } from "@/lib/db/schema";
 import { useTranslations } from "next-intl";
@@ -10,21 +14,39 @@ import { useTranslations } from "next-intl";
 interface BlogCardProps {
   blog: Blog & { author?: { username: string | null } };
   locale: string;
+  skipEntranceAnimation?: boolean;
 }
 
-export default function BlogCard({ blog, locale }: BlogCardProps) {
+export default function BlogCard({ blog, locale, skipEntranceAnimation = false }: BlogCardProps) {
   const t = useTranslations("landing");
   const cardRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
-  useEffect(() => {
-    // Entrance animation
-    gsap.fromTo(
-      cardRef.current,
-      { opacity: 0, y: 30, rotation: -2 },
-      { opacity: 1, y: 0, rotation: 0, duration: 0.8, ease: "back.out(1.7)" },
-    );
-  }, []);
+  useGSAP(
+    () => {
+      if (skipEntranceAnimation) return;
+
+      // Entrance animation with ScrollTrigger
+      gsap.fromTo(
+        cardRef.current,
+        { opacity: 0, y: 40, rotation: -1, scale: 0.95 },
+        { 
+          opacity: 1, 
+          y: 0, 
+          rotation: 0, 
+          scale: 1,
+          duration: 1, 
+          ease: "back.out(1.2)",
+          scrollTrigger: {
+            trigger: cardRef.current,
+            start: "top 92%", // Trigger when near viewport
+            toggleActions: "play none none none"
+          }
+        },
+      );
+    },
+    { scope: cardRef, dependencies: [skipEntranceAnimation] },
+  );
 
   const handleMouseEnter = () => {
     gsap.to(cardRef.current, {

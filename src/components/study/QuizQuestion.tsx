@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
-import { gsap } from "gsap";
+import { useRef, useState } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import Button from "@/components/ui/Button";
 import { Word } from "@/lib/db/schema";
 import { Check, X } from "lucide-react";
@@ -32,7 +33,7 @@ export default function QuizQuestion({
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   // Focus input if type answer
-  useEffect(() => {
+  useGSAP(() => {
     if (question.type === "type_answer") {
       const input = document.getElementById("type-answer-input");
       if (input) input.focus();
@@ -44,7 +45,7 @@ export default function QuizQuestion({
       { opacity: 0, x: 20 },
       { opacity: 1, x: 0, duration: 0.3 },
     );
-  }, [question]);
+  }, { dependencies: [question], scope: containerRef });
 
   const handleChoiceClick = (
     option: string,

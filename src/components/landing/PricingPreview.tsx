@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { Check, X as XIcon } from "lucide-react";
 import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -15,30 +16,29 @@ export default function PricingPreview({ locale = "en" }: { locale?: string }) {
   const t = useTranslations("landing");
   const tTiers = useTranslations("tiers");
   const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.set(".pricing-card", {
-        y: 50,
+  const cardsContainerRef = useRef<HTMLDivElement>(null);
+  useGSAP(
+    () => {
+      gsap.from(".pricing-card", {
         opacity: 0,
-      });
-
-      gsap.to(".pricing-card", {
-        y: 0,
-        opacity: 1,
-        duration: 0.7,
-        stagger: 0.2,
-        ease: "power3.out",
+        y: 60,
+        rotation: -2,
+        scale: 0.9,
+        duration: 1.2,
+        stagger: {
+          amount: 0.4,
+          ease: "power2.out",
+        },
+        ease: "back.out(1.5)",
         scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 80%",
-          once: true,
+          trigger: cardsContainerRef.current,
+          start: "top 90%",
+          toggleActions: "play none none none",
         },
       });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
+    },
+    { scope: cardsContainerRef },
+  );
 
   return (
     <section ref={sectionRef} className="px-4 py-20 sm:px-6 md:py-22">
@@ -52,11 +52,11 @@ export default function PricingPreview({ locale = "en" }: { locale?: string }) {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div ref={cardsContainerRef} className="grid gap-6 md:grid-cols-2">
           {PRICING_PLANS.map((plan) => (
             <div
               key={plan.nameKey}
-              className={`pricing-card relative rounded-2xl border p-8 transition-all duration-300 hover:shadow-lg ${
+              className={`pricing-card relative rounded-2xl border p-8 transition-colors transition-shadow duration-300 hover:shadow-lg ${
                 plan.popular
                   ? "border-primary-500 bg-[var(--surface)] shadow-lg shadow-primary-500/10"
                   : "border-[var(--border-color)] bg-[var(--surface)]"

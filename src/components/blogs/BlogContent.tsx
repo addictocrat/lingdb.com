@@ -1,7 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+
+// Register ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
 
 interface BlogContentProps {
   content: string;
@@ -10,30 +15,43 @@ interface BlogContentProps {
 export default function BlogContent({ content }: BlogContentProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useGSAP(() => {
     if (!contentRef.current) return;
 
     // Entrance animation for content children
-    const elements = contentRef.current.querySelectorAll('h2, h3, p, ul, ol, table, blockquote, img, pre');
+    // We target direct top-level children to ensure they animate as blocks 
+    // and avoid double-animating nested elements like <li> within <ul>
+    const elements = contentRef.current.children;
     
-    gsap.fromTo(
-      elements,
-      { 
-        opacity: 0, 
-        y: 40,
-        scale: 0.98,
-      },
-      { 
-        opacity: 1, 
-        y: 0, 
+    if (elements.length === 0) return;
+
+    // Set initial state (hidden and slightly offset)
+    gsap.set(elements, { 
+      opacity: 0, 
+      y: 20,
+      scale: 0.99,
+    });
+
+    // Use ScrollTrigger.batch to stagger elements that enter the viewport at the same time
+    // This is much more efficient and smoother than individual triggers for every element
+    ScrollTrigger.batch(elements, {
+      start: 'top 80%',
+      onEnter: (batch) => gsap.to(batch, {
+        opacity: 1,
+        y: 0,
         scale: 1,
-        duration: 1, 
-        stagger: 0.15, 
-        ease: 'elastic.out(1, 0.8)',
-        delay: 0.2
-      }
-    );
-  }, [content]);
+        duration: 1,
+        stagger: {
+          each: 0.15,
+          from: "start"
+        },
+        ease: 'power3.out',
+        overwrite: true
+      }),
+      // Play only once for a natural reading flow
+      once: true
+    });
+  }, { dependencies: [content], scope: contentRef });
 
   return (
     <div 

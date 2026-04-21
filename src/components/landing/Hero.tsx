@@ -1,56 +1,53 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ArrowRight, Sparkles } from "lucide-react";
 import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import AddWordDemoCard from "@/components/landing/AddWordDemoCard";
 
 export default function Hero({ locale = "en" }: { locale?: string }) {
   const t = useTranslations("landing");
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(".hero-badge", {
-        y: 20,
-        opacity: 0,
-        duration: 0.6,
-        ease: "power3.out",
-      });
-      gsap.from(".hero-title", {
-        y: 40,
-        opacity: 0,
-        duration: 0.8,
-        delay: 0.15,
-        ease: "power3.out",
-      });
-      gsap.from(".hero-subtitle", {
-        y: 30,
-        opacity: 0,
-        duration: 0.7,
-        delay: 0.3,
-        ease: "power3.out",
-      });
-      gsap.from(".hero-cta", {
-        y: 20,
-        opacity: 0,
-        duration: 0.6,
-        delay: 0.45,
-        ease: "power3.out",
-      });
-      gsap.from(".hero-cards", {
-        y: 60,
-        opacity: 0,
-        duration: 1,
-        delay: 0.6,
-        ease: "power3.out",
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, []);
+  useGSAP(() => {
+    gsap.from(".hero-badge", {
+      y: 20,
+      opacity: 0,
+      duration: 0.6,
+      ease: "power3.out",
+    });
+    gsap.from(".hero-title", {
+      y: 40,
+      opacity: 0,
+      duration: 0.8,
+      delay: 0.15,
+      ease: "power3.out",
+    });
+    gsap.from(".hero-subtitle", {
+      y: 30,
+      opacity: 0,
+      duration: 0.7,
+      delay: 0.3,
+      ease: "power3.out",
+    });
+    gsap.from(".hero-cta", {
+      y: 20,
+      opacity: 0,
+      duration: 0.6,
+      delay: 0.45,
+      ease: "power3.out",
+    });
+    gsap.from(".hero-cards", {
+      y: 60,
+      opacity: 0,
+      duration: 1,
+      delay: 0.6,
+      ease: "power3.out",
+    });
+  }, { scope: containerRef });
 
   return (
     <section

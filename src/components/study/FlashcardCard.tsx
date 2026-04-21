@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import type { Word, ExamplePhrase } from "@/lib/db/schema";
 
 interface FlashcardCardProps {
@@ -19,7 +20,7 @@ export default function FlashcardCard({
 }: FlashcardCardProps) {
   const innerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useGSAP(() => {
     if (innerRef.current) {
       gsap.to(innerRef.current, {
         rotateY: isFlipped ? 180 : 0,
@@ -27,7 +28,7 @@ export default function FlashcardCard({
         ease: "power2.inOut",
       });
     }
-  }, [isFlipped]);
+  }, { dependencies: [isFlipped], scope: innerRef });
 
   const frontContent =
     direction === "word-first" ? word.title : word.translation;
