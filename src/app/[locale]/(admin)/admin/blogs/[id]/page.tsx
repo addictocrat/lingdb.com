@@ -4,6 +4,15 @@ import { blogs } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
+interface TranslationData {
+  title: string;
+  description: string;
+  content: string;
+  keywords: string;
+  seoTitle: string;
+  seoDescription: string;
+}
+
 export default async function AdminBlogEditPage({
   params,
 }: {
@@ -23,15 +32,18 @@ export default async function AdminBlogEditPage({
   }
 
   // Transform translations array into a locale-keyed object
-  const translationsMap: Record<string, any> = {};
+  const translationsMap: Record<string, TranslationData> = {};
   for (const t of blog.translations) {
     translationsMap[t.locale] = {
       title: t.title,
-      description: t.description,
-      content: t.content,
-      keywords: t.keywords,
-      seoTitle: t.seoTitle,
-      seoDescription: t.seoDescription,
+      description: t.description ?? "",
+      content:
+        typeof t.content === "string"
+          ? t.content
+          : JSON.stringify(t.content ?? ""),
+      keywords: t.keywords ?? "",
+      seoTitle: t.seoTitle ?? "",
+      seoDescription: t.seoDescription ?? "",
     };
   }
 

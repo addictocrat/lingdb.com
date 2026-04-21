@@ -1,12 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import {
-  SUPPORTED_LOCALES,
-  type SupportedLocale,
-} from "@/lib/utils/constants";
+import { SUPPORTED_LOCALES, type SupportedLocale } from "@/lib/utils/constants";
+import { createWordleGame } from "@/lib/api/wordle.api";
 
 type CreateResponse = {
   gameId: string;
@@ -35,6 +34,10 @@ export default function WordleCreator({ locale }: { locale: string }) {
   const [error, setError] = useState<string | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [sharePath, setSharePath] = useState<string | null>(null);
+
+  const createGameMutation = useMutation({
+    mutationFn: createWordleGame,
+  });
 
   const normalizedWord = useMemo(() => {
     try {
@@ -66,25 +69,13 @@ export default function WordleCreator({ locale }: { locale: string }) {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/wordle/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          locale,
-          language,
-          word: normalizedWord,
-          noteToSolver,
-          maxTries,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data?.error || t("errors.create_failed"));
-        return;
-      }
-
-      const payload = data as CreateResponse;
+      const payload = (await createGameMutation.mutateAsync({
+        locale,
+        language,
+        word: normalizedWord,
+        noteToSolver,
+        maxTries,
+      })) as CreateResponse;
       setShareUrl(payload.shareUrl);
       setSharePath(payload.sharePath);
     } catch {

@@ -1,19 +1,26 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
-import AddWordForm from '@/components/dictionary/AddWordForm';
-import MagicWords from '@/components/dictionary/MagicWords';
-import WordList from '@/components/dictionary/WordList';
-import DictionarySettings from '@/components/dictionary/DictionarySettings';
-import DictionaryTour from '@/components/dictionary/DictionaryTour';
-import ExamplePhrasePopup from '@/components/dictionary/ExamplePhrasePopup';
-import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
-import Modal from '@/components/ui/Modal';
-import { useToast } from '@/components/ui/Toast';
-import { useTranslations } from 'next-intl';
+import { useState, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import AddWordForm from "@/components/dictionary/AddWordForm";
+import MagicWords from "@/components/dictionary/MagicWords";
+import WordList from "@/components/dictionary/WordList";
+import DictionarySettings from "@/components/dictionary/DictionarySettings";
+import DictionaryTour from "@/components/dictionary/DictionaryTour";
+import ExamplePhrasePopup from "@/components/dictionary/ExamplePhrasePopup";
+import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
+import Modal from "@/components/ui/Modal";
+import { useToast } from "@/components/ui/Toast";
+import { useTranslations } from "next-intl";
+import {
+  deleteDictionary,
+  getDictionary,
+  updateDictionary,
+} from "@/lib/api/dictionaries.api";
+import { qk } from "@/lib/tanstack/query-keys";
 import {
   Globe,
   Lock,
@@ -23,20 +30,27 @@ import {
   Layers,
   Brain,
   X,
-  Settings
-} from 'lucide-react';
-import type { Dictionary, Word, ExamplePhrase } from '@/lib/db/schema';
+  Settings,
+} from "lucide-react";
+import type {
+  Dictionary,
+  Word,
+  ExamplePhrase,
+  DictionaryEditor,
+} from "@/lib/db/schema";
 
 interface DictionaryDetailClientProps {
   dictionary: Dictionary & {
     words: (Word & { examplePhrases: ExamplePhrase[] })[];
     user?: { username: string };
-    dictionaryEditors?: { userId: string }[];
+    dictionaryEditors?: (DictionaryEditor & { user: { username: string } })[];
   };
   isOwner: boolean;
   currentUserId?: string;
   showTour?: boolean;
 }
+
+type DictionaryDetailData = DictionaryDetailClientProps["dictionary"];
 
 export default function DictionaryDetailClient({
   dictionary: initialDict,
@@ -47,66 +61,98 @@ export default function DictionaryDetailClient({
   const locale = useLocale();
   const router = useRouter();
   const { toast } = useToast();
-  const t = useTranslations('dictionary');
-  const tCommon = useTranslations('common');
-  const [dictionary, setDictionary] = useState(initialDict);
+  const t = useTranslations("dictionary");
+  const tCommon = useTranslations("common");
+  const queryClient = useQueryClient();
+
+  const { data: dictionary = initialDict } = useQuery<DictionaryDetailData>({
+    queryKey: qk.dictionaries.detail(initialDict.id),
+    queryFn: async () => {
+      const data = await getDictionary(initialDict.id);
+      return data.dictionary as DictionaryDetailData;
+    },
+    initialData: initialDict,
+    staleTime: 120_000,
+  });
+
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editTitle, setEditTitle] = useState(initialDict.title);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [activeTab, setActiveTab] = useState<'words' | 'flashcards' | 'quiz' | 'settings'>(
-    'words'
-  );
+  const [activeTab, setActiveTab] = useState<
+    "words" | "flashcards" | "quiz" | "settings"
+  >("words");
   const [selectedWordId, setSelectedWordId] = useState<string | null>(null);
 
   const refreshDictionary = useCallback(async () => {
-    const res = await fetch(`/api/dictionaries/${dictionary.id}`);
-    if (res.ok) {
-      const data = await res.json();
-      setDictionary(data.dictionary);
-    }
-  }, [dictionary.id]);
+    await queryClient.invalidateQueries({
+      queryKey: qk.dictionaries.detail(initialDict.id),
+    });
+  }, [queryClient, initialDict.id]);
+
+  const updateDictionaryMutation = useMutation({
+    mutationFn: (payload: Record<string, unknown>) =>
+      updateDictionary(initialDict.id, payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: qk.dictionaries.detail(initialDict.id),
+      });
+      await queryClient.invalidateQueries({ queryKey: ["dictionaries"] });
+    },
+  });
+
+  const deleteDictionaryMutation = useMutation({
+    mutationFn: () => deleteDictionary(initialDict.id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["dictionaries"] });
+    },
+  });
 
   const handleUpdateTitle = async () => {
     if (!editTitle.trim()) return;
-    const res = await fetch(`/api/dictionaries/${dictionary.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: editTitle.trim() }),
-    });
-    if (res.ok) {
+    try {
+      await updateDictionaryMutation.mutateAsync({ title: editTitle.trim() });
       refreshDictionary();
+    } catch {
+      toast(t("settings.error_saved"), "error");
     }
   };
 
-  const isCollaborator = isOwner || dictionary.dictionaryEditors?.some(e => e.userId === currentUserId);
-  const canEdit = isOwner || dictionary.dictionaryEditors?.some(e => e.userId === currentUserId);
+  const isCollaborator =
+    isOwner ||
+    dictionary.dictionaryEditors?.some((e) => e.userId === currentUserId);
+  const canEdit =
+    isOwner ||
+    dictionary.dictionaryEditors?.some((e) => e.userId === currentUserId);
 
   const handleDelete = async () => {
-    const res = await fetch(`/api/dictionaries/${dictionary.id}`, {
-      method: 'DELETE',
-    });
-    if (res.ok) {
-      toast(t('settings.success_deleted'), 'success');
+    try {
+      await deleteDictionaryMutation.mutateAsync();
+      toast(t("settings.success_deleted"), "success");
       router.push(`/${locale}/dashboard`);
+    } catch {
+      toast(t("settings.error_saved"), "error");
     }
   };
 
   const tabs = [
-    { id: 'words' as const, label: t('words_tab'), icon: BookOpen },
-    { id: 'flashcards' as const, label: t('flashcards_tab'), icon: Layers },
-    { id: 'quiz' as const, label: t('quiz_tab'), icon: Brain },
+    { id: "words" as const, label: t("words_tab"), icon: BookOpen },
+    { id: "flashcards" as const, label: t("flashcards_tab"), icon: Layers },
+    { id: "quiz" as const, label: t("quiz_tab"), icon: Brain },
   ];
 
   const languageFlags: Record<string, string> = {
-    en: 'fi fi-gb',
-    fr: 'fi fi-fr',
-    de: 'fi fi-de',
-    es: 'fi fi-es',
-    tr: 'fi fi-tr',
+    en: "fi fi-gb",
+    fr: "fi fi-fr",
+    de: "fi fi-de",
+    es: "fi fi-es",
+    tr: "fi fi-tr",
   };
 
   const existingWords = useMemo(() => {
-    return dictionary.words.map((w) => ({ title: w.title, translation: w.translation }));
+    return dictionary.words.map((w) => ({
+      title: w.title,
+      translation: w.translation,
+    }));
   }, [dictionary.words]);
 
   return (
@@ -115,8 +161,9 @@ export default function DictionaryDetailClient({
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <span className={`text-4xl rounded-sm overflow-hidden ${languageFlags[dictionary.language] || 'fi fi-xx'}`}>
-            </span>
+            <span
+              className={`text-4xl rounded-sm overflow-hidden ${languageFlags[dictionary.language] || "fi fi-xx"}`}
+            ></span>
             {isEditingTitle ? (
               <div className="flex items-center gap-2">
                 <input
@@ -128,16 +175,14 @@ export default function DictionaryDetailClient({
                 <button
                   onClick={handleUpdateTitle}
                   className="rounded-lg p-1 text-green-500"
-                >
-                </button>
+                ></button>
                 <button
                   onClick={() => {
                     setIsEditingTitle(false);
                     setEditTitle(dictionary.title);
                   }}
                   className="rounded-lg p-1 text-[var(--fg)]/40"
-                >
-                </button>
+                ></button>
               </div>
             ) : (
               <h1 className="text-3xl font-bold sm:text-4xl">
@@ -154,16 +199,16 @@ export default function DictionaryDetailClient({
             {dictionary.isPublic ? (
               <Badge variant="default">
                 <Globe className="mr-1 h-3 w-3" />
-                {t('public')}
+                {t("public")}
               </Badge>
             ) : (
               <Badge variant="warning">
                 <Lock className="mr-1 h-3 w-3" />
-                {t('private')}
+                {t("private")}
               </Badge>
             )}
             <span className="text-sm text-[var(--fg)]/40">
-              {t('stats', { count: dictionary.words.length, max: 500 })}
+              {t("stats", { count: dictionary.words.length, max: 500 })}
             </span>
           </div>
         </div>
@@ -172,39 +217,44 @@ export default function DictionaryDetailClient({
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => setActiveTab('settings')}
-            className={activeTab === 'settings' ? 'bg-[var(--surface-hover)]' : ''}
+            onClick={() => setActiveTab("settings")}
+            className={
+              activeTab === "settings" ? "bg-[var(--surface-hover)]" : ""
+            }
           >
             <Settings className="mr-2 h-4 w-4" />
-            {tCommon('settings')}
+            {tCommon("settings")}
           </Button>
         )}
       </div>
 
-      {showTour && <DictionaryTour hasCompletedTour={false} userId={currentUserId || ''} />}
+      {showTour && (
+        <DictionaryTour hasCompletedTour={false} userId={currentUserId || ""} />
+      )}
 
       {/* Tabs */}
-      <div id="dictionary-tabs" className="mb-6 flex gap-1 rounded-xl border border-[var(--border-color)] bg-[var(--surface)] p-1">
+      <div
+        id="dictionary-tabs"
+        className="mb-6 flex gap-1 rounded-xl border border-[var(--border-color)] bg-[var(--surface)] p-1"
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => {
-              if (tab.id === 'flashcards') {
+              if (tab.id === "flashcards") {
                 router.push(
-                  `/${locale}/dictionary/${dictionary.id}/flashcards`
+                  `/${locale}/dictionary/${dictionary.id}/flashcards`,
                 );
-              } else if (tab.id === 'quiz') {
-                router.push(
-                  `/${locale}/dictionary/${dictionary.id}/quiz`
-                );
+              } else if (tab.id === "quiz") {
+                router.push(`/${locale}/dictionary/${dictionary.id}/quiz`);
               } else {
                 setActiveTab(tab.id);
               }
             }}
             className={`cursor-pointer flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 text-lg font-medium transition-all ${
               activeTab === tab.id
-                ? 'bg-[var(--bg)] shadow-sm'
-                : 'text-[var(--fg)]/50 hover:text-[var(--fg)]'
+                ? "bg-[var(--bg)] shadow-sm"
+                : "text-[var(--fg)]/50 hover:text-[var(--fg)]"
             }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -214,7 +264,7 @@ export default function DictionaryDetailClient({
       </div>
 
       {/* Content */}
-      {activeTab === 'words' && (
+      {activeTab === "words" && (
         <div className="space-y-4">
           {canEdit && (
             <>
@@ -251,30 +301,29 @@ export default function DictionaryDetailClient({
         </div>
       )}
 
-      {activeTab === 'settings' && (
+      {activeTab === "settings" && (
         <DictionarySettings
-          dictionary={dictionary as any}
+          dictionary={dictionary}
           isOwner={isOwner}
           onUpdate={refreshDictionary}
         />
       )}
 
-
-
       {/* Example phrases popup */}
-      {selectedWordId && (() => {
-        const word = dictionary.words.find((w) => w.id === selectedWordId);
-        if (!word) return null;
-        return (
-          <ExamplePhrasePopup
-            isOpen={true}
-            onClose={() => setSelectedWordId(null)}
-            wordId={word.id}
-            wordTitle={word.title}
-            wordTranslation={word.translation}
-          />
-        );
-      })()}
+      {selectedWordId &&
+        (() => {
+          const word = dictionary.words.find((w) => w.id === selectedWordId);
+          if (!word) return null;
+          return (
+            <ExamplePhrasePopup
+              isOpen={true}
+              onClose={() => setSelectedWordId(null)}
+              wordId={word.id}
+              wordTitle={word.title}
+              wordTranslation={word.translation}
+            />
+          );
+        })()}
     </div>
   );
 }

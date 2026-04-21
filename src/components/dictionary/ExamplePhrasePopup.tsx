@@ -1,11 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Modal from '@/components/ui/Modal';
-import Button from '@/components/ui/Button';
-import { useToast } from '@/components/ui/Toast';
-import { Sparkles, Trash2, Plus, Zap } from 'lucide-react';
-import type { ExamplePhrase } from '@/lib/db/schema';
+import { useState, useEffect } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
+import { Sparkles, Trash2, Plus, Zap } from "lucide-react";
+import type { ExamplePhrase } from "@/lib/db/schema";
+import {
+  createExamplePhrase,
+  deleteExamplePhrase,
+  listExamplePhrases,
+} from "@/lib/api/example-phrases.api";
+import { generateAiPhrases } from "@/lib/api/ai.api";
+import { qk } from "@/lib/tanstack/query-keys";
+import { getErrorMessage } from "@/lib/api/errors";
 
 interface ExamplePhrasePopupProps {
   isOpen: boolean;
@@ -25,60 +34,68 @@ export default function ExamplePhrasePopup({
   readOnly = false,
 }: ExamplePhrasePopupProps) {
   const { toast } = useToast();
-  const [phrases, setPhrases] = useState<ExamplePhrase[]>([]);
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [creditsRemaining, setCreditsRemaining] = useState<number | null>(null);
 
   // Manual add form
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newPhrase, setNewPhrase] = useState('');
-  const [newTranslation, setNewTranslation] = useState('');
+  const [newPhrase, setNewPhrase] = useState("");
+  const [newTranslation, setNewTranslation] = useState("");
   const [isAdding, setIsAdding] = useState(false);
 
-  // Fetch phrases
+  const { data: phrases = [], isFetching: isFetchingPhrases } = useQuery<
+    ExamplePhrase[]
+  >({
+    queryKey: qk.phrases.byWord(wordId),
+    enabled: isOpen && Boolean(wordId),
+    queryFn: async () => {
+      const data = await listExamplePhrases(wordId);
+      return data.phrases as ExamplePhrase[];
+    },
+    staleTime: 120_000,
+  });
+
+  const generateMutation = useMutation({
+    mutationFn: () => generateAiPhrases(wordId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: qk.phrases.byWord(wordId),
+      });
+    },
+  });
+
+  const addPhraseMutation = useMutation({
+    mutationFn: createExamplePhrase,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: qk.phrases.byWord(wordId),
+      });
+    },
+  });
+
+  const deletePhraseMutation = useMutation({
+    mutationFn: deleteExamplePhrase,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: qk.phrases.byWord(wordId),
+      });
+    },
+  });
+
   useEffect(() => {
-    if (!isOpen || !wordId) return;
-
-    const fetchPhrases = async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetch(`/api/example-phrases?wordId=${wordId}`);
-        if (res.ok) {
-          const data = await res.json();
-          setPhrases(data.phrases);
-        }
-      } catch {
-        // Silently fail
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchPhrases();
-  }, [isOpen, wordId]);
+    setIsLoading(isFetchingPhrases);
+  }, [isFetchingPhrases]);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
     try {
-      const res = await fetch('/api/ai/generate-phrases', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wordId }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        toast(data.error || 'Generation failed', 'error');
-        return;
-      }
-
-      const data = await res.json();
-      setPhrases((prev) => [...prev, ...data.phrases]);
-      setCreditsRemaining(data.creditsRemaining);
-      toast(`Generated ${data.phrases.length} phrases!`, 'success');
-    } catch {
-      toast('Something went wrong', 'error');
+      const data = await generateMutation.mutateAsync();
+      setCreditsRemaining(data.creditsRemaining ?? null);
+      toast(`Generated ${data.phrases.length} phrases!`, "success");
+    } catch (error: unknown) {
+      toast(getErrorMessage(error, "Something went wrong"), "error");
     } finally {
       setIsGenerating(false);
     }
@@ -90,29 +107,17 @@ export default function ExamplePhrasePopup({
 
     setIsAdding(true);
     try {
-      const res = await fetch('/api/example-phrases', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          wordId,
-          phrase: newPhrase.trim(),
-          translation: newTranslation.trim(),
-        }),
+      await addPhraseMutation.mutateAsync({
+        wordId,
+        phrase: newPhrase.trim(),
+        translation: newTranslation.trim(),
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        toast(data.error || 'Failed to add phrase', 'error');
-        return;
-      }
-
-      const data = await res.json();
-      setPhrases((prev) => [...prev, data.phrase]);
-      setNewPhrase('');
-      setNewTranslation('');
+      setNewPhrase("");
+      setNewTranslation("");
       setShowAddForm(false);
-    } catch {
-      toast('Something went wrong', 'error');
+    } catch (error: unknown) {
+      toast(getErrorMessage(error, "Something went wrong"), "error");
     } finally {
       setIsAdding(false);
     }
@@ -120,19 +125,19 @@ export default function ExamplePhrasePopup({
 
   const handleDelete = async (phraseId: string) => {
     try {
-      const res = await fetch(`/api/example-phrases/${phraseId}`, {
-        method: 'DELETE',
-      });
-      if (res.ok) {
-        setPhrases((prev) => prev.filter((p) => p.id !== phraseId));
-      }
+      await deletePhraseMutation.mutateAsync(phraseId);
     } catch {
-      toast('Failed to delete phrase', 'error');
+      toast("Failed to delete phrase", "error");
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Examples for "${wordTitle}"`} size="lg">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Examples for "${wordTitle}"`}
+      size="lg"
+    >
       <p className="mb-4 text-lg text-[var(--fg)]/50">
         {wordTitle} → {wordTranslation}
       </p>
@@ -242,7 +247,7 @@ export default function ExamplePhrasePopup({
               <Zap className="h-3 w-3" />
               {creditsRemaining !== null
                 ? `${creditsRemaining} AI credits remaining`
-                : '1 credit per generation'}
+                : "1 credit per generation"}
             </span>
             <span>{phrases.length} / 9 phrases</span>
           </div>

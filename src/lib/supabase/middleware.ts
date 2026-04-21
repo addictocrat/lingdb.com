@@ -5,7 +5,7 @@ export async function updateSession(
   request: NextRequest,
   response?: NextResponse,
 ) {
-  let supabaseResponse =
+  const supabaseResponse =
     response ||
     NextResponse.next({
       request,
@@ -20,7 +20,7 @@ export async function updateSession(
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
           // If we have a response, we should use it, but if we need a fresh next() to update request...

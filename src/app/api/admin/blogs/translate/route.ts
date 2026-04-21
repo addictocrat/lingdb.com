@@ -183,7 +183,7 @@ CRITICAL: Return ONLY raw JSON, no markdown fences.`,
           };
           return acc;
         },
-        {} as Record<string, any>,
+        {} as Record<string, unknown>,
       ),
     });
   } catch (error) {

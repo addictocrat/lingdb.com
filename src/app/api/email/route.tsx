@@ -1,12 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { transporter } from '@/lib/email/client';
-import { renderVerifyEmail } from '@/lib/email/templates/verify-email';
-import { renderWelcomeEmail } from '@/lib/email/templates/welcome';
-import { renderForgotPasswordEmail } from '@/lib/email/templates/forgot-password';
-import { renderPaymentProcessedEmail } from '@/lib/email/templates/payment-processed';
-import { renderReminderEmail } from '@/lib/email/templates/reminder';
+import { NextRequest, NextResponse } from "next/server";
+import { transporter } from "@/lib/email/client";
+import { renderVerifyEmail } from "@/lib/email/templates/verify-email";
+import { renderWelcomeEmail } from "@/lib/email/templates/welcome";
+import { renderForgotPasswordEmail } from "@/lib/email/templates/forgot-password";
+import { renderPaymentProcessedEmail } from "@/lib/email/templates/payment-processed";
+import { renderReminderEmail } from "@/lib/email/templates/reminder";
 
-export const runtime = 'nodejs';
+export const runtime = "nodejs";
 
 /**
  * INTERNAL API ROUTE
@@ -17,35 +17,45 @@ export async function POST(request: NextRequest) {
     const { to, subject, template, data } = await request.json();
 
     if (!to || !subject || !template) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
     }
 
-    let html = '';
+    let html = "";
 
     switch (template) {
-      case 'verify-email':
+      case "verify-email":
         html = renderVerifyEmail(data.username, data.verifyLink);
         break;
-      case 'welcome':
+      case "welcome":
         html = renderWelcomeEmail(data.username, data.loginLink);
         break;
-      case 'forgot-password':
+      case "forgot-password":
         html = renderForgotPasswordEmail(data.username, data.resetLink);
         break;
-      case 'payment-processed':
+      case "payment-processed":
         html = renderPaymentProcessedEmail(
           data.username,
           data.planName,
           data.amount,
           data.currency,
-          data.billingDate
+          data.billingDate,
         );
         break;
-      case 'reminder':
-        html = renderReminderEmail(data.username, data.dashboardLink, data.lastWordTitle);
+      case "reminder":
+        html = renderReminderEmail(
+          data.username,
+          data.dashboardLink,
+          data.lastWordTitle,
+        );
         break;
       default:
-        return NextResponse.json({ error: 'Invalid template' }, { status: 400 });
+        return NextResponse.json(
+          { error: "Invalid template" },
+          { status: 400 },
+        );
     }
 
     await transporter.sendMail({
@@ -56,8 +66,13 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('Email send error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error: unknown) {
+    console.error("Email send error:", error);
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Internal Server Error",
+      },
+      { status: 500 },
+    );
   }
 }

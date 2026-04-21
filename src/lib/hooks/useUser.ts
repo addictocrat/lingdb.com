@@ -1,22 +1,25 @@
-'use client';
+"use client";
 
-import { useEffect, useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import type { User } from '@supabase/supabase-js';
+import { useEffect, useState, useCallback } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createClient } from "@/lib/supabase/client";
+import { getUserProfileBySupabaseId } from "@/lib/api/auth.api";
+import { qk } from "@/lib/tanstack/query-keys";
+import type { User } from "@supabase/supabase-js";
 
 interface UserProfile {
   id: string;
   username: string;
   email: string;
   locale: string;
-  tier: 'FREE' | 'PREMIUM';
+  tier: "FREE" | "PREMIUM";
   aiCredits: number;
   totalWords: number;
   totalFlashcards: number;
   totalQuizzes: number;
   streakCount: number;
   hasCompletedTour: boolean;
-  role: 'USER' | 'ADMIN';
+  role: "USER" | "ADMIN";
 }
 
 interface UseUserReturn {
@@ -29,30 +32,44 @@ interface UseUserReturn {
 
 export function useUser(): UseUserReturn {
   const supabase = createClient();
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
 
-  const fetchProfile = useCallback(
-    async (supabaseUserId: string) => {
-      try {
-        const response = await fetch(`/api/user/profile?supabaseId=${supabaseUserId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setProfile(data.profile);
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
+  const {
+    data: profile,
+    isLoading: isProfileLoading,
+    refetch,
+  } = useQuery<UserProfile | null>({
+    queryKey: user
+      ? qk.auth.profile(user.id)
+      : ["auth", "profile", "anonymous"],
+    enabled: Boolean(user?.id),
+    queryFn: async () => {
+      if (!user?.id) {
+        return null;
       }
+      const data = await getUserProfileBySupabaseId(user.id);
+      return data.profile;
     },
-    []
-  );
+    staleTime: 30_000,
+  });
+
+  const signOutMutation = useMutation({
+    mutationFn: async () => {
+      await supabase.auth.signOut();
+    },
+    onSuccess: () => {
+      setUser(null);
+      queryClient.removeQueries({ queryKey: ["auth"] });
+    },
+  });
 
   const refreshProfile = useCallback(async () => {
-    if (user) {
-      await fetchProfile(user.id);
+    if (user?.id) {
+      await refetch();
     }
-  }, [user, fetchProfile]);
+  }, [user?.id, refetch]);
 
   useEffect(() => {
     const getInitialSession = async () => {
@@ -61,14 +78,10 @@ export function useUser(): UseUserReturn {
           data: { user: currentUser },
         } = await supabase.auth.getUser();
         setUser(currentUser);
-
-        if (currentUser) {
-          await fetchProfile(currentUser.id);
-        }
       } catch (error) {
-        console.error('Error getting session:', error);
+        console.error("Error getting session:", error);
       } finally {
-        setIsLoading(false);
+        setIsAuthLoading(false);
       }
     };
 
@@ -80,23 +93,25 @@ export function useUser(): UseUserReturn {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
-      if (currentUser) {
-        await fetchProfile(currentUser.id);
+      if (currentUser?.id) {
+        queryClient.invalidateQueries({
+          queryKey: qk.auth.profile(currentUser.id),
+        });
       } else {
-        setProfile(null);
+        queryClient.removeQueries({ queryKey: ["auth"] });
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [supabase, fetchProfile]);
+  }, [supabase, queryClient]);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
+    await signOutMutation.mutateAsync();
   };
 
-  return { user, profile, isLoading, signOut, refreshProfile };
+  const isLoading = isAuthLoading || (Boolean(user?.id) && isProfileLoading);
+
+  return { user, profile: profile ?? null, isLoading, signOut, refreshProfile };
 }

@@ -5,7 +5,10 @@ import { useRouter, usePathname } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils/cn";
 import { Globe, ChevronDown } from "lucide-react";
-import { SUPPORTED_LANGUAGES } from "@/lib/utils/constants";
+import {
+  SUPPORTED_LANGUAGES,
+  type SupportedLocale,
+} from "@/lib/utils/constants";
 
 export default function LocaleSwitcher() {
   const locale = useLocale();
@@ -32,8 +35,8 @@ export default function LocaleSwitcher() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLocaleChange = (newLocale: string) => {
-    router.replace(pathname, { locale: newLocale as any });
+  const handleLocaleChange = (newLocale: SupportedLocale) => {
+    router.replace(pathname, { locale: newLocale });
     setIsOpen(false);
   };
 

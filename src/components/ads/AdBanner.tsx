@@ -1,53 +1,48 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from "react";
+
+type WindowWithAds = Window & {
+  adsbygoogle?: Array<Record<string, unknown>>;
+};
 
 interface AdBannerProps {
   slotId: string;
-  format?: 'auto' | 'fluid' | 'rectangle';
+  format?: "auto" | "fluid" | "rectangle";
   layout?: string;
   className?: string;
-  userTier?: 'FREE' | 'PREMIUM';
+  userTier?: "FREE" | "PREMIUM";
 }
 
 export default function AdBanner({
   slotId,
-  format = 'auto',
+  format = "auto",
   layout,
-  className = '',
-  userTier = 'FREE',
+  className = "",
+  userTier = "FREE",
 }: AdBannerProps) {
   const adRef = useRef<HTMLModElement>(null);
-  const [shouldRender, setShouldRender] = useState(false);
-
-  useEffect(() => {
-    // 1. Never show ads to premium users
-    if (userTier === 'PREMIUM') {
-      setShouldRender(false);
-      return;
-    }
-
-    // 2. Show ads to everyone else regardless of cookie consent
-    setShouldRender(true);
-  }, [userTier]);
+  const shouldRender = userTier !== "PREMIUM";
 
   useEffect(() => {
     if (shouldRender && adRef.current) {
       try {
-        // @ts-ignore - Google Adsense global variable
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        const adsWindow = window as WindowWithAds;
+        (adsWindow.adsbygoogle = adsWindow.adsbygoogle || []).push({});
       } catch (error) {
-        console.error('AdSense injection failed', error);
+        console.error("AdSense injection failed", error);
       }
     }
   }, [shouldRender]);
 
-  if (!shouldRender || userTier === 'PREMIUM') {
+  if (!shouldRender) {
     return null; // Don't render anything for premium users
   }
 
   return (
-    <div className={`overflow-hidden rounded-xl bg-[var(--surface-hover)] p-2 text-center shadow-sm ${className}`}>
+    <div
+      className={`overflow-hidden rounded-xl bg-[var(--surface-hover)] p-2 text-center shadow-sm ${className}`}
+    >
       <span className="mb-2 block text-[10px] font-medium uppercase tracking-wider text-[var(--fg)]/30">
         Advertisement
       </span>

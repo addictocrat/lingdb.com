@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
-import FlashcardCard from './FlashcardCard';
-import Button from '@/components/ui/Button';
-import { useToast } from '@/components/ui/Toast';
+import { useState, useEffect, useCallback } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import FlashcardCard from "./FlashcardCard";
+import Button from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
 import {
   ArrowLeft,
   ArrowRight,
@@ -13,8 +14,9 @@ import {
   RotateCcw,
   ArrowLeftRight,
   Check,
-} from 'lucide-react';
-import type { Word, ExamplePhrase } from '@/lib/db/schema';
+} from "lucide-react";
+import type { Word, ExamplePhrase } from "@/lib/db/schema";
+import { completeFlashcardSession } from "@/lib/api/study.api";
 
 export default function FlashcardSlider({
   words,
@@ -26,27 +28,32 @@ export default function FlashcardSlider({
   const [deck, setDeck] = useState(words);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
-  const [direction, setDirection] = useState<'word-first' | 'translation-first'>(
-    'word-first'
-  );
+  const [direction, setDirection] = useState<
+    "word-first" | "translation-first"
+  >("word-first");
   const [isFinished, setIsFinished] = useState(false);
   const router = useRouter();
   const locale = useLocale();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const completeFlashcardMutation = useMutation({
+    mutationFn: completeFlashcardSession,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["auth"] });
+      await queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+    },
+  });
 
   const finishDeck = useCallback(async () => {
     setIsFinished(true);
     try {
-      await fetch('/api/study/flashcard/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dictionaryId }),
-      });
-      toast('Flashcard session completed!', 'success');
+      await completeFlashcardMutation.mutateAsync(dictionaryId);
+      toast("Flashcard session completed!", "success");
     } catch (error) {
       console.error(error);
     }
-  }, [dictionaryId, toast]);
+  }, [dictionaryId, toast, completeFlashcardMutation]);
 
   const handleNext = useCallback(() => {
     if (currentIndex < deck.length - 1) {
@@ -71,15 +78,15 @@ export default function FlashcardSlider({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isFinished) return;
-      if (e.key === 'ArrowRight') handleNext();
-      if (e.key === 'ArrowLeft') handlePrev();
-      if (e.key === ' ' || e.key === 'Spacebar') {
+      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "ArrowLeft") handlePrev();
+      if (e.key === " " || e.key === "Spacebar") {
         e.preventDefault();
         handleFlip();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleNext, handlePrev, handleFlip, isFinished]);
 
   const shuffleDeck = () => {
@@ -98,7 +105,7 @@ export default function FlashcardSlider({
   const toggleDirection = () => {
     setIsFlipped(false);
     setDirection((prev) =>
-      prev === 'word-first' ? 'translation-first' : 'word-first'
+      prev === "word-first" ? "translation-first" : "word-first",
     );
   };
 
@@ -109,7 +116,9 @@ export default function FlashcardSlider({
         <p className="mb-6 text-[var(--fg)]/60">
           Add some words to this dictionary first.
         </p>
-        <Button onClick={() => router.push(`/${locale}/dictionary/${dictionaryId}`)}>
+        <Button
+          onClick={() => router.push(`/${locale}/dictionary/${dictionaryId}`)}
+        >
           Back to Dictionary
         </Button>
       </div>
@@ -128,7 +137,9 @@ export default function FlashcardSlider({
             <RotateCcw className="mr-2 h-4 w-4" />
             Study Again
           </Button>
-          <Button onClick={() => router.push(`/${locale}/dictionary/${dictionaryId}`)}>
+          <Button
+            onClick={() => router.push(`/${locale}/dictionary/${dictionaryId}`)}
+          >
             Back to Dictionary
           </Button>
         </div>
@@ -152,7 +163,12 @@ export default function FlashcardSlider({
           >
             <ArrowLeftRight className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={shuffleDeck} title="Shuffle">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={shuffleDeck}
+            title="Shuffle"
+          >
             <Shuffle className="h-4 w-4" />
           </Button>
           <Button variant="ghost" size="sm" onClick={resetDeck} title="Restart">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Button from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
 import { Plus } from "lucide-react";
@@ -10,6 +11,8 @@ import AutoSuggest from "./AutoSuggest";
 import { SUPPORTED_LANGUAGES } from "@/lib/utils/constants";
 
 import Dropdown, { DropdownItem } from "@/components/ui/Dropdown";
+import { createWord } from "@/lib/api/words.api";
+import { getErrorMessage } from "@/lib/api/errors";
 
 const addWordSchema = z.object({
   title: z.string().min(1, "Word is required").max(100),
@@ -38,6 +41,15 @@ export default function AddWordForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const titleRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
+
+  const createWordMutation = useMutation({
+    mutationFn: createWord,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["dictionaries"] });
+      await queryClient.invalidateQueries({ queryKey: ["words"] });
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,24 +72,14 @@ export default function AddWordForm({
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/words", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...result.data, dictionaryId }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        toast(data.error || t("settings.error_saved"), "error");
-        return;
-      }
+      await createWordMutation.mutateAsync({ ...result.data, dictionaryId });
 
       setTitle("");
       setTranslation("");
       titleRef.current?.focus(); // Actually AutoSuggest input ref might not be exposed, but that's fine
       onWordAdded();
-    } catch {
-      toast(t("settings.error_saved"), "error");
+    } catch (error: unknown) {
+      toast(getErrorMessage(error, t("settings.error_saved")), "error");
     } finally {
       setIsSubmitting(false);
     }

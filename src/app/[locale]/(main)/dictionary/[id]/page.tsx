@@ -3,7 +3,22 @@ import { db } from "@/lib/db/client";
 import { dictionaries, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
+import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import DictionaryDetailClient from "@/components/dictionary/DictionaryDetailClient";
+import { makeServerQueryClient } from "@/lib/tanstack/hydration";
+import { qk } from "@/lib/tanstack/query-keys";
+import type {
+  Dictionary,
+  Word,
+  ExamplePhrase,
+  DictionaryEditor,
+} from "@/lib/db/schema";
+
+type DictionaryWithRelations = Dictionary & {
+  words: (Word & { examplePhrases: ExamplePhrase[] })[];
+  user?: { username: string };
+  dictionaryEditors?: (DictionaryEditor & { user: { username: string } })[];
+};
 
 export default async function DictionaryPage({
   params,
@@ -50,9 +65,12 @@ export default async function DictionaryPage({
 
   if (!dict) notFound();
 
+  const queryClient = makeServerQueryClient();
+  queryClient.setQueryData(qk.dictionaries.detail(id), dict);
+
   const isOwner = dbUser?.id === dict.userId;
   const isEditor = dict.dictionaryEditors.some(
-    (ed: any) => ed.userId === dbUser?.id,
+    (ed) => ed.userId === dbUser?.id,
   );
 
   if (!dict.isPublic && !isOwner && !isEditor) {
@@ -74,12 +92,14 @@ export default async function DictionaryPage({
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-      <DictionaryDetailClient
-        dictionary={dict as any}
-        isOwner={isOwner}
-        currentUserId={dbUser?.id}
-        showTour={showTour}
-      />
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <DictionaryDetailClient
+          dictionary={dict as DictionaryWithRelations}
+          isOwner={isOwner}
+          currentUserId={dbUser?.id}
+          showTour={showTour}
+        />
+      </HydrationBoundary>
     </main>
   );
 }

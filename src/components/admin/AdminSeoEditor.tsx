@@ -1,9 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useToast } from '@/components/ui/Toast';
-import Button from '@/components/ui/Button';
-import { RefreshCw, Save, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/Toast";
+import Button from "@/components/ui/Button";
+import { RefreshCw, Save, ChevronDown, ChevronUp } from "lucide-react";
+import { updateDictionary } from "@/lib/api/dictionaries.api";
+import { generateDictionarySeo } from "@/lib/api/ai.api";
 
 interface AdminSeoEditorProps {
   dictionaryId: string;
@@ -19,24 +22,44 @@ export default function AdminSeoEditor({
   seoGeneratedAt,
 }: AdminSeoEditorProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
-  const [seoTitle, setSeoTitle] = useState(currentSeoTitle || '');
-  const [seoDescription, setSeoDescription] = useState(currentSeoDescription || '');
+  const [seoTitle, setSeoTitle] = useState(currentSeoTitle || "");
+  const [seoDescription, setSeoDescription] = useState(
+    currentSeoDescription || "",
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
+
+  const saveSeoMutation = useMutation({
+    mutationFn: (payload: Record<string, unknown>) =>
+      updateDictionary(dictionaryId, payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["dictionaries"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["admin", "dictionaries"],
+      });
+    },
+  });
+
+  const regenerateSeoMutation = useMutation({
+    mutationFn: (payload: Record<string, unknown>) =>
+      generateDictionarySeo(payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["dictionaries"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["admin", "dictionaries"],
+      });
+    },
+  });
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      const res = await fetch(`/api/dictionaries/${dictionaryId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ seoTitle, seoDescription }),
-      });
-      if (!res.ok) throw new Error('Failed to save');
-      toast('SEO metadata saved successfully!', 'success');
+      await saveSeoMutation.mutateAsync({ seoTitle, seoDescription });
+      toast("SEO metadata saved successfully!", "success");
     } catch (error) {
-      toast('Failed to save SEO metadata', 'error');
+      toast("Failed to save SEO metadata", "error");
     } finally {
       setIsSaving(false);
     }
@@ -45,18 +68,15 @@ export default function AdminSeoEditor({
   const handleRegenerate = async () => {
     setIsRegenerating(true);
     try {
-      const res = await fetch('/api/dictionaries/generate-seo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dictionaryId, force: true }),
+      const data = await regenerateSeoMutation.mutateAsync({
+        dictionaryId,
+        force: true,
       });
-      if (!res.ok) throw new Error('Failed to regenerate');
-      const data = await res.json();
-      setSeoTitle(data.seoTitle || '');
-      setSeoDescription(data.seoDescription || '');
-      toast('SEO metadata regenerated!', 'success');
+      setSeoTitle(data.seoTitle || "");
+      setSeoDescription(data.seoDescription || "");
+      toast("SEO metadata regenerated!", "success");
     } catch (error) {
-      toast('Failed to regenerate SEO metadata', 'error');
+      toast("Failed to regenerate SEO metadata", "error");
     } finally {
       setIsRegenerating(false);
     }
@@ -127,13 +147,9 @@ export default function AdminSeoEditor({
           )}
 
           <div className="flex flex-wrap gap-3">
-            <Button
-              onClick={handleSave}
-              disabled={isSaving}
-              size="sm"
-            >
+            <Button onClick={handleSave} disabled={isSaving} size="sm">
               <Save className="mr-1.5 h-4 w-4" />
-              {isSaving ? 'Saving...' : 'Save SEO Fields'}
+              {isSaving ? "Saving..." : "Save SEO Fields"}
             </Button>
             <Button
               onClick={handleRegenerate}
@@ -141,8 +157,10 @@ export default function AdminSeoEditor({
               size="sm"
               variant="secondary"
             >
-              <RefreshCw className={`mr-1.5 h-4 w-4 ${isRegenerating ? 'animate-spin' : ''}`} />
-              {isRegenerating ? 'Regenerating...' : 'Regenerate with AI'}
+              <RefreshCw
+                className={`mr-1.5 h-4 w-4 ${isRegenerating ? "animate-spin" : ""}`}
+              />
+              {isRegenerating ? "Regenerating..." : "Regenerate with AI"}
             </Button>
           </div>
         </div>

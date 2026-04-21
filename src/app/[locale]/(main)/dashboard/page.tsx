@@ -50,7 +50,12 @@ export default async function DashboardPage({
       description: dictionaries.description,
       language: dictionaries.language,
       isPublic: dictionaries.isPublic,
+      slug: dictionaries.slug,
       userId: dictionaries.userId,
+      seoTitle: dictionaries.seoTitle,
+      seoDescription: dictionaries.seoDescription,
+      seoGeneratedAt: dictionaries.seoGeneratedAt,
+      lastDailyUpdateSentAt: dictionaries.lastDailyUpdateSentAt,
       createdAt: dictionaries.createdAt,
       updatedAt: dictionaries.updatedAt,
       activeMagicWords: dictionaries.activeMagicWords,
@@ -79,7 +84,7 @@ export default async function DashboardPage({
     .orderBy(dictionaries.updatedAt);
 
   // Ensure unique dictionary instances based on DB groupBy
-  const userDictionaries = rawDictionaries as any;
+  const userDictionaries = rawDictionaries;
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">

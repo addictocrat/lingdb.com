@@ -1,15 +1,25 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslations, useLocale } from 'next-intl';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useDebounce } from 'use-debounce';
-import Button from '@/components/ui/Button';
-import { useToast } from '@/components/ui/Toast';
-import { Save, Loader2, AlertCircle, CheckCircle2, HelpCircle } from 'lucide-react';
+import { useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import { useForm } from "react-hook-form";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useDebounce } from "use-debounce";
+import Button from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
+import { checkUsernameAvailability } from "@/lib/api/users.api";
+import { patchUserProfile } from "@/lib/api/auth.api";
+import { getErrorMessage } from "@/lib/api/errors";
+import { qk } from "@/lib/tanstack/query-keys";
+import {
+  Save,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  HelpCircle,
+} from "lucide-react";
 
 interface SettingsFormProps {
   user: {
@@ -25,22 +35,20 @@ interface SettingsFormProps {
 export default function SettingsForm({ user }: SettingsFormProps) {
   const router = useRouter();
   const currentLocale = useLocale();
-  const t = useTranslations('settings');
+  const t = useTranslations("settings");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const settingsSchema = z.object({
     username: z
       .string()
-      .min(3, t('username_min'))
-      .max(20, t('username_max'))
-      .regex(/^[a-zA-Z0-9_]+$/, t('username_regex')),
-    locale: z.enum(['en', 'fr', 'de', 'es', 'tr']),
+      .min(3, t("username_min"))
+      .max(20, t("username_max"))
+      .regex(/^[a-zA-Z0-9_]+$/, t("username_regex")),
+    locale: z.enum(["en", "fr", "de", "es", "tr"]),
   });
 
   type SettingsFormData = z.infer<typeof settingsSchema>;
-  
-  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
-  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
 
   const {
     register,
@@ -52,61 +60,62 @@ export default function SettingsForm({ user }: SettingsFormProps) {
     resolver: zodResolver(settingsSchema),
     defaultValues: {
       username: user.username,
-      locale: user.locale as any,
+      locale: (["en", "fr", "de", "es", "tr"].includes(user.locale)
+        ? user.locale
+        : "en") as SettingsFormData["locale"],
     },
   });
 
-  const watchUsername = watch('username');
+  const watchUsername = watch("username");
   const [debouncedUsername] = useDebounce(watchUsername, 500);
 
-  // Check username availability
-  useEffect(() => {
-    const checkUsername = async () => {
-      if (debouncedUsername === user.username) {
-        setUsernameAvailable(true);
-        setIsCheckingUsername(false);
-        return;
-      }
+  const shouldCheckUsername =
+    Boolean(debouncedUsername) &&
+    debouncedUsername.length >= 3 &&
+    debouncedUsername !== user.username;
 
-      if (!debouncedUsername || debouncedUsername.length < 3) {
-        setUsernameAvailable(null);
-        return;
-      }
+  const { data: checkedUsernameAvailable, isFetching: isCheckingUsername } =
+    useQuery({
+      queryKey: qk.users.usernameCheck(debouncedUsername || ""),
+      enabled: shouldCheckUsername,
+      queryFn: async () => {
+        const data = await checkUsernameAvailability(debouncedUsername);
+        return data.available;
+      },
+      staleTime: 30_000,
+    });
 
-      setIsCheckingUsername(true);
-      try {
-        const res = await fetch(`/api/users/profile?checkUsername=${debouncedUsername}`);
-        const data = await res.json();
-        setUsernameAvailable(data.available);
-      } catch (e) {
-        setUsernameAvailable(null);
-      } finally {
-        setIsCheckingUsername(false);
-      }
-    };
+  const usernameAvailable =
+    debouncedUsername === user.username
+      ? true
+      : !debouncedUsername || debouncedUsername.length < 3
+        ? null
+        : (checkedUsernameAvailable ?? null);
 
-    checkUsername();
-  }, [debouncedUsername, user.username]);
+  const saveProfileMutation = useMutation({
+    mutationFn: patchUserProfile,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["auth"] });
+    },
+  });
+
+  const resetTourMutation = useMutation({
+    mutationFn: patchUserProfile,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["auth"] });
+    },
+  });
 
   const onSubmit = async (data: SettingsFormData) => {
     if (usernameAvailable === false) {
-      setError('username', { message: t('username_taken') });
+      setError("username", { message: t("username_taken") });
       return;
     }
 
     try {
-      const res = await fetch('/api/users/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+      await saveProfileMutation.mutateAsync(data);
 
-      if (!res.ok) {
-        const result = await res.json();
-        throw new Error(result.error || t('reset_tutorial_fail')); // Use a generic error or specific if available
-      }
-
-      toast(t('saved'), 'success');
+      toast(t("saved"), "success");
 
       // If locale changed, we need to completely redirect to apply the new locale prefix
       if (data.locale !== currentLocale) {
@@ -114,8 +123,8 @@ export default function SettingsForm({ user }: SettingsFormProps) {
       } else {
         router.refresh();
       }
-    } catch (error: any) {
-      toast(error.message, 'error');
+    } catch (error: unknown) {
+      toast(getErrorMessage(error, t("reset_tutorial_fail")), "error");
     }
   };
 
@@ -125,7 +134,7 @@ export default function SettingsForm({ user }: SettingsFormProps) {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
         <div>
           <label className="mb-2 block text-lg font-medium text-[var(--fg)]">
-            {t('email')}
+            {t("email")}
           </label>
           <input
             type="email"
@@ -138,13 +147,13 @@ export default function SettingsForm({ user }: SettingsFormProps) {
 
         <div>
           <label className="mb-2 block text-lg font-medium text-[var(--fg)]">
-            {t('tier')}
+            {t("tier")}
           </label>
           <div className="flex h-[50px] items-center rounded-xl border border-[var(--border-color)] bg-[var(--bg)] px-4 opacity-80">
             <span className="font-semibold">{user.tier}</span>
-            {user.tier === 'FREE' && (
+            {user.tier === "FREE" && (
               <span className="ml-auto text-lg text-[var(--fg)]/50">
-                {t('credits_left', { count: user.aiCredits })}
+                {t("credits_left", { count: user.aiCredits })}
               </span>
             )}
           </div>
@@ -157,15 +166,15 @@ export default function SettingsForm({ user }: SettingsFormProps) {
       <div className="space-y-6">
         <div>
           <label className="mb-2 block text-lg font-medium text-[var(--fg)]">
-            {t('username')}
+            {t("username")}
           </label>
           <div className="relative">
             <input
-              {...register('username')}
+              {...register("username")}
               className={`w-full rounded-xl border bg-[var(--surface)] px-4 py-3 pr-10 outline-none transition-colors ${
                 errors.username || usernameAvailable === false
-                  ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500'
-                  : 'border-[var(--border-color)] focus:border-primary-500 focus:ring-1 focus:ring-primary-500'
+                  ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                  : "border-[var(--border-color)] focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
               }`}
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -179,74 +188,80 @@ export default function SettingsForm({ user }: SettingsFormProps) {
             </div>
           </div>
           {errors.username && (
-            <p className="mt-1.5 text-lg text-red-500">{errors.username.message}</p>
+            <p className="mt-1.5 text-lg text-red-500">
+              {errors.username.message}
+            </p>
           )}
           {usernameAvailable === false && !errors.username && (
-            <p className="mt-1.5 text-lg text-red-500">{t('username_taken')}</p>
+            <p className="mt-1.5 text-lg text-red-500">{t("username_taken")}</p>
           )}
           <p className="mt-2 text-sm text-[var(--fg)]/50">
-            {t('username_hint')}
+            {t("username_hint")}
           </p>
         </div>
 
         <div>
           <label className="mb-2 block text-lg font-medium text-[var(--fg)]">
-            {t('locale')}
+            {t("locale")}
           </label>
           <select
-            {...register('locale')}
+            {...register("locale")}
             className="w-full appearance-none rounded-xl border border-[var(--border-color)] bg-[var(--surface)] px-4 py-3 outline-none transition-colors focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
           >
-            <option value="en">{t('languages.en')}</option>
-            <option value="fr">{t('languages.fr')}</option>
-            <option value="de">{t('languages.de')}</option>
-            <option value="es">{t('languages.es')}</option>
-            <option value="tr">{t('languages.tr')}</option>
+            <option value="en">{t("languages.en")}</option>
+            <option value="fr">{t("languages.fr")}</option>
+            <option value="de">{t("languages.de")}</option>
+            <option value="es">{t("languages.es")}</option>
+            <option value="tr">{t("languages.tr")}</option>
           </select>
-          <p className="mt-2 text-sm text-[var(--fg)]/50">
-            {t('locale_hint')}
-          </p>
+          <p className="mt-2 text-sm text-[var(--fg)]/50">{t("locale_hint")}</p>
         </div>
       </div>
 
       <div className="flex flex-col gap-4 border-t border-[var(--border-color)] pt-8 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-[var(--fg)]">{t('tour_title')}</h3>
-          <p className="mt-1 text-sm text-[var(--fg)]/50">{t('tour_description')}</p>
+          <h3 className="text-lg font-semibold text-[var(--fg)]">
+            {t("tour_title")}
+          </h3>
+          <p className="mt-1 text-sm text-[var(--fg)]/50">
+            {t("tour_description")}
+          </p>
           <Button
             type="button"
             variant="secondary"
             className="mt-3"
             onClick={async () => {
               try {
-                const res = await fetch('/api/users/profile', {
-                  method: 'PATCH',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ hasCompletedTour: false }),
+                await resetTourMutation.mutateAsync({
+                  hasCompletedTour: false,
                 });
-                
-                if (!res.ok) throw new Error('Failed to reset');
-                
-                localStorage.removeItem('lingdb_tour_completed');
+
+                localStorage.removeItem("lingdb_tour_completed");
                 window.location.href = `/${currentLocale}/dashboard`;
-              } catch (e) {
-                toast(t('reset_tutorial_fail'), 'error');
+              } catch {
+                toast(t("reset_tutorial_fail"), "error");
               }
             }}
           >
             <HelpCircle className="mr-2 h-4 w-4" />
-            {t('restart_tour')}
+            {t("restart_tour")}
           </Button>
         </div>
 
         <div className="flex shrink-0 justify-end">
           <Button
             type="submit"
-            disabled={!isDirty || isSubmitting || isCheckingUsername || usernameAvailable === false}
-            isLoading={isSubmitting}
+            disabled={
+              !isDirty ||
+              isSubmitting ||
+              isCheckingUsername ||
+              usernameAvailable === false ||
+              saveProfileMutation.isPending
+            }
+            isLoading={isSubmitting || saveProfileMutation.isPending}
           >
             <Save className="mr-2 h-4 w-4" />
-            {t('save_changes')}
+            {t("save_changes")}
           </Button>
         </div>
       </div>

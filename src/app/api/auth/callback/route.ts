@@ -1,26 +1,32 @@
-import { createServerClient } from '@supabase/ssr';
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { APP_URL } from '@/lib/utils/constants';
-import { db } from '@/lib/db/client';
-import { users } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
-import { generateRandomUsername } from '@/lib/utils/random-username';
-import { sendAdminNewUserNotification } from '@/lib/email/notify-admin';
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { APP_URL } from "@/lib/utils/constants";
+import { db } from "@/lib/db/client";
+import { users } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
+import { generateRandomUsername } from "@/lib/utils/random-username";
+import { sendAdminNewUserNotification } from "@/lib/email/notify-admin";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/en/dashboard';
+  const code = searchParams.get("code");
+  const next = searchParams.get("next") ?? "/en/dashboard";
 
   if (!code) {
-    return NextResponse.redirect(`${APP_URL}/en/login?error=auth_callback_failed`);
+    return NextResponse.redirect(
+      `${APP_URL}/en/login?error=auth_callback_failed`,
+    );
   }
 
   const cookieStore = await cookies();
 
   // Collect cookies so we can forward them to the redirect response
-  const cookiesToForward: { name: string; value: string; options: any }[] = [];
+  const cookiesToForward: {
+    name: string;
+    value: string;
+    options?: Parameters<typeof cookieStore.set>[2];
+  }[] = [];
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -34,21 +40,23 @@ export async function GET(request: Request) {
           cookiesToForward.push(...cookiesToSet);
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              cookieStore.set(name, value, options),
             );
           } catch {
             // Ignore errors from Server Components
           }
         },
       },
-    }
+    },
   );
 
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error || !data.user) {
-    console.error('OAuth callback error:', error?.message);
-    return NextResponse.redirect(`${APP_URL}/en/login?error=auth_callback_failed`);
+    console.error("OAuth callback error:", error?.message);
+    return NextResponse.redirect(
+      `${APP_URL}/en/login?error=auth_callback_failed`,
+    );
   }
 
   let redirectPath = next;
@@ -65,7 +73,7 @@ export async function GET(request: Request) {
           where: eq(users.email, data.user.email),
         });
         if (emailConflict) {
-          redirectPath = '/en/login?error=account_exists';
+          redirectPath = "/en/login?error=account_exists";
         }
       }
 
@@ -83,16 +91,18 @@ export async function GET(request: Request) {
           supabaseId: data.user.id,
           email: data.user.email!,
           username,
-          locale: 'en',
-          tier: 'FREE',
+          locale: "en",
+          tier: "FREE",
           aiCredits: 30,
         });
 
-        sendAdminNewUserNotification(username, data.user.email!).catch(console.error);
+        sendAdminNewUserNotification(username, data.user.email!).catch(
+          console.error,
+        );
       }
     }
   } catch (dbError) {
-    console.error('DB error during OAuth callback:', dbError);
+    console.error("DB error during OAuth callback:", dbError);
   }
 
   // Create redirect and forward all session cookies

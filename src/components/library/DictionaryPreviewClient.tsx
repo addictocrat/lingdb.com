@@ -1,15 +1,18 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
-import Button from '@/components/ui/Button';
-import { useToast } from '@/components/ui/Toast';
-import { GitFork, BookOpen, MessageSquare, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import type { Dictionary, Word, ExamplePhrase } from '@/lib/db/schema';
-import Badge from '@/components/ui/Badge';
-import ExamplePhrasePopup from '@/components/dictionary/ExamplePhrasePopup';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Button from "@/components/ui/Button";
+import { useToast } from "@/components/ui/Toast";
+import { GitFork, BookOpen, MessageSquare, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import type { Dictionary, Word, ExamplePhrase } from "@/lib/db/schema";
+import Badge from "@/components/ui/Badge";
+import ExamplePhrasePopup from "@/components/dictionary/ExamplePhrasePopup";
+import { forkDictionary } from "@/lib/api/dictionaries.api";
+import { getErrorMessage } from "@/lib/api/errors";
 
 interface DictionaryPreviewClientProps {
   dictionary: Dictionary & {
@@ -22,11 +25,11 @@ interface DictionaryPreviewClientProps {
 }
 
 const languageFlags: Record<string, string> = {
-  en: '🇬🇧',
-  fr: '🇫🇷',
-  de: '🇩🇪',
-  es: '🇪🇸',
-  tr: '🇹🇷',
+  en: "🇬🇧",
+  fr: "🇫🇷",
+  de: "🇩🇪",
+  es: "🇪🇸",
+  tr: "🇹🇷",
 };
 
 export default function DictionaryPreviewClient({
@@ -37,8 +40,18 @@ export default function DictionaryPreviewClient({
   const router = useRouter();
   const locale = useLocale();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isForking, setIsForking] = useState(false);
-  const [selectedWord, setSelectedWord] = useState<(Word & { examplePhrases: ExamplePhrase[] }) | null>(null);
+  const [selectedWord, setSelectedWord] = useState<
+    (Word & { examplePhrases: ExamplePhrase[] }) | null
+  >(null);
+
+  const forkMutation = useMutation({
+    mutationFn: () => forkDictionary(dictionary.id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["dictionaries"] });
+    },
+  });
 
   const handleFork = async () => {
     if (!isLoggedIn) {
@@ -47,28 +60,19 @@ export default function DictionaryPreviewClient({
     }
 
     if (hasForked) {
-      toast('You have already forked this dictionary', 'warning');
+      toast("You have already forked this dictionary", "warning");
       return;
     }
-    
+
     setIsForking(true);
     try {
-      const res = await fetch('/api/dictionaries/fork', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sourceDictionaryId: dictionary.id }),
-      });
+      const data = await forkMutation.mutateAsync();
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to fork');
-      }
-
-      toast('Dictionary forked successfully! 🎉', 'success');
+      toast("Dictionary forked successfully! 🎉", "success");
       // Redirect to the new copy
       router.push(`/${locale}/dictionary/${data.dictionaryId}`);
-    } catch (error: any) {
-      toast(error.message, 'error');
+    } catch (error: unknown) {
+      toast(getErrorMessage(error, "Failed to fork"), "error");
       setIsForking(false);
     }
   };
@@ -88,7 +92,9 @@ export default function DictionaryPreviewClient({
       </div>
 
       <div className="mb-10 flex flex-col items-center justify-center rounded-3xl border border-[var(--border-color)] bg-[var(--surface)] p-8 text-center sm:p-12">
-        <div className="mb-6 text-6xl">{languageFlags[dictionary.language] || '🌐'}</div>
+        <div className="mb-6 text-6xl">
+          {languageFlags[dictionary.language] || "🌐"}
+        </div>
         <h1 className="mb-4 text-4xl font-extrabold sm:text-5xl">
           {dictionary.title}
         </h1>
@@ -97,10 +103,10 @@ export default function DictionaryPreviewClient({
             {dictionary.description}
           </p>
         )}
-        
+
         <div className="mb-8 flex flex-wrap items-center justify-center gap-4">
           <Badge variant="default" className="text-lg">
-            By {dictionary.user?.username || 'Anonymous'}
+            By {dictionary.user?.username || "Anonymous"}
           </Badge>
           <span className="flex items-center gap-1.5 text-lg font-medium text-[var(--fg)]/60">
             <BookOpen className="h-4 w-4" />
@@ -119,7 +125,11 @@ export default function DictionaryPreviewClient({
           className="w-full max-w-md sm:w-auto text-xl"
         >
           <GitFork className="mr-2 h-5 w-5" />
-          {isForking ? 'Forking...' : hasForked ? 'Already Forked' : 'Fork this Dictionary'}
+          {isForking
+            ? "Forking..."
+            : hasForked
+              ? "Already Forked"
+              : "Fork this Dictionary"}
         </Button>
       </div>
 
@@ -137,9 +147,15 @@ export default function DictionaryPreviewClient({
                 className="flex items-center justify-between p-4 transition-colors hover:bg-[var(--bg)]"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center">
-                  <span className="font-semibold text-[var(--fg)]">{word.title}</span>
-                  <span className="hidden sm:inline-block mx-3 text-[var(--fg)]/20">→</span>
-                  <span className="text-lg sm:text-base text-[var(--fg)]/70">{word.translation}</span>
+                  <span className="font-semibold text-[var(--fg)]">
+                    {word.title}
+                  </span>
+                  <span className="hidden sm:inline-block mx-3 text-[var(--fg)]/20">
+                    →
+                  </span>
+                  <span className="text-lg sm:text-base text-[var(--fg)]/70">
+                    {word.translation}
+                  </span>
                 </div>
                 {word.examplePhrases.length > 0 && (
                   <button
@@ -157,14 +173,14 @@ export default function DictionaryPreviewClient({
       </div>
 
       {selectedWord && (
-         <ExamplePhrasePopup
-           isOpen={true}
-           onClose={() => setSelectedWord(null)}
-           wordId={selectedWord.id}
-           wordTitle={selectedWord.title}
-           wordTranslation={selectedWord.translation}
-           readOnly={true}
-         />
+        <ExamplePhrasePopup
+          isOpen={true}
+          onClose={() => setSelectedWord(null)}
+          wordId={selectedWord.id}
+          wordTitle={selectedWord.title}
+          wordTranslation={selectedWord.translation}
+          readOnly={true}
+        />
       )}
     </div>
   );

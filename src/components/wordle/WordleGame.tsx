@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import Modal from "@/components/ui/Modal";
 import { Link2 } from "lucide-react";
-import {
-  SUPPORTED_LOCALES,
-  type SupportedLocale,
-} from "@/lib/utils/constants";
+import { SUPPORTED_LOCALES, type SupportedLocale } from "@/lib/utils/constants";
+import { getWordleGame, submitWordleGuess } from "@/lib/api/wordle.api";
+import { qk } from "@/lib/tanstack/query-keys";
 
 type CellState = "correct" | "present" | "absent";
 
@@ -62,43 +62,26 @@ export default function WordleGame({
   const isGameOver =
     hasWon || (game ? attempts.length >= game.maxTries : false);
 
+  const { data: gameData, isLoading: isLoadingGame } = useQuery({
+    queryKey: qk.wordle.game(gameId),
+    queryFn: async () => {
+      const data = await getWordleGame(gameId);
+      return data.game as GamePayload;
+    },
+    staleTime: 30_000,
+  });
+
   useEffect(() => {
-    let ignore = false;
-
-    async function fetchGame() {
-      setIsLoading(true);
+    setIsLoading(isLoadingGame);
+    if (gameData) {
+      setGame(gameData);
       setError(null);
-      try {
-        const res = await fetch(`/api/wordle/game/${gameId}`);
-        const data = await res.json();
-
-        if (!res.ok) {
-          if (!ignore) {
-            setError(data?.error || t("game.load_failed"));
-          }
-          return;
-        }
-
-        if (!ignore) {
-          setGame(data.game);
-        }
-      } catch {
-        if (!ignore) {
-          setError(t("game.load_failed"));
-        }
-      } finally {
-        if (!ignore) {
-          setIsLoading(false);
-        }
-      }
     }
+  }, [isLoadingGame, gameData]);
 
-    fetchGame();
-
-    return () => {
-      ignore = true;
-    };
-  }, [gameId, t]);
+  const submitGuessMutation = useMutation({
+    mutationFn: submitWordleGuess,
+  });
 
   const rows = useMemo(() => {
     if (!game) return [];
@@ -136,17 +119,10 @@ export default function WordleGame({
     setError(null);
 
     try {
-      const res = await fetch("/api/wordle/guess", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gameId, guess: nextGuess }),
+      const data = await submitGuessMutation.mutateAsync({
+        gameId,
+        guess: nextGuess,
       });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data?.error || t("game.guess_failed"));
-        return;
-      }
 
       setAttempts((prev) => [
         ...prev,
@@ -302,7 +278,11 @@ export default function WordleGame({
                   value={guess}
                   maxLength={game.wordLength}
                   onChange={(e) =>
-                    setGuess(onlyLetters(e.target.value).toLocaleUpperCase(game?.language || locale))
+                    setGuess(
+                      onlyLetters(e.target.value).toLocaleUpperCase(
+                        game?.language || locale,
+                      ),
+                    )
                   }
                   className="w-full border border-[var(--border-color)] bg-[var(--bg)] px-5 py-4 text-3xl font-black tracking-[0.2em] uppercase outline-none focus:border-primary-500 sm:text-5xl"
                   placeholder={t("game.guess_placeholder")}

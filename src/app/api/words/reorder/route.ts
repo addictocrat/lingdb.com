@@ -1,17 +1,17 @@
-import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
-import { createClient } from '@/lib/supabase/server';
-import { db } from '@/lib/db/client';
-import { words, dictionaries, users } from '@/lib/db/schema';
-import { eq, inArray } from 'drizzle-orm';
-import { z } from 'zod';
+import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db/client";
+import { words, dictionaries, users } from "@/lib/db/schema";
+import { eq, inArray } from "drizzle-orm";
+import { z } from "zod";
 
 const updateSchema = z.object({
   updates: z.array(
     z.object({
       id: z.string().uuid(),
       order: z.number(),
-    })
+    }),
   ),
 });
 
@@ -23,10 +23,7 @@ export async function PATCH(request: Request) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = await request.json();
@@ -34,8 +31,8 @@ export async function PATCH(request: Request) {
 
     if (!result.success) {
       return NextResponse.json(
-        { error: 'Invalid payload', details: result.error },
-        { status: 400 }
+        { error: "Invalid payload", details: result.error },
+        { status: 400 },
       );
     }
 
@@ -51,10 +48,7 @@ export async function PATCH(request: Request) {
     });
 
     if (!dbUser) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Security check: ensure all words belong to a dictionary owned by the user
@@ -62,25 +56,25 @@ export async function PATCH(request: Request) {
     const existingWords = await db.query.words.findMany({
       where: inArray(words.id, wordIds),
       with: {
-        dictionary: { columns: { userId: true, isPublic: true } },
+        dictionary: { columns: { userId: true, isPublic: true, slug: true } },
       },
     });
 
     if (existingWords.length !== wordIds.length) {
       return NextResponse.json(
-        { error: 'One or more words not found' },
-        { status: 404 }
+        { error: "One or more words not found" },
+        { status: 404 },
       );
     }
 
     const isOwner = existingWords.every(
-      (w) => w.dictionary.userId === dbUser.id
+      (w) => w.dictionary.userId === dbUser.id,
     );
 
     if (!isOwner) {
       return NextResponse.json(
-        { error: 'Unauthorized to modify these words' },
-        { status: 403 }
+        { error: "Unauthorized to modify these words" },
+        { status: 403 },
       );
     }
 
@@ -97,7 +91,7 @@ export async function PATCH(request: Request) {
 
     const dictionaryId = existingWords[0]?.dictionaryId;
     const isPublic = existingWords[0]?.dictionary?.isPublic;
-    const dictSlug = (existingWords[0]?.dictionary as any)?.slug;
+    const dictSlug = existingWords[0]?.dictionary?.slug;
 
     if (dictionaryId && isPublic && dictSlug) {
       revalidatePath(`/en/library/${dictSlug}`);
@@ -105,10 +99,10 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Reorder error:', error);
+    console.error("Reorder error:", error);
     return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+      { error: "Internal Server Error" },
+      { status: 500 },
     );
   }
 }

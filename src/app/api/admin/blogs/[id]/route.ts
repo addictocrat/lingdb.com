@@ -8,7 +8,7 @@ import { z } from "zod";
 const translationSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
-  content: z.any(),
+  content: z.unknown(),
   keywords: z.string().optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
@@ -18,12 +18,12 @@ const blogUpdateSchema = z.object({
   title: z.string().min(1).optional(),
   slug: z.string().min(1).optional(),
   description: z.string().optional(),
-  content: z.any().optional(),
+  content: z.unknown().optional(),
   keywords: z.string().optional(),
   status: z.enum(["DRAFT", "PUBLISHED"]).optional(),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
-  schemaData: z.any().optional(),
+  schemaData: z.unknown().optional(),
   translations: z.record(z.string(), translationSchema).optional(),
 });
 
@@ -67,7 +67,7 @@ export async function GET(
     }
 
     // Transform translations array into a locale-keyed object
-    const translationsMap: Record<string, any> = {};
+    const translationsMap: Record<string, unknown> = {};
     for (const t of blog.translations) {
       translationsMap[t.locale] = {
         title: t.title,
@@ -126,7 +126,8 @@ export async function PATCH(
       result.data.status === "PUBLISHED" &&
       currentBlog.status !== "PUBLISHED"
     ) {
-      (updates as any).publishedAt = new Date();
+      (updates as typeof updates & { publishedAt?: Date }).publishedAt =
+        new Date();
     }
 
     const [updatedBlog] = await db
@@ -176,7 +177,12 @@ export async function PATCH(
     return NextResponse.json(updatedBlog);
   } catch (error) {
     console.error("Update blog error:", error);
-    if ((error as any).code === "23505") {
+    if (
+      error &&
+      typeof error === "object" &&
+      "code" in error &&
+      (error as { code?: string }).code === "23505"
+    ) {
       return NextResponse.json(
         { error: "Slug already exists" },
         { status: 400 },

@@ -2,17 +2,10 @@
 
 import { useTheme } from "next-themes";
 import DotGrid from "@/components/ui/DotGrid";
-import { useEffect, useState } from "react";
 
 export default function AppBackground() {
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
+  if (!resolvedTheme) return null;
 
   const isDark = resolvedTheme === "dark";
 

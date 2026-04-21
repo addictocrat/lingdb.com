@@ -4,12 +4,13 @@ Lingdb is a modern, full-stack language-learning platform inspired by Quizlet. I
 
 ## 🚀 Tech Stack
 
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **Database**: [Supabase](https://supabase.com/) (PostgreSQL)
 - **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
-- **Animations**: [GSAP](https://gsap.com/)
+- **Animations**: [GSAP v3.15](https://gsap.com/resources/React/)
+- **Server State**: [TanStack Query](https://tanstack.com/query/latest) (client caching, invalidation, mutations, hydration)
 - **Authentication**: [Supabase Auth](https://supabase.com/auth) (+ Google OAuth)
 - **Internationalization**: [next-intl](https://next-intl-docs.vercel.app/)
 
@@ -20,9 +21,22 @@ Lingdb is a modern, full-stack language-learning platform inspired by Quizlet. I
 | **Zod**               | Runtime schema validation for API inputs and form data, ensuring type safety and data integrity.      |
 | **Jest & Playwright** | A combination of unit/component testing (Jest) and End-to-End browser testing (Playwright).           |
 | **Drizzle ORM**       | A lightweight, TypeScript-first ORM used for interacting with the PostgreSQL database.                |
+| **TanStack Query**    | Handles server-state caching, query invalidation, mutation flows, and hydration for faster UX.        |
 | **Inngest**           | Handles background processing, cron jobs, and event-driven workflows (e.g., sending reminder emails). |
 | **OpenAI**            | Powers the AI word suggestions and example phrase generation features.                                |
 | **next-intl**         | Manages the application's multi-language support (English, French, German, Spanish, Turkish).         |
+
+## Data Fetching with TanStack Query
+
+- Lingdb uses TanStack Query as the default client-side server-state layer.
+- Use the shared query key factory in `src/lib/tanstack/query-keys.ts`.
+- Use API wrappers in `src/lib/api/*` instead of direct component-level `fetch` calls.
+- Use `useQuery` for reads and `useMutation` for writes.
+- Invalidate only affected keys after mutations for predictable updates.
+- Prefer hydrated initial data on pages that already fetch on the server.
+- Query provider/client/defaults: `src/lib/tanstack/query-provider.tsx`, `src/lib/tanstack/query-client.ts`, `src/lib/tanstack/query-defaults.ts`
+- Query keys: `src/lib/tanstack/query-keys.ts`
+- Hydration helpers: `src/lib/tanstack/hydration.ts`
 
 ## 🛠️ Local Setup
 

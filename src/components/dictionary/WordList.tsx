@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useToast } from '@/components/ui/Toast';
-import { useTranslations } from 'next-intl';
+import { useState, useEffect } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/Toast";
+import { useTranslations } from "next-intl";
 import {
   Pencil,
   Trash2,
@@ -10,7 +11,7 @@ import {
   Check,
   X,
   GripVertical,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -19,19 +20,20 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { Word, ExamplePhrase } from '@/lib/db/schema';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import type { Word, ExamplePhrase } from "@/lib/db/schema";
+import { deleteWord, reorderWords, updateWord } from "@/lib/api/words.api";
 
 interface WordItemProps {
-  word: Word & { 
+  word: Word & {
     examplePhrases?: ExamplePhrase[];
     lastModifiedBy?: { username: string } | null;
   };
@@ -49,11 +51,29 @@ function SortableWordItem({
   canEdit,
 }: WordItemProps) {
   const { toast } = useToast();
-  const t = useTranslations('dictionary');
+  const t = useTranslations("dictionary");
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(word.title);
   const [editTranslation, setEditTranslation] = useState(word.translation);
   const [isDeleting, setIsDeleting] = useState(false);
+  const queryClient = useQueryClient();
+
+  const updateWordMutation = useMutation({
+    mutationFn: (payload: { title: string; translation: string }) =>
+      updateWord(word.id, payload),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["words"] });
+      await queryClient.invalidateQueries({ queryKey: ["dictionaries"] });
+    },
+  });
+
+  const deleteWordMutation = useMutation({
+    mutationFn: () => deleteWord(word.id),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["words"] });
+      await queryClient.invalidateQueries({ queryKey: ["dictionaries"] });
+    },
+  });
 
   const {
     attributes,
@@ -75,38 +95,25 @@ function SortableWordItem({
     if (!editTitle.trim() || !editTranslation.trim()) return;
 
     try {
-      const res = await fetch(`/api/words/${word.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: editTitle.trim(),
-          translation: editTranslation.trim(),
-        }),
+      await updateWordMutation.mutateAsync({
+        title: editTitle.trim(),
+        translation: editTranslation.trim(),
       });
-
-      if (!res.ok) {
-        toast(t('settings.error_saved'), 'error');
-        return;
-      }
 
       setIsEditing(false);
       onUpdate();
     } catch {
-      toast(t('settings.error_saved'), 'error');
+      toast(t("settings.error_saved"), "error");
     }
   };
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const res = await fetch(`/api/words/${word.id}`, { method: 'DELETE' });
-      if (!res.ok) {
-        toast(t('settings.error_saved'), 'error');
-        return;
-      }
+      await deleteWordMutation.mutateAsync();
       onDelete();
     } catch {
-      toast(t('settings.error_saved'), 'error');
+      toast(t("settings.error_saved"), "error");
     } finally {
       setIsDeleting(false);
     }
@@ -157,7 +164,9 @@ function SortableWordItem({
       ref={setNodeRef}
       style={style}
       className={`group flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors ${
-        isDragging ? 'bg-[var(--surface)] shadow-md' : 'hover:bg-[var(--surface)]'
+        isDragging
+          ? "bg-[var(--surface)] shadow-md"
+          : "hover:bg-[var(--surface)]"
       }`}
     >
       {canEdit ? (
@@ -173,8 +182,12 @@ function SortableWordItem({
       )}
 
       <div className="flex flex-1 min-w-0 flex-col sm:flex-row sm:items-center">
-        <span className="text-xl font-medium text-[var(--fg)]">{word.title}</span>
-        <span className="hidden sm:inline-block mx-2 text-[var(--fg)]/20">→</span>
+        <span className="text-xl font-medium text-[var(--fg)]">
+          {word.title}
+        </span>
+        <span className="hidden sm:inline-block mx-2 text-[var(--fg)]/20">
+          →
+        </span>
         <span className="text-xl  text-[var(--fg)]/60">{word.translation}</span>
         {word.lastModifiedBy && (
           <span className="ml-auto text-xs text-[var(--fg)]/40 italic">
@@ -185,10 +198,11 @@ function SortableWordItem({
 
       <div
         className={`flex items-center gap-1 transition-opacity ${
-          isDragging ? 'opacity-0' : 'opacity-100 group-hover:opacity-100 focus-within:opacity-100'
+          isDragging
+            ? "opacity-0"
+            : "opacity-100 group-hover:opacity-100 focus-within:opacity-100"
         }`}
       >
-     
         <button
           onClick={() => onShowPhrases(word.id)}
           className="cursor-pointer flex gap-2 rounded-lg p-1.5 text-[var(--fg)]/40 hover:bg-primary-50 hover:text-primary-500 dark:hover:bg-primary-900/20"
@@ -224,7 +238,7 @@ function SortableWordItem({
 }
 
 interface WordListProps {
-  words: (Word & { 
+  words: (Word & {
     examplePhrases?: ExamplePhrase[];
     lastModifiedBy?: { username: string } | null;
   })[];
@@ -240,8 +254,17 @@ export default function WordList({
   canEdit = true,
 }: WordListProps) {
   const { toast } = useToast();
-  const t = useTranslations('dictionary');
+  const t = useTranslations("dictionary");
   const [items, setItems] = useState(initialWords);
+  const queryClient = useQueryClient();
+
+  const reorderMutation = useMutation({
+    mutationFn: reorderWords,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["words"] });
+      await queryClient.invalidateQueries({ queryKey: ["dictionaries"] });
+    },
+  });
 
   useEffect(() => {
     setItems(initialWords);
@@ -255,7 +278,7 @@ export default function WordList({
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -283,18 +306,9 @@ export default function WordList({
 
   const saveReorder = async (updates: { id: string; order: number }[]) => {
     try {
-      const res = await fetch('/api/words/reorder', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ updates }),
-      });
-
-      if (!res.ok) {
-        toast(t('settings.error_saved'), 'error');
-        onUpdate(); // Revert back to original on failure
-      }
+      await reorderMutation.mutateAsync(updates);
     } catch {
-      toast(t('settings.error_saved'), 'error');
+      toast(t("settings.error_saved"), "error");
       onUpdate();
     }
   };
@@ -302,7 +316,7 @@ export default function WordList({
   if (items.length === 0) {
     return (
       <div className="py-12 text-center text-xl text-[var(--fg)]/40">
-        {t('no_words')}
+        {t("no_words")}
       </div>
     );
   }

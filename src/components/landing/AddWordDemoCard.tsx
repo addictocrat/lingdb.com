@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import AutoSuggest from "@/components/dictionary/AutoSuggest";
 import { Plus, Puzzle, Sparkles, WandSparkles } from "lucide-react";
@@ -12,6 +13,9 @@ import {
   DEMO_LANGUAGE_PLACEHOLDERS,
   type DemoLanguageCode,
 } from "@/lib/constants/landing";
+import { createWordleGame } from "@/lib/api/wordle.api";
+import { suggestTranslation } from "@/lib/api/words.api";
+import { suggestAiWordsDemo, suggestAiDemoPhrases } from "@/lib/api/ai.api";
 
 type MagicSuggestion = {
   word: string;
@@ -77,6 +81,28 @@ export default function AddWordDemoCard({
   const sourceLanguage = useMemo(() => toSafeLocale(locale), [locale]);
   const showTranslationField = translation.length > 0;
 
+  const createWordleMutation = useMutation({
+    mutationFn: createWordleGame,
+  });
+
+  const translateMutation = useMutation({
+    mutationFn: (payload: { word: string; lang: string; targetLang: string }) =>
+      suggestTranslation({
+        word: payload.word,
+        lang: payload.lang,
+        targetLang: payload.targetLang,
+        endpoint: "/api/words/translate-suggest",
+      }),
+  });
+
+  const suggestWordsDemoMutation = useMutation({
+    mutationFn: suggestAiWordsDemo,
+  });
+
+  const suggestPhrasesDemoMutation = useMutation({
+    mutationFn: suggestAiDemoPhrases,
+  });
+
   async function handleCreateWordle() {
     if (isCreatingWordle) {
       return;
@@ -98,22 +124,16 @@ export default function AddWordDemoCard({
     setIsCreatingWordle(true);
 
     try {
-      const res = await fetch("/api/wordle/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          locale,
-          language,
-          word: normalizedWord,
-          maxTries: 6,
-          noteToSolver: "Good job!",
-        }),
+      const data = await createWordleMutation.mutateAsync({
+        locale,
+        language,
+        word: normalizedWord,
+        maxTries: 6,
+        noteToSolver: "Good job!",
       });
 
-      const data = await res.json();
-
-      if (!res.ok || typeof data?.sharePath !== "string") {
-        setWordleError(data?.error || tWordle("errors.create_failed"));
+      if (typeof data?.sharePath !== "string") {
+        setWordleError(tWordle("errors.create_failed"));
         return;
       }
 
@@ -201,24 +221,11 @@ export default function AddWordDemoCard({
       setIsLoadingPhrase(false);
 
       try {
-        const url = new URL(
-          "/api/words/translate-suggest",
-          window.location.origin,
-        );
-        url.searchParams.set("word", requestWord);
-        url.searchParams.set("lang", language);
-        url.searchParams.set("targetLang", sourceLanguage);
-
-        const res = await fetch(url.toString());
-        if (!res.ok) {
-          if (!isCancelled) {
-            setTranslation("");
-            setTranslatedWord("");
-          }
-          return;
-        }
-
-        const data = await res.json();
+        const data = await translateMutation.mutateAsync({
+          word: requestWord,
+          lang: language,
+          targetLang: sourceLanguage,
+        });
         if (!isCancelled) {
           const firstSuggestion = Array.isArray(data.suggestions)
             ? String((data.suggestions as string[])[0] || "")
@@ -267,25 +274,13 @@ export default function AddWordDemoCard({
       let resolvedSuggestions: MagicSuggestion[] = [];
 
       try {
-        const res = await fetch("/api/ai/suggest-words-demo", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            word: translatedWord,
-            translation,
-            language,
-            sourceLanguage,
-          }),
+        const data = await suggestWordsDemoMutation.mutateAsync({
+          word: translatedWord,
+          translation,
+          language,
+          sourceLanguage,
         });
 
-        if (!res.ok) {
-          if (!isCancelled) {
-            setMagicSuggestions([]);
-          }
-          return;
-        }
-
-        const data = await res.json();
         if (!isCancelled) {
           resolvedSuggestions = Array.isArray(data.suggestions)
             ? (data.suggestions as MagicSuggestion[]).slice(0, 3)
@@ -304,26 +299,14 @@ export default function AddWordDemoCard({
       }
 
       try {
-        const phraseRes = await fetch("/api/ai/suggest-demo-phrases", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            word: translatedWord,
-            translation,
-            language,
-            sourceLanguage,
-            magicWords: resolvedSuggestions.map((item) => item.word),
-          }),
+        const phraseData = await suggestPhrasesDemoMutation.mutateAsync({
+          word: translatedWord,
+          translation,
+          language,
+          sourceLanguage,
+          magicWords: resolvedSuggestions.map((item) => item.word),
         });
 
-        if (!phraseRes.ok) {
-          if (!isCancelled) {
-            setExamplePhrase(null);
-          }
-          return;
-        }
-
-        const phraseData = await phraseRes.json();
         if (!isCancelled) {
           const phrase =
             typeof phraseData.phrase === "string" ? phraseData.phrase : "";

@@ -1,16 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import QuizQuestion, { Question, QuestionType } from './QuizQuestion';
-import QuizResults from './QuizResults';
-import type { Word } from '@/lib/db/schema';
+import { useState, useEffect, useCallback } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import QuizQuestion, { Question, QuestionType } from "./QuizQuestion";
+import QuizResults from "./QuizResults";
+import type { Word } from "@/lib/db/schema";
+import { completeQuiz } from "@/lib/api/study.api";
 
 function generateOptions(
   correctAnswer: string,
-  allPossible: string[]
+  allPossible: string[],
 ): string[] {
   const wrongAnswers = Array.from(new Set(allPossible)).filter(
-    (a) => a !== correctAnswer
+    (a) => a !== correctAnswer,
   );
   const shuffledWrong = wrongAnswers
     .sort(() => Math.random() - 0.5)
@@ -26,46 +28,36 @@ export default function QuizEngine({
   words: Word[];
   dictionaryId: string;
 }) {
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [score, setScore] = useState(0);
-  const [incorrectAnswers, setIncorrectAnswers] = useState<
-    { word: Word; userAnswer: string }[]
-  >([]);
-  const [isFinished, setIsFinished] = useState(false);
-
-  const generateQuiz = useCallback(() => {
-    // Generate questions
+  const buildQuiz = useCallback((): Question[] => {
     const shuffledWords = [...words].sort(() => Math.random() - 0.5);
-    // Take up to 20 words for a quiz
     const quizWords = shuffledWords.slice(0, 20);
 
     const types: QuestionType[] = [
-      'multiple_choice',
-      'reverse_choice',
-      'type_answer',
+      "multiple_choice",
+      "reverse_choice",
+      "type_answer",
     ];
 
-    const generated: Question[] = quizWords.map((word) => {
+    return quizWords.map((word) => {
       const type = types[Math.floor(Math.random() * types.length)];
 
-      let prompt = '';
-      let correctAnswer = '';
+      let prompt = "";
+      let correctAnswer = "";
       let options: string[] | undefined;
 
-      if (type === 'multiple_choice') {
+      if (type === "multiple_choice") {
         prompt = word.title;
         correctAnswer = word.translation;
         options = generateOptions(
           word.translation,
-          words.map((w) => w.translation)
+          words.map((w) => w.translation),
         );
-      } else if (type === 'reverse_choice') {
+      } else if (type === "reverse_choice") {
         prompt = word.translation;
         correctAnswer = word.title;
         options = generateOptions(
           word.title,
-          words.map((w) => w.title)
+          words.map((w) => w.title),
         );
       } else {
         prompt = word.title;
@@ -81,17 +73,32 @@ export default function QuizEngine({
         wordRef: word,
       };
     });
+  }, [words]);
 
-    setQuestions(generated);
+  const queryClient = useQueryClient();
+  const [questions, setQuestions] = useState<Question[]>(() => buildQuiz());
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [incorrectAnswers, setIncorrectAnswers] = useState<
+    { word: Word; userAnswer: string }[]
+  >([]);
+  const [isFinished, setIsFinished] = useState(false);
+
+  const completeQuizMutation = useMutation({
+    mutationFn: completeQuiz,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["auth"] });
+      await queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+    },
+  });
+
+  const generateQuiz = useCallback(() => {
+    setQuestions(buildQuiz());
     setCurrentIndex(0);
     setScore(0);
     setIncorrectAnswers([]);
     setIsFinished(false);
-  }, [words]);
-
-  useEffect(() => {
-    generateQuiz();
-  }, [generateQuiz]);
+  }, [buildQuiz]);
 
   const handleAnswer = (isCorrect: boolean, userAnswer: string) => {
     const currentScore = score + (isCorrect ? 1 : 0);
@@ -99,7 +106,10 @@ export default function QuizEngine({
       ? incorrectAnswers
       : [
           ...incorrectAnswers,
-          { word: questions[currentIndex].wordRef, userAnswer: userAnswer || '(blank)' },
+          {
+            word: questions[currentIndex].wordRef,
+            userAnswer: userAnswer || "(blank)",
+          },
         ];
 
     if (isCorrect) {
@@ -118,7 +128,7 @@ export default function QuizEngine({
   const finishQuiz = async (
     finalScore: number,
     total: number,
-    finalIncorrect: { word: Word; userAnswer: string }[]
+    finalIncorrect: { word: Word; userAnswer: string }[],
   ) => {
     setIsFinished(true);
     setScore(finalScore);
@@ -127,17 +137,13 @@ export default function QuizEngine({
     const qTypes = Array.from(new Set(questions.map((q) => q.type)));
 
     try {
-      await fetch('/api/study/quiz/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          dictionaryId,
-          score: finalScore,
-          totalQuestions: total,
-          percentage,
-          questionTypes: qTypes,
-          duration: 0, // Placeholder
-        }),
+      await completeQuizMutation.mutateAsync({
+        dictionaryId,
+        score: finalScore,
+        totalQuestions: total,
+        percentage,
+        questionTypes: qTypes,
+        duration: 0,
       });
     } catch (e) {
       console.error(e);

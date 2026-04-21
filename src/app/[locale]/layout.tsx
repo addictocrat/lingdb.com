@@ -1,11 +1,11 @@
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import { notFound } from 'next/navigation';
-import { routing } from '@/i18n/routing';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import { ToastProvider } from '@/components/ui/Toast';
-import CookieConsent from '@/components/ads/CookieConsent';
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { routing } from "@/i18n/routing";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import { ToastProvider } from "@/components/ui/Toast";
+import CookieConsent from "@/components/ads/CookieConsent";
 
 export default async function LocaleLayout({
   children,
@@ -17,7 +17,7 @@ export default async function LocaleLayout({
   const { locale } = await params;
 
   // Validate locale
-  if (!routing.locales.includes(locale as any)) {
+  if (!routing.locales.includes(locale as (typeof routing.locales)[number])) {
     notFound();
   }
 

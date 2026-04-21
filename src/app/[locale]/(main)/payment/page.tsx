@@ -1,38 +1,55 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
-import Button from '@/components/ui/Button';
-import { ArrowLeft, ShieldCheck, CreditCard, Lock } from 'lucide-react';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-import Modal from '@/components/ui/Modal';
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import Button from "@/components/ui/Button";
+import { ArrowLeft, ShieldCheck, CreditCard, Lock } from "lucide-react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import Modal from "@/components/ui/Modal";
+import { createPayment } from "@/lib/api/payment.api";
+import { redeemCoupon } from "@/lib/api/coupons.api";
+import { getErrorMessage } from "@/lib/api/errors";
 
 export default function PaymentPage() {
-  const t = useTranslations('payment');
-  const commonT = useTranslations('common');
+  const t = useTranslations("payment");
+  const commonT = useTranslations("common");
   const router = useRouter();
   const locale = useLocale();
+  const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [couponCode, setCouponCode] = useState('');
+  const [couponCode, setCouponCode] = useState("");
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  const createPaymentMutation = useMutation({
+    mutationFn: createPayment,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["auth"] });
+    },
+  });
+
+  const redeemCouponMutation = useMutation({
+    mutationFn: redeemCoupon,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["auth"] });
+    },
+  });
+
   // This is a placeholder for the actual Iyzico integration
   const handleSimulatedPayment = async () => {
     setIsProcessing(true);
-    
+
     // Simulate API call to create subscription
     setTimeout(async () => {
       try {
-        const res = await fetch('/api/payment', { method: 'POST' });
-        if (res.ok) {
-          router.push(`/${locale}/dashboard?upgraded=true`);
-        }
+        await createPaymentMutation.mutateAsync();
+        router.push(`/${locale}/dashboard?upgraded=true`);
       } catch (error) {
-        console.error('Payment simulation failed', error);
+        console.error("Payment simulation failed", error);
       } finally {
         setIsProcessing(false);
       }
@@ -41,27 +58,17 @@ export default function PaymentPage() {
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
-    
+
     setIsApplyingCoupon(true);
     setCouponError(null);
 
     try {
-      const res = await fetch('/api/coupons/redeem', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: couponCode }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setShowSuccessModal(true);
-      } else {
-        setCouponError(t(`errors.${data.error}`) || t('errors.INTERNAL_ERROR'));
-      }
+      await redeemCouponMutation.mutateAsync(couponCode);
+      setShowSuccessModal(true);
     } catch (error) {
-      console.error('Coupon redemption failed:', error);
-      setCouponError(t('errors.INTERNAL_ERROR'));
+      console.error("Coupon redemption failed:", error);
+      const message = getErrorMessage(error, "INTERNAL_ERROR");
+      setCouponError(t(`errors.${message}`) || t("errors.INTERNAL_ERROR"));
     } finally {
       setIsApplyingCoupon(false);
     }
@@ -89,14 +96,19 @@ export default function PaymentPage() {
               <div className="rounded-full bg-primary-100 p-2 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
                 <CreditCard className="h-6 w-6" />
               </div>
-              <h2 className="text-3xl font-bold text-[var(--fg)]">Payment Details</h2>
+              <h2 className="text-3xl font-bold text-[var(--fg)]">
+                Payment Details
+              </h2>
             </div>
 
             <div className="mb-8 flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[var(--border-color)] bg-[var(--bg)] py-12 text-center opacity-60">
               <Lock className="mb-4 h-8 w-8 text-[var(--fg)]/40" />
-              <h3 className="mb-2 text-xl font-bold">Iyzico Integration Placeholder</h3>
+              <h3 className="mb-2 text-xl font-bold">
+                Iyzico Integration Placeholder
+              </h3>
               <p className="max-w-md text-lg text-[var(--fg)]/60">
-                The actual payment form will be rendered here once the Iyzico API keys and integration logic are provided.
+                The actual payment form will be rendered here once the Iyzico
+                API keys and integration logic are provided.
               </p>
             </div>
 
@@ -108,9 +120,10 @@ export default function PaymentPage() {
             >
               Payment Under Maintenance
             </Button>
-            
+
             <p className="mt-4 text-center text-sm text-[var(--fg)]/40">
-              By simulating this payment, your account will be upgraded to Premium instantly for testing purposes.
+              By simulating this payment, your account will be upgraded to
+              Premium instantly for testing purposes.
             </p>
           </div>
         </div>
@@ -119,11 +132,13 @@ export default function PaymentPage() {
         <div className="md:col-span-1">
           <div className="sticky top-8 rounded-3xl border border-[var(--border-color)] bg-[var(--surface)] p-6 shadow-sm">
             <h3 className="mb-4 text-xl font-bold">Order Summary</h3>
-            
+
             <div className="mb-4 flex items-start justify-between border-b border-[var(--border-color)] pb-4">
               <div>
                 <p className="font-semibold text-[var(--fg)]">Lingdb Premium</p>
-                <p className="text-lg text-[var(--fg)]/60">Monthly Subscription</p>
+                <p className="text-lg text-[var(--fg)]/60">
+                  Monthly Subscription
+                </p>
                 <div className="mt-2 inline-flex items-center gap-1 rounded bg-green-100 px-2 py-0.5 text-sm font-bold text-green-700 dark:bg-green-900/30 dark:text-green-400">
                   Includes 30-Day Free Trial
                 </div>
@@ -165,22 +180,22 @@ export default function PaymentPage() {
 
           {/* Coupon Code Section */}
           <div className="mt-6 rounded-3xl border border-[var(--border-color)] bg-[var(--surface)] p-6 shadow-sm">
-            <h3 className="mb-4 text-xl font-bold">{t('coupon_section')}</h3>
+            <h3 className="mb-4 text-xl font-bold">{t("coupon_section")}</h3>
             <div className="flex flex-col gap-2">
               <input
                 type="text"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                placeholder={t('coupon_placeholder')}
+                placeholder={t("coupon_placeholder")}
                 className="flex-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 disabled={isApplyingCoupon}
               />
-              <Button 
-                onClick={handleApplyCoupon} 
+              <Button
+                onClick={handleApplyCoupon}
                 isLoading={isApplyingCoupon}
                 disabled={!couponCode.trim() || isApplyingCoupon}
               >
-                {t('apply_button')}
+                {t("apply_button")}
               </Button>
             </div>
             {couponError && (
@@ -191,50 +206,59 @@ export default function PaymentPage() {
       </div>
 
       {/* Success Modal */}
-      <Modal isOpen={showSuccessModal} onClose={() => {
-        setShowSuccessModal(false);
-        router.push(`/${locale}/dashboard`);
-      }}>
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={() => {
+          setShowSuccessModal(false);
+          router.push(`/${locale}/dashboard`);
+        }}
+      >
         <div className="p-6 text-center">
           <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
             <ShieldCheck className="h-10 w-10" />
           </div>
-          <h2 className="mb-2 text-3xl font-bold text-[var(--fg)]">{t('success_title')}</h2>
-          <p className="mb-6 text-lg text-[var(--fg)]/60">{t('success_message')}</p>
-          
+          <h2 className="mb-2 text-3xl font-bold text-[var(--fg)]">
+            {t("success_title")}
+          </h2>
+          <p className="mb-6 text-lg text-[var(--fg)]/60">
+            {t("success_message")}
+          </p>
+
           <div className="mb-8 rounded-2xl bg-[var(--bg)]/50 p-6 text-left">
-            <h3 className="mb-4 font-bold uppercase tracking-wider text-[var(--fg)]/40">{t('perks_title')}</h3>
+            <h3 className="mb-4 font-bold uppercase tracking-wider text-[var(--fg)]/40">
+              {t("perks_title")}
+            </h3>
             <ul className="space-y-3">
               <li className="flex items-center gap-3 text-lg">
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-500/10 text-primary-500">
                   <ShieldCheck className="h-4 w-4" />
                 </div>
-                {t('unlimited_dictionaries')}
+                {t("unlimited_dictionaries")}
               </li>
               <li className="flex items-center gap-3 text-lg">
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-500/10 text-primary-500">
                   <ShieldCheck className="h-4 w-4" />
                 </div>
-                {t('ai_credits')}
+                {t("ai_credits")}
               </li>
               <li className="flex items-center gap-3 text-lg">
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-500/10 text-primary-500">
                   <ShieldCheck className="h-4 w-4" />
                 </div>
-                {t('no_ads')}
+                {t("no_ads")}
               </li>
             </ul>
           </div>
 
-          <Button 
-            className="w-full text-xl" 
+          <Button
+            className="w-full text-xl"
             size="lg"
             onClick={() => {
               setShowSuccessModal(false);
               router.push(`/${locale}/dashboard`);
             }}
           >
-            {commonT('back_to_dashboard') || 'Go to Dashboard'}
+            {commonT("back_to_dashboard") || "Go to Dashboard"}
           </Button>
         </div>
       </Modal>

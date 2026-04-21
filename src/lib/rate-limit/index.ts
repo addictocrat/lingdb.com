@@ -14,7 +14,7 @@ interface RateLimitOptions {
 export async function checkRateLimit(
   userId: string,
   type: string,
-  options: RateLimitOptions = {}
+  options: RateLimitOptions = {},
 ) {
   const { limit = 5, windowMs = 60 * 1000 } = options;
   const windowStart = new Date(Date.now() - windowMs);
@@ -26,8 +26,8 @@ export async function checkRateLimit(
       and(
         eq(activityLogs.userId, userId),
         eq(activityLogs.type, type),
-        gte(activityLogs.createdAt, windowStart)
-      )
+        gte(activityLogs.createdAt, windowStart),
+      ),
     );
 
   return count < limit;
@@ -39,7 +39,7 @@ export async function checkRateLimit(
 export async function logActivity(
   userId: string,
   type: string,
-  metadata?: any
+  metadata?: unknown,
 ) {
   await db.insert(activityLogs).values({
     userId,

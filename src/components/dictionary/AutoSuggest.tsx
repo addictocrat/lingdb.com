@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import { suggestTranslation, suggestWords } from "@/lib/api/words.api";
+import { qk } from "@/lib/tanstack/query-keys";
 
 interface AutoSuggestProps {
   language: string;
@@ -44,6 +47,44 @@ export default function AutoSuggest({
 
   const isTranslationMode = apiEndpoint === "/api/words/translate-suggest";
 
+  const { data: standardSuggestions } = useQuery({
+    queryKey: qk.words.suggest({
+      q: debouncedValue,
+      lang: language,
+      endpoint: apiEndpoint,
+    }),
+    enabled: !isTranslationMode && debouncedValue.length >= 2,
+    queryFn: async () => {
+      const data = await suggestWords({
+        q: debouncedValue,
+        lang: language,
+        endpoint: apiEndpoint,
+      });
+      return data.suggestions || [];
+    },
+    staleTime: 120_000,
+  });
+
+  const { refetch: refetchTranslations, isFetching: isFetchingTranslations } =
+    useQuery({
+      queryKey: qk.words.translateSuggest({
+        word: sourceWord,
+        lang: language,
+        targetLang,
+      }),
+      enabled: false,
+      queryFn: async () => {
+        const data = await suggestTranslation({
+          word: sourceWord,
+          lang: language,
+          targetLang,
+          endpoint: apiEndpoint,
+        });
+        return data.suggestions || [];
+      },
+      staleTime: 5 * 60 * 1000,
+    });
+
   const fetchTranslations = useCallback(
     async (wordToTranslate: string) => {
       if (!wordToTranslate || wordToTranslate.length < 2) return;
@@ -59,30 +100,22 @@ export default function AutoSuggest({
 
       setIsLoading(true);
       try {
-        const url = new URL(apiEndpoint, window.location.origin);
-        url.searchParams.set("word", wordToTranslate);
-        url.searchParams.set("lang", language);
-        if (targetLang) url.searchParams.set("targetLang", targetLang);
-
-        const res = await fetch(url.toString());
-        if (res.ok) {
-          const data = await res.json();
-          const results = data.suggestions || [];
-          setAllTranslations(results);
-          lastFetchedSource.current = wordToTranslate;
-          lastFetchedLang.current = targetLang || "";
-          setIsOpen(results.length > 0);
-        }
+        const result = await refetchTranslations();
+        const results = result.data || [];
+        setAllTranslations(results);
+        lastFetchedSource.current = wordToTranslate;
+        lastFetchedLang.current = targetLang || "";
+        setIsOpen(results.length > 0);
       } catch {
         // Silently fail
       } finally {
         setIsLoading(false);
       }
     },
-    [apiEndpoint, language, targetLang, allTranslations.length],
+    [language, targetLang, allTranslations.length, refetchTranslations],
   );
 
-  // Standard suggestion fetching (e.g., from dictionary/word list)
+  // Standard suggestion syncing from query cache
   useEffect(() => {
     if (isTranslationMode) return;
 
@@ -92,26 +125,15 @@ export default function AutoSuggest({
       return;
     }
 
-    const fetchSuggestions = async () => {
-      try {
-        const url = new URL(apiEndpoint, window.location.origin);
-        url.searchParams.set("q", debouncedValue);
-        url.searchParams.set("lang", language);
+    const resolved = standardSuggestions || [];
+    setSuggestions(resolved);
+    setIsOpen(resolved.length > 0);
+    setActiveIndex(-1);
+  }, [debouncedValue, isTranslationMode, standardSuggestions]);
 
-        const res = await fetch(url.toString());
-        if (res.ok) {
-          const data = await res.json();
-          setSuggestions(data.suggestions || []);
-          setIsOpen(data.suggestions?.length > 0);
-          setActiveIndex(-1);
-        }
-      } catch {
-        // Silently fail
-      }
-    };
-
-    fetchSuggestions();
-  }, [debouncedValue, language, apiEndpoint, isTranslationMode]);
+  useEffect(() => {
+    setIsLoading(isFetchingTranslations);
+  }, [isFetchingTranslations]);
 
   // Handle translation filtering
   useEffect(() => {

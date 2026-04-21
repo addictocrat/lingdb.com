@@ -1,10 +1,8 @@
 import { db } from "@/lib/db/client";
 import { blogs as blogsTable } from "@/lib/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import BlogCard from "@/components/blogs/BlogCard";
 import { getTranslations } from "next-intl/server";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
 interface FeaturedBlogsProps {
   locale: string;
@@ -37,15 +35,17 @@ export default async function FeaturedBlogs({ locale }: FeaturedBlogsProps) {
 
   // Map blogs with locale-specific content (logic matches BlogsPage)
   const localizedBlogs = sortedBlogs.map((blog) => {
-    if (locale === "en") {
-      const { translations, ...rest } = blog;
-      return rest;
-    }
-    const translation = blog.translations?.find((t) => t.locale === locale);
+    const translation =
+      locale === "en"
+        ? null
+        : blog.translations?.find((t) => t.locale === locale);
+
     const { translations, ...rest } = blog;
+
     if (!translation) {
       return rest;
     }
+
     return {
       ...rest,
       title: translation.title,
@@ -69,7 +69,7 @@ export default async function FeaturedBlogs({ locale }: FeaturedBlogsProps) {
         </div>
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
           {localizedBlogs.map((blog) => (
-            <BlogCard key={blog.id} blog={blog as any} locale={locale} />
+            <BlogCard key={blog.id} blog={blog} locale={locale} />
           ))}
         </div>
       </div>

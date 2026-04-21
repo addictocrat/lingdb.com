@@ -6,6 +6,7 @@ import CookieConsent from "@/components/ads/CookieConsent";
 import Script from "next/script";
 import AppBackground from "@/components/layout/AppBackground";
 import { APP_URL } from "@/lib/utils/constants";
+import QueryProvider from "@/lib/tanstack/query-provider";
 import "./globals.css";
 
 // const inter = Inter({
@@ -62,15 +63,17 @@ export default function RootLayout({
         />
       </head>
       <body className={`${league_spartan.variable} font-sans antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AppBackground />
-          {children}
-        </ThemeProvider>
+        <QueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <AppBackground />
+            {children}
+          </ThemeProvider>
+        </QueryProvider>
 
         {/* AdSense will only activate ads if the CookieConsent sets the accepted cookie value */}
         <Script
