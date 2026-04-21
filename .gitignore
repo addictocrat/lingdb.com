@@ -48,7 +48,7 @@ next-env.d.ts
 /implementations
 
 # static assets
-/public
+/public/ads.txt
 
 # scripts
 /scripts

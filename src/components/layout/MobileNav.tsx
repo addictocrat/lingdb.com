@@ -105,9 +105,12 @@ export default function MobileNav({
         <Link
           href={isLoggedIn ? `/${locale}/dashboard` : `/${locale}`}
           onClick={closeMenu}
-          className="text-2xl font-bold tracking-tight"
+          className="flex items-center gap-2 text-2xl font-bold tracking-tight"
         >
-          {profile?.tier === "PREMIUM" ? t("premium") : t("appName")}
+          <img src="/lingdbfav.png" alt="Lingdb" className="h-8 w-8 object-contain" />
+          <span>
+            {profile?.tier === "PREMIUM" ? t("premium") : t("appName")}
+          </span>
         </Link>
         <button
           onClick={closeMenu}

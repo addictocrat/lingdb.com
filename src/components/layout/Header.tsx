@@ -36,7 +36,7 @@ export default function Header({ locale = "en" }: { locale?: string }) {
               href={user ? `/${locale}/dashboard` : `/${locale}`}
               className="flex items-center gap-2 text-3xl font-bold tracking-tight transition-opacity hover:opacity-80"
             >
-              {/* <BookOpen className="h-6 w-6 text-primary-500" /> */}
+              <img src="/lingdbfav.png" alt="Lingdb" className="h-9 w-9 object-contain mb-1" />
               <span>
                 {t("appName")}
               </span>
