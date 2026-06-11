@@ -82,9 +82,9 @@
     "featured_blogs_description": "Popüler dil uygulamalarla karşılaştırın ve kararınızı verin",
     "view_all_blogs": "Tüm blog yazılarını görüntüle",
     "read_more": "Devamını Oku",
-    "demo_save_word": "Kelimeyi Kaydet",
-    "demo_magic_words": "Sihirli Kelimeler",
-    "demo_example_usages": "Örnek Kullanımlar"
+    "demo_save_word": "Kelime Ekle",
+    "demo_magic_words": "Benzer Kelimeler",
+    "demo_example_usages": "Örnek Cümle"
   },
   "dashboard": {
     "title": "Sözlüklerim",
@@ -426,7 +426,7 @@
     "blogs": "Haberler",
     "profile": "Profil",
     "leaderboards": "Liderlik Tahtası",
-    "wordle": "Wordle",
+    "wordle": "Wordle Oyna",
     "legal": "Yasal",
     "contact": "İletişim"
   },

@@ -10,6 +10,7 @@ import AIFeatureDemo from "@/components/landing/AIFeatureDemo";
 
 export default function Hero({ locale = "en" }: { locale?: string }) {
   const t = useTranslations("landing");
+  const tNav = useTranslations("nav");
   const containerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
@@ -82,19 +83,19 @@ export default function Hero({ locale = "en" }: { locale?: string }) {
         </div>
 
         {/* CTA */}
-        <div className="hero-cta relative z-10 mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+        <div className="hero-cta relative z-10 mt-10 flex flex-row items-center justify-center gap-3 sm:gap-4">
           <Link
             href={`/${locale}/signup`}
-            className="group flex items-center gap-2 rounded-2xl bg-primary-500 px-8 py-4 text-base font-bold text-white shadow-lg shadow-primary-500/25 transition-all duration-300 hover:bg-primary-600 hover:shadow-xl hover:shadow-primary-500/30 active:scale-[0.97]"
+            className="group flex items-center gap-1.5 sm:gap-2 rounded-2xl bg-primary-500 px-4 py-3 sm:px-8 sm:py-4 text-sm sm:text-base font-bold text-white shadow-lg shadow-primary-500/25 transition-all duration-300 hover:bg-primary-600 hover:shadow-xl hover:shadow-primary-500/30 active:scale-[0.97] whitespace-nowrap"
           >
             {t("cta_button")}
-            <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+            <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:translate-x-1" />
           </Link>
           <Link
-            href={`/${locale}/library`}
-            className="flex items-center gap-2 rounded-2xl border border-[var(--border-color)] bg-[var(--surface)] px-8 py-4 text-base font-semibold text-[var(--fg)]/70 transition-all duration-200 hover:bg-[var(--border-color)] hover:shadow-md"
+            href={`/${locale}/wordle`}
+            className="flex items-center gap-1.5 sm:gap-2 rounded-2xl bg-[#fcc419] px-4 py-3 sm:px-8 sm:py-4 text-sm sm:text-base font-bold text-slate-900 shadow-lg shadow-[#fcc419]/25 transition-all duration-300 hover:bg-[#fab005] hover:shadow-xl hover:shadow-[#fcc419]/30 active:scale-[0.97] whitespace-nowrap"
           >
-            {t("browse_library")}
+            {tNav("wordle")}
           </Link>
         </div>
       </div>

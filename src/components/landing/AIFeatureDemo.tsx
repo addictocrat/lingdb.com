@@ -176,37 +176,37 @@ export default function AIFeatureDemo({ locale = "en" }: { locale?: string }) {
 
   return (
     <div ref={containerRef} className="w-full relative py-4">
-      <div className="relative flex flex-col lg:flex-row items-stretch justify-between gap-4 lg:gap-0">
+      <div className="relative flex flex-row items-stretch justify-between gap-2 lg:gap-0">
         {/* Step 1: Save Word */}
         <div
           id="card-1"
-          className="step-card group relative z-10 w-full lg:w-[30%] glass-card px-6 py-4 rounded-2xl border border-[var(--border-color)] bg-[var(--surface)]/80 backdrop-blur-2xl dark:border-primary-500/30"
+          className="step-card group relative z-10 flex-1 lg:flex-none lg:w-[30%] glass-card px-1.5 py-2.5 md:px-4 md:py-3.5 rounded-2xl border border-[var(--border-color)] bg-[var(--surface)]/80 backdrop-blur-2xl dark:border-primary-500/30"
         >
-          <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 rounded-lg bg-primary-500/10 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400">
+          <div className="flex items-center justify-center sm:justify-start gap-1.5 md:gap-2 mb-3">
+            <div className="hidden sm:flex p-1 md:p-1.5 rounded-lg bg-primary-500/10 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400">
               <Save className="h-3.5 w-3.5" />
             </div>
-            <span className="text-[9px] font-black uppercase tracking-[0.1em] text-primary-600/80 dark:text-primary-400/80">
+            <span className="text-[9px] font-black uppercase tracking-[0.1em] text-primary-600/80 dark:text-primary-400/80 text-center sm:text-left">
               {t("demo_save_word")}
             </span>
           </div>
           <div className="step-content-inner space-y-2">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5 md:gap-2">
               <span
-                className={`text-xl rounded-sm overflow-hidden shadow-sm ring-1 ring-white/10 ${sourceFlag}`}
+                className={`text-base md:text-xl rounded-sm overflow-hidden shadow-sm ring-1 ring-white/10 ${sourceFlag}`}
               />
-              <h4 className="text-2xl font-black text-[var(--fg)] tracking-tight truncate">
+              <h4 className="text-base sm:text-lg md:text-2xl font-black text-[var(--fg)] tracking-tight truncate">
                 {currentData.sourceWord}
               </h4>
             </div>
-            <div className="flex flex-col gap-2 pt-2 border-t border-[var(--border-color)]">
-              <div className="flex-1 flex flex-col gap-2">
-                <p className="text-2xl font-black text-primary-600 truncate">
+            <div className="flex flex-col gap-1.5 md:gap-2 pt-2 border-t border-[var(--border-color)]">
+              <div className="flex-1 flex flex-col gap-1.5 md:gap-2">
+                <p className="text-base sm:text-lg md:text-2xl font-black text-primary-600 truncate">
                   {currentData.translation}
                 </p>
                 <div className="self-end">
                   <span
-                    className={`text-xl rounded-sm overflow-hidden shadow-sm ring-1 ring-white/10 ${targetFlag}`}
+                    className={`text-base md:text-xl rounded-sm overflow-hidden shadow-sm ring-1 ring-white/10 ${targetFlag}`}
                   />
                 </div>
               </div>
@@ -217,27 +217,27 @@ export default function AIFeatureDemo({ locale = "en" }: { locale?: string }) {
         {/* Step 2: Example Usages */}
         <div
           id="card-2"
-          className="step-card group relative z-10 w-full lg:w-[30%] glass-card px-6 py-4 rounded-2xl border border-[var(--border-color)] bg-[var(--surface)]/80 backdrop-blur-2xl dark:border-green-500/30"
+          className="step-card group relative z-10 flex-1 lg:flex-none lg:w-[30%] glass-card px-1.5 py-2.5 md:px-4 md:py-3.5 rounded-2xl border border-[var(--border-color)] bg-[var(--surface)]/80 backdrop-blur-2xl dark:border-green-500/30"
         >
-          <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 rounded-lg bg-green-500/10 dark:bg-green-500/20 text-green-600 dark:text-green-400">
+          <div className="flex items-center justify-center sm:justify-start gap-1.5 md:gap-2 mb-3">
+            <div className="hidden sm:flex p-1 md:p-1.5 rounded-lg bg-green-500/10 dark:bg-green-500/20 text-green-600 dark:text-green-400">
               <MessageSquareCode className="h-3.5 w-3.5" />
             </div>
-            <span className="text-[9px] font-black uppercase tracking-[0.1em] text-green-600/80 dark:text-green-400/80">
+            <span className="text-[9px] font-black uppercase tracking-[0.1em] text-green-600/80 dark:text-green-400/80 text-center sm:text-left">
               {t("demo_example_usages")}
             </span>
           </div>
           <div className="step-content-inner">
-            <div className="p-3 rounded-xl bg-[var(--bg)]/10 border border-[var(--border-color)] text-left">
+            <div className="p-2 md:p-3 rounded-xl bg-[var(--bg)]/10 border border-[var(--border-color)] text-left">
               <p
-                className="text-xs leading-relaxed text-[var(--fg)] font-semibold italic line-clamp-3"
+                className="text-[10px] md:text-xs leading-relaxed text-[var(--fg)] font-semibold italic line-clamp-3"
                 dangerouslySetInnerHTML={{
                   __html: `"${currentData.magicPhrase.source}"`,
                 }}
               />
-              <div className="my-2 h-px bg-[var(--border-color)]" />
+              <div className="my-1.5 md:my-2 h-px bg-[var(--border-color)]" />
               <p
-                className="text-xs leading-relaxed text-[var(--fg)]/70 font-medium"
+                className="text-[10px] md:text-xs leading-relaxed text-[var(--fg)]/70 font-medium"
                 dangerouslySetInnerHTML={{
                   __html: currentData.magicPhrase.target,
                 }}
@@ -249,26 +249,26 @@ export default function AIFeatureDemo({ locale = "en" }: { locale?: string }) {
         {/* Step 3: Magic Words */}
         <div
           id="card-3"
-          className="step-card group relative z-10 w-full lg:w-[30%] glass-card px-6 py-4 rounded-2xl border border-[var(--border-color)] bg-[var(--surface)]/80 backdrop-blur-2xl dark:border-purple-500/30"
+          className="step-card group relative z-10 flex-1 lg:flex-none lg:w-[30%] glass-card px-1.5 py-2.5 md:px-4 md:py-3.5 rounded-2xl border border-[var(--border-color)] bg-[var(--surface)]/80 backdrop-blur-2xl dark:border-purple-500/30"
         >
-          <div className="flex items-center gap-2 mb-3">
-            <div className="p-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400">
+          <div className="flex items-center justify-center sm:justify-start gap-1.5 md:gap-2 mb-3">
+            <div className="hidden sm:flex p-1 md:p-1.5 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400">
               <Brain className="h-3.5 w-3.5" />
             </div>
-            <span className="text-[9px] font-black uppercase tracking-[0.1em] text-purple-600/80 dark:text-purple-400/80">
+            <span className="text-[9px] font-black uppercase tracking-[0.1em] text-purple-600/80 dark:text-purple-400/80 text-center sm:text-left">
               {t("demo_magic_words")}
             </span>
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1 md:space-y-1.5">
             {currentData.magicWords.map((mw, i) => (
               <div
                 key={i}
-                className="magic-item flex justify-between items-center bg-[var(--bg)]/10 px-3 py-2 rounded-lg border border-[var(--border-color)] transition-colors"
+                className="magic-item flex justify-between items-center bg-[var(--bg)]/10 px-2 py-1.5 md:px-3 md:py-2 rounded-lg border border-[var(--border-color)] transition-colors"
               >
-                <span className="text-[12px] font-bold text-[var(--fg)]">
+                <span className="text-[10px] md:text-[12px] font-bold text-[var(--fg)]">
                   {mw.source}
                 </span>
-                <span className="text-[9px] text-primary-600 font-medium">
+                <span className="text-[8px] md:text-[9px] text-primary-600 font-medium">
                   {mw.target}
                 </span>
               </div>
