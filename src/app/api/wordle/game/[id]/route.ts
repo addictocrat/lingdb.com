@@ -42,7 +42,7 @@ export async function GET(
 
     return NextResponse.json({ game });
   } catch (error) {
-    console.error("Wordle game route error:", error);
+    console.error("Yordle game route error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },

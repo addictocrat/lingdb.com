@@ -41,7 +41,7 @@
     "feature_dictionaries": "Akıllı Sözlükler",
     "feature_dictionaries_desc": "YZ yeni kelimeler önerir ve örnek cümleler kurar.",
     "feature_minigames": "Mini oyunlar",
-    "feature_minigames_desc": "Wordle hazırla ve arkadaşlarına meydan oku.",
+    "feature_minigames_desc": "Yordle hazırla ve arkadaşlarına meydan oku.",
     "feature_study": "Quiz ve Kelime Kartları",
     "feature_study_desc": "Kelime kartları ve quizlerle etkili şekilde çalışın.",
     "feature_community": "Birlikte Öğrenin",
@@ -426,13 +426,20 @@
     "blogs": "Haberler",
     "profile": "Profil",
     "leaderboards": "Liderlik Tahtası",
-    "wordle": "Wordle Oyna",
+    "wordle": "Yordle Oyna",
     "legal": "Yasal",
     "contact": "İletişim"
   },
   "wordle": {
-    "title": "Wordle Oluşturucu",
-    "subtitle": "Kendi Wordle oyununuzu oluşturun ve anında paylaşın.",
+    "title": "Yordle Oluşturucu",
+    "subtitle": "Kendi Yordle oyununuzu oluşturun ve anında paylaşın.",
+    "play_title": "Günün Kelimesini Bul",
+    "play_subtitle": "Seçtiğiniz dilde rastgele bir Yordle oyunu oynayın veya kendi oyununuzu oluşturun.",
+    "play_random": "Oyna",
+    "create_custom": "Kendin Oluştur",
+    "select_language": "Oyun Dilini Seçin",
+    "no_games_warning": "Bu dil için kayıtlı oyun bulunamadı. Sizin için yeni bir rastgele oyun oluşturuluyor...",
+    "fetching_game": "Rastgele oyun yükleniyor...",
     "fields": {
       "word": "Gizli Kelime",
       "word_placeholder": "KELIME GIR",
@@ -444,7 +451,7 @@
       "note_placeholder": "Oyuncu için gizli bir mesaj ekleyin...",
       "note_hint": "Bu not sadece bulmaca çözüldüğünde gösterilir."
     },
-    "create_button": "Paylaşılabilir Wordle Oluştur",
+    "create_button": "Paylaşılabilir Yordle Oluştur",
     "creating": "Oluşturuluyor...",
     "share": {
       "title": "Paylaşım Linkiniz",
@@ -458,7 +465,7 @@
       "create_failed": "Oyun oluşturulamadı. Tekrar deneyin."
     },
     "game": {
-      "title": "Wordle",
+      "title": "Yordle",
       "loading": "Oyun yükleniyor...",
       "load_failed": "Bu oyun yüklenemedi.",
       "guess_failed": "Tahmin gönderilemedi.",
@@ -466,17 +473,18 @@
       "guess_placeholder": "TAHMININIZ",
       "submit": "Tahmini Gönder",
       "share": "Paylaş",
-      "share_modal_title": "Bu Wordle'ı Paylaş",
+      "share_modal_title": "Bu Yordle'ı Paylaş",
       "share_copy": "Linki Kopyala",
       "share_whatsapp": "WhatsApp ile Gönder",
       "share_copied": "Link kopyalandı!",
       "share_copy_failed": "Link kopyalanamadı.",
-      "share_message": "Bu Wordle'ı dene: {url}",
+      "share_message": "Bu Yordle'ı dene: {url}",
       "submitting": "Gönderiliyor...",
       "win": "Çözdünüz!",
       "secret_note_title": "Gizli Not",
-      "lose": "Deneme kalmadı. Yeni oyun oluşturun!",
-      "create_new": "Yeni Wordle Oluştur"
+      "lose": "Tekrar deneyin veya oluşturun!",
+      "create_new": "Kendin Oluştur",
+      "play_again": "Tekrar Oyna"
     }
   },
   "leaderboards": {

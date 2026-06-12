@@ -41,7 +41,7 @@
     "feature_dictionaries": "Intelligente Wörterbücher",
     "feature_dictionaries_desc": "KI empfiehlt magische Wörter und Beispielsätze.",
     "feature_minigames": "Minispiele",
-    "feature_minigames_desc": "Spiele Wordle und fordere deine Freunde heraus.",
+    "feature_minigames_desc": "Spiele Yordle und fordere deine Freunde heraus.",
     "feature_study": "Interaktive Lernwerkzeuge",
     "feature_study_desc": "Lerne mit interaktiven Karteikarten und Quizzen.",
     "feature_community": "Gemeinsam lernen",
@@ -426,13 +426,20 @@
     "blogs": "Blogs",
     "profile": "Profil",
     "leaderboards": "Bestenlisten",
-    "wordle": "Wordle",
+    "wordle": "Yordle",
     "legal": "Rechtliches",
     "contact": "Kontakt"
   },
   "wordle": {
-    "title": "Wordle-Ersteller",
-    "subtitle": "Erstelle ein eigenes Wordle und teile es sofort.",
+    "title": "Yordle-Ersteller",
+    "subtitle": "Erstelle ein eigenes Yordle und teile es sofort.",
+    "play_title": "Finde das Wort des Tages",
+    "play_subtitle": "Spielen Sie ein zufälliges Yordle-Spiel in Ihrer bevorzugten Sprache oder erstellen Sie Ihr eigenes.",
+    "play_random": "Spielen",
+    "create_custom": "Selbst erstellen",
+    "select_language": "Spielsprache wählen",
+    "no_games_warning": "Keine Spiele für diese Sprache gefunden. Ein neues zufälliges Spiel wird für Sie generiert...",
+    "fetching_game": "Zufälliges Spiel wird geladen...",
     "fields": {
       "word": "Geheimes Wort",
       "word_placeholder": "WORT EINGEBEN",
@@ -444,7 +451,7 @@
       "note_placeholder": "Fuge eine geheime Nachricht fur den Spieler hinzu...",
       "note_hint": "Diese Nachricht wird erst nach dem Losen angezeigt."
     },
-    "create_button": "Teilbares Wordle Erstellen",
+    "create_button": "Teilbares Yordle Erstellen",
     "creating": "Wird erstellt...",
     "share": {
       "title": "Dein Freigabelink",
@@ -458,7 +465,7 @@
       "create_failed": "Spiel konnte nicht erstellt werden. Bitte erneut versuchen."
     },
     "game": {
-      "title": "Wordle",
+      "title": "Yordle",
       "loading": "Spiel wird geladen...",
       "load_failed": "Dieses Spiel konnte nicht geladen werden.",
       "guess_failed": "Dein Versuch konnte nicht gesendet werden.",
@@ -466,17 +473,18 @@
       "guess_placeholder": "DEIN VERSUCH",
       "submit": "Versuch Absenden",
       "share": "Teilen",
-      "share_modal_title": "Dieses Wordle teilen",
+      "share_modal_title": "Dieses Yordle teilen",
       "share_copy": "Link kopieren",
       "share_whatsapp": "Per WhatsApp senden",
       "share_copied": "Link kopiert!",
       "share_copy_failed": "Link konnte nicht kopiert werden.",
-      "share_message": "Probier dieses Wordle: {url}",
+      "share_message": "Probier dieses Yordle: {url}",
       "submitting": "Wird gesendet...",
       "win": "Geloest!",
       "secret_note_title": "Geheime Notiz",
       "lose": "Keine Versuche mehr. Erstelle ein neues Spiel!",
-      "create_new": "Neues Wordle Erstellen"
+      "create_new": "Neues Yordle Erstellen",
+      "play_again": "Noch einmal spielen"
     }
   },
   "leaderboards": {

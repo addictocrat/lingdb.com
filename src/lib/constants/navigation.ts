@@ -80,4 +80,9 @@ export const ADMIN_NAV_LINKS = [
     label: "Coupons",
     icon: Ticket,
   },
+  {
+    href: "/admin/wordle",
+    label: "Wordle",
+    icon: Puzzle,
+  },
 ];

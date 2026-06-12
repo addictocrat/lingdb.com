@@ -24,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "",
     "/library",
     "/wordle",
+    "/wordle/create",
     "/tiers",
     "/login",
     "/signup",

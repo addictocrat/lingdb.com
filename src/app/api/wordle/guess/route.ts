@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       maxTries: game.maxTries,
     });
   } catch (error) {
-    console.error("Wordle guess route error:", error);
+    console.error("Yordle guess route error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },

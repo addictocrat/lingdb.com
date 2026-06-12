@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import Modal from "@/components/ui/Modal";
 import { Link2 } from "lucide-react";
@@ -24,15 +25,48 @@ type GamePayload = {
   maxTries: number;
 };
 
-function toCellClass(state?: CellState) {
-  if (state === "correct") return "bg-green-500 border-green-500 text-white";
-  if (state === "present") return "bg-yellow-400 border-yellow-400 text-black";
-  if (state === "absent") return "bg-neutral-500 border-neutral-500 text-white";
-  return "border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)]";
-}
+const KEYBOARD_LAYOUTS: Record<SupportedLocale, string[][]> = {
+  en: [
+    ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+    ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+    ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "BACKSPACE"],
+  ],
+  es: [
+    ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+    ["A", "S", "D", "F", "G", "H", "J", "K", "L", "Ñ"],
+    ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "BACKSPACE"],
+  ],
+  fr: [
+    ["A", "Z", "E", "R", "T", "Y", "U", "I", "O", "P"],
+    ["Q", "S", "D", "F", "G", "H", "J", "K", "L", "M"],
+    ["ENTER", "W", "X", "C", "V", "B", "N", "BACKSPACE"],
+  ],
+  de: [
+    ["Q", "W", "E", "R", "T", "Z", "U", "I", "O", "P", "Ü"],
+    ["A", "S", "D", "F", "G", "H", "J", "K", "L", "Ö", "Ä"],
+    ["ENTER", "Y", "X", "C", "V", "B", "N", "M", "BACKSPACE"],
+  ],
+  tr: [
+    ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "Ğ", "Ü"],
+    ["A", "S", "D", "F", "G", "H", "J", "K", "L", "Ş", "İ"],
+    ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "Ö", "Ç", "BACKSPACE"],
+  ],
+};
 
-function onlyLetters(value: string) {
-  return value.replace(/[^\p{L}]/gu, "");
+function getCellStyles(state: CellState | undefined, hasLetter: boolean) {
+  if (state === "correct") {
+    return "bg-success border-success text-white shadow-sm";
+  }
+  if (state === "present") {
+    return "bg-warning border-warning text-black dark:text-neutral-900 shadow-sm";
+  }
+  if (state === "absent") {
+    return "bg-[var(--key-bg-absent-flat)] border-[var(--key-bg-absent-flat)] text-white";
+  }
+  if (hasLetter) {
+    return "border-neutral-600 dark:border-neutral-400 bg-[var(--bg)] text-[var(--fg)] scale-[1.03] shadow-md";
+  }
+  return "border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)]";
 }
 
 export default function WordleGame({
@@ -45,11 +79,14 @@ export default function WordleGame({
   const t = useTranslations("wordle");
   const tCommon = useTranslations("common");
   const tLanguages = useTranslations("settings.languages");
+  const router = useRouter();
+
   const [game, setGame] = useState<GamePayload | null>(null);
   const [attempts, setAttempts] = useState<GuessResult[]>([]);
   const [guess, setGuess] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasWon, setHasWon] = useState(false);
   const [solverNote, setSolverNote] = useState<string | null>(null);
@@ -57,7 +94,6 @@ export default function WordleGame({
   const [shareFeedback, setShareFeedback] = useState<
     "copied" | "failed" | null
   >(null);
-  const guessInputRef = useRef<HTMLInputElement | null>(null);
 
   const isGameOver =
     hasWon || (game ? attempts.length >= game.maxTries : false);
@@ -100,8 +136,7 @@ export default function WordleGame({
     return allRows;
   }, [attempts, game]);
 
-  async function handleSubmitGuess(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const submitGuess = async () => {
     if (!game || isGameOver || isSubmitting) return;
 
     const nextGuess = guess.trim().toLocaleUpperCase(game.language);
@@ -139,7 +174,136 @@ export default function WordleGame({
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
+
+  const handleKeyPress = (char: string) => {
+    if (!game || isGameOver) return;
+    if (guess.length < game.wordLength) {
+      setGuess((prev) => prev + char);
+      setError(null);
+    }
+  };
+
+  const handleBackspace = () => {
+    if (isGameOver) return;
+    setGuess((prev) => prev.slice(0, -1));
+    setError(null);
+  };
+
+  const handlePlayAgain = async () => {
+    if (!game) return;
+    setIsRetrying(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/wordle/random?language=${game.language}`);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to load game");
+      }
+      
+      // Reset local gameplay states
+      setAttempts([]);
+      setGuess("");
+      setHasWon(false);
+      setSolverNote(null);
+      
+      // Redirect to the new game ID
+      router.push(`/${locale}/wordle/game/${data.gameId}`);
+    } catch (err: any) {
+      setError(err.message || t("game.load_failed"));
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+
+  // Centralized keyboard layout
+  const keyboardLayout = useMemo(() => {
+    if (!game) return [];
+    return KEYBOARD_LAYOUTS[game.language] || KEYBOARD_LAYOUTS.en;
+  }, [game]);
+
+  // Allowed characters mapping for fast lookup
+  const allowedKeys = useMemo(() => {
+    const keysSet = new Set<string>();
+    keyboardLayout.forEach((row) => {
+      row.forEach((key) => {
+        if (key !== "ENTER" && key !== "BACKSPACE") {
+          keysSet.add(key);
+        }
+      });
+    });
+    return keysSet;
+  }, [keyboardLayout]);
+
+  // Compute status for keys in visual keyboard
+  const letterStatuses = useMemo(() => {
+    const statuses: Record<string, CellState> = {};
+    attempts.forEach((attempt) => {
+      const letters = attempt.guess.split("");
+      letters.forEach((char, index) => {
+        const state = attempt.pattern[index];
+        const currentStatus = statuses[char];
+
+        if (state === "correct") {
+          statuses[char] = "correct";
+        } else if (state === "present") {
+          if (currentStatus !== "correct") {
+            statuses[char] = "present";
+          }
+        } else if (state === "absent") {
+          if (currentStatus !== "correct" && currentStatus !== "present") {
+            statuses[char] = "absent";
+          }
+        }
+      });
+    });
+    return statuses;
+  }, [attempts]);
+
+  // Capture physical keyboard events
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!game || isGameOver || isShareModalOpen) return;
+
+      // Ignore input if user is focusing an input field or text area (e.g. search bars)
+      if (
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA"
+      ) {
+        return;
+      }
+
+      if (e.key === "Backspace") {
+        handleBackspace();
+      } else if (e.key === "Enter") {
+        submitGuess();
+      } else {
+        const char = e.key.toLocaleUpperCase(game.language);
+        if (allowedKeys.has(char)) {
+          handleKeyPress(char);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [game, isGameOver, isShareModalOpen, guess, allowedKeys, isSubmitting]);
+
+  // Responsive sizes for cell grids (slightly smaller and tighter padding)
+  const cellSizeStyle = useMemo(() => {
+    if (!game) return {};
+    return {
+      width: `min(3.5rem, calc((100vw - 32px) / ${game.wordLength} - 4px))`,
+      height: `min(3.5rem, calc((100vw - 32px) / ${game.wordLength} - 4px))`,
+    };
+  }, [game]);
+
+  const fontSizeStyle = useMemo(() => {
+    if (!game) return {};
+    return {
+      fontSize: `min(${game.wordLength > 8 ? "1.2rem" : "1.75rem"}, calc((100vw - 32px) / ${game.wordLength} * 0.4))`,
+    };
+  }, [game]);
 
   function openShareModal() {
     setShareFeedback(null);
@@ -148,12 +312,6 @@ export default function WordleGame({
 
   function closeShareModal() {
     setIsShareModalOpen(false);
-  }
-
-  function focusGuessInput() {
-    if (!isGameOver) {
-      guessInputRef.current?.focus();
-    }
   }
 
   function getShareUrl() {
@@ -190,61 +348,60 @@ export default function WordleGame({
   }, [game?.language, tLanguages]);
 
   return (
-    <main className="mx-auto w-full px-2 py-6 sm:max-w-5xl sm:px-6 sm:py-14">
-      <div>
-        <div className="flex items-start justify-between gap-3 sm:gap-4">
-          <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
-            {t("game.title")}
-          </h1>
+    <main className="mx-auto w-full px-2 py-6 sm:max-w-5xl sm:px-6 sm:py-10">
+      <div className="flex flex-col items-center">
+        {/* Header Section */}
+        <div className="flex w-full max-w-xl items-center justify-between gap-4 border-b border-[var(--border-color)] pb-4">
+          <div>
+            <h1 className="text-4xl font-black tracking-tight sm:text-5xl uppercase">
+              {t("game.title")}
+            </h1>
+            {game && (
+              <p className="mt-1 text-sm font-bold text-[var(--fg)]/60">
+                {t("game.meta", {
+                  length: game.wordLength,
+                  tries: game.maxTries,
+                })}
+                {gameLanguageName && ` • ${gameLanguageName}`}
+              </p>
+            )}
+          </div>
           <button
             type="button"
             onClick={openShareModal}
-            className="inline-flex cursor-pointer items-center justify-center bg-yellow-400 p-3 text-black transition-colors hover:bg-yellow-300 sm:px-6 sm:py-4"
+            className="cursor-pointer bg-yellow-400 px-4 py-2 text-black transition-colors hover:bg-yellow-300 rounded font-black text-sm sm:text-base flex items-center gap-1.5"
           >
-            <span className="sm:hidden">
-              <Link2 className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <span className="hidden text-center text-xl font-black sm:inline sm:text-2xl">
-              {t("game.share")}
-            </span>
-            <span className="sr-only sm:hidden">{t("game.share")}</span>
+            <Link2 className="h-4 w-4" />
+            <span>{t("game.share")}</span>
           </button>
         </div>
 
         {isLoading && (
-          <p className="mt-6 text-2xl font-bold text-[var(--fg)]/60 sm:text-3xl">
+          <p className="mt-12 text-2xl font-bold text-[var(--fg)]/60 sm:text-3xl animate-pulse">
             {t("game.loading")}
           </p>
         )}
 
         {!isLoading && error && (
-          <div className="mt-6 border border-red-300 bg-red-50 px-5 py-4 text-xl font-semibold text-red-700">
+          <div className="mt-6 w-full max-w-md border border-red-300 bg-red-50 dark:bg-red-950/20 dark:border-red-900/40 px-5 py-4 text-center text-lg font-semibold text-red-700 dark:text-red-400 rounded">
             {error}
           </div>
         )}
 
         {game && !isLoading && (
           <>
-            <p className="mt-4 text-2xl font-bold text-[var(--fg)]/70 sm:text-3xl">
-              {t("game.meta", {
-                length: game.wordLength,
-                tries: game.maxTries,
-              })}
-            </p>
-            {gameLanguageName && (
-              <p className="mt-2 text-xl font-semibold text-[var(--fg)]/65 sm:text-2xl">
-                {tCommon("language")}: {gameLanguageName}
-              </p>
-            )}
-
-            <div className="mt-8 space-y-3">
+            {/* Yordle Letter Grid (Smaller cells & closer to each other) */}
+            <div className="mt-6 flex flex-col gap-1 sm:gap-1.5">
               {rows.map((row, rowIndex) => {
                 const letters = row.guess.split("");
-                const isPendingRow =
-                  rowIndex === attempts.length && !isGameOver;
+                const isPendingRow = rowIndex === attempts.length && !isGameOver;
+                const isLatestSubmitted = rowIndex === attempts.length - 1;
 
                 return (
-                  <div key={rowIndex} className="flex gap-2 sm:gap-3">
+                  <div
+                    key={rowIndex}
+                    className="flex justify-center gap-1 sm:gap-1.5"
+                  >
                     {Array.from({ length: game.wordLength }).map(
                       (_, cellIndex) => {
                         const letter =
@@ -255,11 +412,27 @@ export default function WordleGame({
                             ? row.pattern[cellIndex]
                             : undefined;
 
+                        const hasLetter = isPendingRow
+                          ? !!guess[cellIndex]
+                          : !!letter;
+                        const isPopClass =
+                          isPendingRow && hasLetter ? "animate-pop" : "";
+                        const isFlipClass = isLatestSubmitted ? "animate-flip" : "";
+
                         return (
                           <div
                             key={cellIndex}
-                            onClick={focusGuessInput}
-                            className={`flex h-14 w-14 cursor-text items-center justify-center border text-2xl font-black sm:h-20 sm:w-20 sm:text-4xl ${toCellClass(state)}`}
+                            style={{
+                              ...cellSizeStyle,
+                              ...fontSizeStyle,
+                              animationDelay: isLatestSubmitted
+                                ? `${cellIndex * 150}ms`
+                                : undefined,
+                              transitionDelay: isLatestSubmitted
+                                ? `${cellIndex * 150 + 250}ms`
+                                : undefined,
+                            }}
+                            className={`flex cursor-default select-none items-center justify-center border-2 text-2xl font-black uppercase rounded-md transition-colors duration-0 ${isPopClass} ${isFlipClass} ${getCellStyles(state, hasLetter)}`}
                           >
                             {letter}
                           </div>
@@ -271,58 +444,121 @@ export default function WordleGame({
               })}
             </div>
 
-            {!isGameOver && (
-              <form onSubmit={handleSubmitGuess} className="mt-8 space-y-4">
-                <input
-                  ref={guessInputRef}
-                  value={guess}
-                  maxLength={game.wordLength}
-                  onChange={(e) =>
-                    setGuess(
-                      onlyLetters(e.target.value).toLocaleUpperCase(
-                        game?.language || locale,
-                      ),
-                    )
-                  }
-                  className="w-full border border-[var(--border-color)] bg-[var(--bg)] px-5 py-4 text-3xl font-black tracking-[0.2em] uppercase outline-none focus:border-primary-500 sm:text-5xl"
-                  placeholder={t("game.guess_placeholder")}
-                />
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-black px-6 py-5 text-2xl font-black text-yellow-300 transition-colors hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60 sm:text-3xl"
-                >
-                  {isSubmitting ? t("game.submitting") : t("game.submit")}
-                </button>
-              </form>
-            )}
-
+            {/* Game Result Banners */}
             {hasWon && (
-              <>
-                <div className="mt-8 border border-green-300 bg-green-50 px-5 py-4 text-2xl font-black text-green-700 sm:text-3xl">
+              <div className="mt-6 w-full max-w-md text-center">
+                <div className="border border-green-300 bg-green-50 dark:bg-green-950/20 dark:border-green-900/40 px-5 py-3 text-xl font-black text-green-700 dark:text-green-400 rounded">
                   {t("game.win")}
                 </div>
                 {solverNote && (
-                  <div className="mt-4 border border-yellow-300 bg-yellow-50 px-5 py-4 text-xl font-semibold text-yellow-900 sm:text-2xl">
-                    <p className="mb-2 text-base font-black uppercase tracking-wide sm:text-lg">
+                  <div className="mt-3 border border-yellow-300 bg-yellow-50 dark:bg-yellow-950/20 dark:border-yellow-900/40 px-5 py-3 text-left text-sm font-semibold text-yellow-900 dark:text-yellow-400 rounded">
+                    <p className="mb-1 text-xs font-black uppercase tracking-wider ">
                       {t("game.secret_note_title")}
                     </p>
                     <p>{solverNote}</p>
                   </div>
                 )}
-              </>
+              </div>
             )}
 
             {!hasWon && isGameOver && (
-              <div className="mt-8 border border-amber-300 bg-amber-50 px-5 py-4 text-2xl font-black text-amber-800 sm:text-3xl">
+              <div className="mt-6 w-full max-w-md border border-amber-300 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-900/40 px-5 py-3 text-center text-xl font-black text-amber-800 dark:text-amber-400 rounded">
                 {t("game.lose")}
               </div>
             )}
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            {/* Visual Virtual Keyboard */}
+            {!isGameOver && (
+              <div className="mt-8 w-full max-w-2xl px-1">
+                <div className="flex flex-col gap-1.5">
+                  {keyboardLayout.map((row, rowIndex) => (
+                    <div
+                      key={rowIndex}
+                      className="flex justify-center gap-1 touch-manipulation"
+                    >
+                      {row.map((key) => {
+                        const status = letterStatuses[key];
+
+                        // Theme-aware overrides using CSS variables
+                        let keyBgClass = "wordle-kbd-btn";
+                        if (status === "correct") {
+                          keyBgClass = "wordle-kbd-btn wordle-kbd-btn-correct";
+                        } else if (status === "present") {
+                          keyBgClass = "wordle-kbd-btn wordle-kbd-btn-present";
+                        } else if (status === "absent") {
+                          keyBgClass = "wordle-kbd-btn wordle-kbd-btn-absent";
+                        }
+
+                        const isSpecialKey =
+                          key === "ENTER" || key === "BACKSPACE";
+                        const keyWidthClass = isSpecialKey
+                          ? "flex-[1.5] text-[10px] sm:text-xs px-1"
+                          : "flex-1 text-xs sm:text-sm px-0.5";
+
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => {
+                              if (key === "ENTER") {
+                                submitGuess();
+                              } else if (key === "BACKSPACE") {
+                                handleBackspace();
+                              } else {
+                                handleKeyPress(key);
+                              }
+                            }}
+                            className={`flex h-11 sm:h-14 items-center justify-center font-extrabold uppercase select-none ${keyBgClass} ${keyWidthClass}`}
+                          >
+                            {key === "BACKSPACE" ? (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth={2.5}
+                                stroke="currentColor"
+                                className="h-5 w-5 sm:h-6 sm:w-6"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M12 9.75L14.25 12m0 0l2.25 2.25M14.25 12l2.25-2.25M14.25 12L12 14.25m-2.58 4.92l-6.375-6.375a1.125 1.125 0 010-1.59L9.42 4.83c.211-.211.498-.33.796-.33H19.5a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-9.284c-.298 0-.585-.119-.796-.33z"
+                                />
+                              </svg>
+                            ) : key === "ENTER" ? (
+                              "Enter"
+                            ) : (
+                              key
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Actions Menu (Side-by-side buttons) */}
+            <div className="mt-8 flex flex-row gap-3 justify-center items-center w-full max-w-md mx-auto">
+              <button
+                type="button"
+                onClick={handlePlayAgain}
+                disabled={isRetrying}
+                className="flex-1 bg-[#0001d8] hover:bg-[#0001d8]/90 text-white px-4 py-3 text-center text-sm sm:text-base font-black transition-colors rounded flex items-center justify-center gap-2 disabled:opacity-50 select-none cursor-pointer"
+              >
+                {isRetrying ? (
+                  <>
+                    <span className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                    <span>{tCommon("loading")}</span>
+                  </>
+                ) : (
+                  <span>{t("game.play_again")}</span>
+                )}
+              </button>
               <Link
-                href={`/${locale}/wordle`}
-                className="bg-yellow-400 px-6 py-4 text-center text-xl font-black text-black transition-colors hover:bg-yellow-300 sm:text-2xl"
+                href={`/${locale}/wordle/create`}
+                className="flex-1 bg-yellow-400 px-4 py-3 text-center text-sm sm:text-base font-black text-black transition-colors hover:bg-yellow-300 rounded select-none"
               >
                 {t("game.create_new")}
               </Link>
@@ -331,6 +567,7 @@ export default function WordleGame({
         )}
       </div>
 
+      {/* Share Modal */}
       <Modal
         isOpen={isShareModalOpen}
         onClose={closeShareModal}
@@ -347,7 +584,7 @@ export default function WordleGame({
             <button
               type="button"
               onClick={handleCopyGameUrl}
-              className="cursor-pointer inline-flex items-center justify-center gap-2 bg-yellow-400 px-5 py-3 text-base font-black text-black transition-colors hover:bg-yellow-300"
+              className="cursor-pointer inline-flex items-center justify-center gap-2 bg-yellow-400 px-5 py-3 text-base font-black text-black transition-colors hover:bg-yellow-300 rounded"
             >
               <Link2 className="h-4 w-4" />
               {t("game.share_copy")}
@@ -357,7 +594,7 @@ export default function WordleGame({
               href={whatsappHref}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-green-600 px-5 py-3 text-center text-base font-black text-white transition-colors hover:bg-green-700"
+              className="inline-flex items-center justify-center gap-2 bg-green-600 px-5 py-3 text-center text-base font-black text-white transition-colors hover:bg-green-700 rounded"
             >
               <svg
                 viewBox="0 0 24 24"

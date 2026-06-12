@@ -41,7 +41,7 @@
     "feature_dictionaries": "Smart Dictionaries",
     "feature_dictionaries_desc": "AI recommends magic words and example phrases.",
     "feature_minigames": "Minigames",
-    "feature_minigames_desc": "Play Wordle and challenge your friends.",
+    "feature_minigames_desc": "Play Yordle and challenge your friends.",
     "feature_study": "Interactive Study Tools",
     "feature_study_desc": "Study with interactive flashcards and quizzes.",
     "feature_community": "Learn Together",
@@ -426,13 +426,20 @@
     "blogs": "Blogs",
     "profile": "Profile",
     "leaderboards": "Leaderboards",
-    "wordle": "Play Wordle",
+    "wordle": "Play Yordle",
     "legal": "Legal",
     "contact": "Contact"
   },
   "wordle": {
-    "title": "Wordle Creator",
-    "subtitle": "Build a custom Wordle and share it instantly.",
+    "title": "Yordle Creator",
+    "subtitle": "Build a custom Yordle and share it instantly.",
+    "play_title": "Find the Word of the Day",
+    "play_subtitle": "Play a random Yordle game in your chosen language or create your own.",
+    "play_random": "Play",
+    "create_custom": "Create Yours",
+    "select_language": "Choose Game Language",
+    "no_games_warning": "No games found for this language. Generating a new random game for you...",
+    "fetching_game": "Loading random game...",
     "fields": {
       "word": "Secret Word",
       "word_placeholder": "ENTER WORD",
@@ -444,7 +451,7 @@
       "note_placeholder": "Add a secret message for the player...",
       "note_hint": "This will only be shown after the puzzle is solved."
     },
-    "create_button": "Create Shareable Wordle",
+    "create_button": "Create Shareable Yordle",
     "creating": "Creating...",
     "share": {
       "title": "Your Share Link",
@@ -458,7 +465,7 @@
       "create_failed": "Could not create game. Please try again."
     },
     "game": {
-      "title": "Wordle",
+      "title": "Yordle",
       "loading": "Loading game...",
       "load_failed": "Could not load this game.",
       "guess_failed": "Could not submit your guess.",
@@ -466,17 +473,18 @@
       "guess_placeholder": "YOUR GUESS",
       "submit": "Submit Guess",
       "share": "Share",
-      "share_modal_title": "Share this Wordle",
+      "share_modal_title": "Share this Yordle",
       "share_copy": "Copy Link",
       "share_whatsapp": "Send via WhatsApp",
       "share_copied": "Link copied!",
       "share_copy_failed": "Could not copy link.",
-      "share_message": "Try this Wordle: {url}",
+      "share_message": "Try this Yordle: {url}",
       "submitting": "Submitting...",
       "win": "You solved it!",
       "secret_note_title": "Secret Note",
       "lose": "No tries left. Create a new game!",
-      "create_new": "Create New Wordle"
+      "create_new": "Create New Yordle",
+      "play_again": "Play Again"
     }
   },
   "leaderboards": {

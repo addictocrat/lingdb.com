@@ -46,6 +46,7 @@ export const qk = {
     dictionaries: ["admin", "dictionaries"] as const,
     blogs: ["admin", "blogs"] as const,
     coupons: ["admin", "coupons"] as const,
+    wordle: ["admin", "wordle"] as const,
   },
   payment: {
     status: ["payment", "status"] as const,

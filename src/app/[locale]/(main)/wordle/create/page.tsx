@@ -1,4 +1,4 @@
-import WordleSelector from "@/components/wordle/WordleSelector";
+import WordleCreator from "@/components/wordle/WordleCreator";
 import type { Metadata } from "next";
 import { APP_URL, SUPPORTED_LOCALES } from "@/lib/utils/constants";
 
@@ -8,26 +8,27 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const canonicalPath = `/${locale}/wordle`;
+  const canonicalPath = `/${locale}/wordle/create`;
 
   return {
-    title: "Play Wordle XXL Online | Wordle Hub",
+    title: "Create Custom Wordle | Wordle XXL",
     description:
-      "Play random Wordle games or create your own custom puzzles in English, French, German, Spanish, or Turkish. Custom lengths from 3 to 12 letters.",
+      "Play and create Wordle without letter limit pressure: from 3 to 12 letters. Perfect for Wordle XXL fans, long-word challenges, and unlimited letter-count Wordle gameplay.",
     keywords: [
-      "play wordle online",
-      "wordle random game",
       "wordle without letter limit",
+      "wordle with unlimited letter count",
+      "wordle with more than 5 letters",
+      "Wordle XXL",
       "custom wordle",
-      "wordle xxl",
-      "multilingual wordle",
+      "long word wordle",
+      "12 letter wordle",
     ],
     alternates: {
       canonical: canonicalPath,
       languages: Object.fromEntries(
         SUPPORTED_LOCALES.map((supportedLocale) => [
           supportedLocale,
-          `/${supportedLocale}/wordle`,
+          `/${supportedLocale}/wordle/create`,
         ]),
       ),
     },
@@ -43,28 +44,28 @@ export async function generateMetadata({
       },
     },
     openGraph: {
-      title: "Play Wordle XXL Online | Wordle Hub by Lingdb",
+      title: "Create Custom Wordle | Wordle XXL by Lingdb",
       description:
-        "Play random Wordle games in multiple languages with custom lengths from 3 to 12 letters, or build your own custom shareable game.",
+        "Try a Wordle with unlimited letter count options from 3 to 12 letters. Share custom games and play Wordle with more than 5 letters.",
       type: "website",
       url: `${APP_URL}${canonicalPath}`,
       locale,
     },
     twitter: {
       card: "summary_large_image",
-      title: "Play Wordle XXL Online | Wordle Hub",
+      title: "Create Custom Wordle | Wordle XXL",
       description:
-        "Play random Wordle games in multiple languages with custom lengths from 3 to 12 letters, or build your own custom shareable game.",
+        "Create and play Wordle with more than 5 letters (up to 12). Built for Wordle XXL and custom long-word challenges.",
     },
   };
 }
 
-export default async function WordlePage({
+export default async function WordleCreatePage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
 
-  return <WordleSelector locale={locale} />;
+  return <WordleCreator locale={locale} />;
 }

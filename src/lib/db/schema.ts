@@ -311,7 +311,7 @@ export const coupons = pgTable("coupons", {
     .defaultNow(),
 });
 
-// ─── Wordle Games ──────────────────────────────────────────
+// ─── Yordle Games ──────────────────────────────────────────
 
 export const wordleGames = pgTable(
   "wordle_games",
@@ -322,6 +322,7 @@ export const wordleGames = pgTable(
     noteToSolver: text("note_to_solver"),
     wordLength: integer("word_length").notNull(),
     maxTries: integer("max_tries").notNull().default(6),
+    isOfficial: boolean("is_official").notNull().default(false),
     expiresAt: timestamp("expires_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()

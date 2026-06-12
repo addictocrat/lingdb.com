@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     );
   } catch (error) {
-    console.error("Wordle create route error:", error);
+    console.error("Yordle create route error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 },

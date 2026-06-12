@@ -71,6 +71,18 @@
   --primary: 92 124 250;
   --accent: 255 107 107;
   --transition-default: 200ms ease;
+  --key-bg: linear-gradient(180deg, #ffffff 0%, #e5e5e5 100%);
+  --key-bg-hover: linear-gradient(180deg, #f5f5f5 0%, #d4d4d4 100%);
+  --key-bg-absent: linear-gradient(180deg, #cccccc 0%, #a3a3a3 100%);
+  --key-bg-absent-flat: #a3a3a3;
+  --key-bg-correct: linear-gradient(180deg, #6bf185 0%, #40ba54 100%);
+  --key-bg-present: linear-gradient(180deg, #ffde6a 0%, #ebb212 100%);
+  --key-border: #cccccc;
+  --key-border-absent: #999999;
+  --key-border-correct: #38a64a;
+  --key-border-present: #d4a010;
+  --key-shadow: 0 3px 0 #b5b5b5, 0 4px 6px rgba(0, 0, 0, 0.08);
+  --key-shadow-active: 0 1px 0 #b5b5b5, 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .dark {
@@ -80,6 +92,18 @@
   --border-color: #323246;
   --primary: 92 124 250;
   --accent: 255 107 107;
+  --key-bg: linear-gradient(180deg, #3a3a4f 0%, #22223b 100%);
+  --key-bg-hover: linear-gradient(180deg, #44445c 0%, #2c2c47 100%);
+  --key-bg-absent: linear-gradient(180deg, #262626 0%, #141414 100%);
+  --key-bg-absent-flat: #262626;
+  --key-bg-correct: linear-gradient(180deg, #2e9648 0%, #1b632e 100%);
+  --key-bg-present: linear-gradient(180deg, #c49615 0%, #8c6a0c 100%);
+  --key-border: #1a1a2e;
+  --key-border-absent: #0d0d0d;
+  --key-border-correct: #144f24;
+  --key-border-present: #70550a;
+  --key-shadow: 0 3px 0 #0f0f1c, 0 4px 6px rgba(0, 0, 0, 0.3);
+  --key-shadow-active: 0 1px 0 #0f0f1c, 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 /* ─── RTL Support ─────────────────────────────────────────── */
@@ -336,3 +360,90 @@ html {
   border-top: 8px dotted var(--border-color) !important;
   margin: clamp(4rem, 12vw, 6rem) 0 !important;
 }
+
+/* ─── Yordle Flip & Pop Animations ──────────────────────── */
+@keyframes cellFlip {
+  0% {
+    transform: rotateX(0deg);
+  }
+  45% {
+    transform: rotateX(90deg);
+  }
+  55% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+.animate-flip {
+  animation: cellFlip 0.5s ease-in-out forwards;
+}
+
+@keyframes cellPop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-pop {
+  animation: cellPop 0.12s ease-in-out forwards;
+}
+
+/* ─── Premium Keyboard Buttons ───────────────────────────── */
+.wordle-kbd-btn {
+  background: var(--key-bg);
+  border: 1px solid var(--key-border);
+  box-shadow: var(--key-shadow);
+  border-radius: 6px;
+  color: var(--fg);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.1s ease;
+}
+
+.dark .wordle-kbd-btn {
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.4);
+}
+
+.wordle-kbd-btn:hover {
+  background: var(--key-bg-hover);
+}
+
+.wordle-kbd-btn:active {
+  transform: translateY(2px);
+  box-shadow: var(--key-shadow-active);
+}
+
+.wordle-kbd-btn-correct {
+  background: var(--key-bg-correct) !important;
+  border-color: var(--key-border-correct) !important;
+  color: white !important;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2) !important;
+}
+
+.wordle-kbd-btn-present {
+  background: var(--key-bg-present) !important;
+  border-color: var(--key-border-present) !important;
+  color: #1f224e !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+.dark .wordle-kbd-btn-present {
+  color: #111827 !important;
+}
+
+.wordle-kbd-btn-absent {
+  background: var(--key-bg-absent) !important;
+  border-color: var(--key-border-absent) !important;
+  color: white !important;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2) !important;
+}
+
+
